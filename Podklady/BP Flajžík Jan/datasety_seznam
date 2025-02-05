@@ -1,0 +1,8 @@
+Datasets:
+1. Eldariel – public version of the disinformation chain email database, https://eldariel.cesti-elfove.cz/
+2. EU vs DiSiNFO database of fake news, https://euvsdisinfo.eu/disinformation-cases/
+3. ISOT Fake News Dataset, University of Victoria https://www.uvic.ca/ecs/ece/isot/datasets/fake-news/index.php
+
+Literature:
+1. D'Ulizia A, Caschera MC, Ferri F, Grifoni P: Fake news detection: a survey of evaluation datasets. PeerJ Comput Sci. 2021 
+2. Zhou, X & Zafarani: A Survey of Fake News: Fundamental Theories, Detection Methods, and Opportunities, ACM Computing Surveys, vol. 53. 2020
