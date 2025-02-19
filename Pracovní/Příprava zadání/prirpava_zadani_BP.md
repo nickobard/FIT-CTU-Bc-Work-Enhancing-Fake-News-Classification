@@ -1,4 +1,22 @@
-## Example:
+# Enhancing Fake News Classification with Advanced NLP Models
+
+The aim of this thesis is to build upon previous research in fake news classification and extend it by incorporating advanced natural language processing models (e.g., transformer architectures such as BERT, GPT, or their variants) or other specific architectures used for such tasks. If needed, the existing datasets may be expanded with relevant content obtained from online sources. The student will conduct experiments with various text preprocessing configurations and advanced models, evaluate their accuracy and robustness, and compare them with the basic methods used in the original work. Emphasis will be placed on clearly describing the student’s own contributions (i.e., dataset extension, implementation, and interpretation of new models) and on maintaining a coherent structure throughout the text.
+
+Subtasks of the project:
+- Understand the previous research.
+- Research new current state-of-the-art techniques. 
+- Clearly differentiate between adopted methods and original innovations.
+- If needed, add additional, more complex data sources.
+- Implement advanced and specialized models (BERT, GPT, or other transformer networks).
+- Focus on the interpretability of the models (e.g., using SHAP or LIME).
+- Present experimental results clearly and compare them with previous work.
+
+Language of the project: Czech or English
+
+***
+
+
+## Examples for theme selection:
 
 ### Abstract
 
@@ -32,7 +50,3 @@ divided into several following subtasks:
 - obtain a brand-new dataset from online fake news databases,
 - perform and evaluate classification experiments on the selected datasets and discuss the
 results.
-
-### TODO
-
-- get examples from other themes on projects
