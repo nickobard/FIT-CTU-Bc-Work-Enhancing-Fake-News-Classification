@@ -1,0 +1,10 @@
+\begin{tabular}{l||c|c|c|c}
+
+         Preprocessing & Accuracy & Precision & Recall & F1-Score \\
+\midrule \midrule
+              Word2Vec &    0.767 &     0.857 &  0.761 &    0.805 \\
+     stemming Word2Vec &    0.797 &     0.798 &  0.835 &    0.816 \\
+lemmatization Word2Vec &    0.801 &     0.812 &  0.831 &    0.821 \\
+      pretrained GloVe &    0.747 &     0.807 &  0.759 &    0.782 \\
+
+\end{tabular}

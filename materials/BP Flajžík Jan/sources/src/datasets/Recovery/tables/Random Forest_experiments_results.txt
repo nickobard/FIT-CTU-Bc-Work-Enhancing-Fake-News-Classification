@@ -1,0 +1,21 @@
+\begin{tabular}{l||c|c|c|c}
+
+                     Preprocessing & Accuracy & Precision & Recall & F1-Score \\
+\midrule \midrule
+     stemming 1-grams bag-of-words &    0.694 &     1.000 &  0.683 &    0.812 \\
+     stemming 2-grams bag-of-words &    0.698 &     1.000 &  0.686 &    0.814 \\
+     stemming 3-grams bag-of-words &    0.713 &     1.000 &  0.697 &    0.821 \\
+           stemming 1-grams tf–idf &    0.689 &     1.000 &  0.680 &    0.809 \\
+           stemming 2-grams tf–idf &    0.706 &     1.000 &  0.692 &    0.818 \\
+           stemming 3-grams tf–idf &    0.713 &     1.000 &  0.697 &    0.821 \\
+                 stemming Word2Vec &    0.695 &     0.999 &  0.685 &    0.812 \\
+lemmatization 1-grams bag-of-words &    0.692 &     1.000 &  0.682 &    0.811 \\
+lemmatization 2-grams bag-of-words &    0.704 &     1.000 &  0.690 &    0.817 \\
+lemmatization 3-grams bag-of-words &    0.715 &     1.000 &  0.699 &    0.823 \\
+      lemmatization 1-grams tf–idf &    0.692 &     1.000 &  0.682 &    0.811 \\
+      lemmatization 2-grams tf–idf &    0.703 &     1.000 &  0.690 &    0.816 \\
+      lemmatization 3-grams tf–idf &    0.718 &     1.000 &  0.701 &    0.824 \\
+            lemmatization Word2Vec &    0.694 &     0.999 &  0.683 &    0.812 \\
+                  pretrained GloVe &    0.794 &     0.956 &  0.781 &    0.860 \\
+
+\end{tabular}

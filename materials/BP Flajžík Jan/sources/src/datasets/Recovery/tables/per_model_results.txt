@@ -1,0 +1,10 @@
+\begin{tabular}{|l|c|c|c|c|}
+\toprule
+        Model & Accuracy & Precision & Recall & F1-Score \\
+\midrule
+  Naive Bayes &    0.835 &     0.941 &  0.834 &    0.884 \\
+Random Forest &    0.794 &     0.956 &  0.781 &    0.860 \\
+          CNN &    0.781 &     0.932 &  0.779 &    0.849 \\
+         LSTM &    0.695 &     0.927 &  0.709 &    0.803 \\
+\bottomrule
+\end{tabular}
