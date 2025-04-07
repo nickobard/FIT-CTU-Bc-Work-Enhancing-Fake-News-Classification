@@ -11,5 +11,8 @@ class BertBasedUncased(Model):
         mlflow.log_param('model_name', self.name)
         super().__init__(random_state)
 
+    def fit(self, dataset):
+        train, val, test = dataset.split()
+
 
 

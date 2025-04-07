@@ -49,4 +49,4 @@ class Experiment(ABC):
         self.__init_experiment()
         with mlflow.start_run(experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
-            pass
+            self.model.fit(self.dataset)
