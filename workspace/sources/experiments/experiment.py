@@ -1,8 +1,9 @@
 from abc import ABC
-from datasets.dataset import Dataset
+from local_datasets.dataset import Dataset
 from models.model import Model
 import mlflow
 from utils import generate_random_state
+
 
 class Experiment(ABC):
     class Builder:

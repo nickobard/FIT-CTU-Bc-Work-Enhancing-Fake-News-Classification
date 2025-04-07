@@ -2,8 +2,8 @@ from abc import ABC
 import mlflow
 import numpy as np
 from scipy.special import softmax
-from datasets import Dataset
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
+import datasets as hf_datasets
+from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, set_seed
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import confusion_matrix
 from transformers.integrations import MLflowCallback
@@ -21,22 +21,24 @@ class BertBasedUncased(Model):
         super().__init__(random_state)
 
     def fit(self, dataset):
+        set_seed(self.random_state)
         train, val, test = self.__prepare_dataset(dataset)
         tokenizer = BertTokenizer.from_pretrained(self.name)
 
         def tokenize_function(example):
             return tokenizer(example["article"], truncation=True, padding="max_length", max_length=256)
 
-        train_tokenized = train.map(tokenize_function, batched=True)
+        train_tokenized = train.map(tokenize_function, batched=True).to
         val_tokenized = val.map(tokenize_function, batched=True)
         test_tokenized = test.map(tokenize_function, batched=True)
 
         train_tokenized.set_format(type="torch")
         val_tokenized.set_format(type="torch")
         test_tokenized.set_format(type="torch")
+        self.train(train_tokenized, val_tokenized)
 
     def train(self, train, val):
-        model = BertForSequenceClassification.from_pretrained(self.name, num_labels=2)
+        self.model = BertForSequenceClassification.from_pretrained(self.name, num_labels=2)
 
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
@@ -50,26 +52,36 @@ class BertBasedUncased(Model):
             tn, fp, fn, tp = confusion_matrix(labels, predictions).ravel()
             false_positive_rate = fp / (fp + tn) if (fp + tn) > 0 else 0
             false_negative_rate = fn / (fn + tp) if (fn + tp) > 0 else 0
-            return {"false_positive_rate": false_positive_rate, "false_negative_rate": false_negative_rate, "accuracy": accuracy, 'precision': precision, "recall": recall, "f1": f1, "roc_auc": roc_auc}
+            return {"false_positive_rate": false_positive_rate, "false_negative_rate": false_negative_rate,
+                    "accuracy": accuracy, 'precision': precision, "recall": recall, "f1": f1, "roc_auc": roc_auc}
 
-        training_args = TrainingArguments(
+        artifacts_dir = f"mlruns/{mlflow.active_run().info.experiment_id}/{mlflow.active_run().info.run_id}/artifacts/"
+        self.training_args = TrainingArguments(
+            output_dir=artifacts_dir + '/model/checkpoints',
             num_train_epochs=3,
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
             evaluation_strategy="epoch",
             logging_steps=10,
             save_steps=100,
-            weight_decay=0.01,
+            weight_decay=0.01
         )
-        trainer = Trainer(
-            model=model,
-            args=training_args,
+        self.trainer = Trainer(
+            model=self.model,
+            args=self.training_args,
             train_dataset=train,
             eval_dataset=val,
             compute_metrics=compute_metrics,
             callbacks=[MLflowCallback()]
         )
+        self.trainer.train()
+        self.trainer.save_model(artifacts_dir + '/model/')
+
+    def evaluate(self, dataset):
+        self.trainer.evaluate(dataset, metric_key_prefix="test")
 
     def __prepare_dataset(self, dataset):
         train, val, test = dataset.split()
-        return Dataset.from_pandas(train), Dataset.from_pandas(val), Dataset.from_pandas(test)
+        return (hf_datasets.Dataset.from_pandas(train),
+                hf_datasets.Dataset.from_pandas(val),
+                hf_datasets.Dataset.from_pandas(test))
