@@ -6,6 +6,8 @@ class Model(ABC):
 
 class BertBasedUncased(Model):
     def __init__(self):
-        self.model_name = "bert-base-uncased"
-        mlflow.log_params('model_name', self.model_name)
+        self.name = "bert-base-uncased"
+
+    def init_log(self):
+        mlflow.log_param('model_name', self.name)
 
