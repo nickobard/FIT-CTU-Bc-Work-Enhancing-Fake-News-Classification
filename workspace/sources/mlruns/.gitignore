@@ -1,1 +1,2 @@
-artifacts/model
+# remove checkpoints from transformers
+**/artifacts/model/
