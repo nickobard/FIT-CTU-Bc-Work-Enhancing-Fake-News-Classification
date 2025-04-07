@@ -2,12 +2,14 @@ from abc import ABC
 import mlflow
 
 class Model(ABC):
-    pass
+    def __init__(self, random_state):
+        self.random_state = random_state
 
 class BertBasedUncased(Model):
-    def __init__(self):
+    def __init__(self, random_state):
         self.name = "bert-base-uncased"
-
-    def init_log(self):
         mlflow.log_param('model_name', self.name)
+        super().__init__(random_state)
+
+
 

@@ -13,12 +13,13 @@ class Experiment(ABC):
             self._params["name"] = name
             return self
 
-        def with_dataset(self, dataset):
-            self._params["dataset"] = dataset
+        def with_dataset(self, dataset_class, dataset_path):
+            self._params["dataset_class"] = dataset_class
+            self._params["dataset_path"] = dataset_path
             return self
 
-        def with_model(self, model):
-            self._params["model"] = model
+        def with_model(self, model_class):
+            self._params["model_class"] = model_class
             return self
 
         def with_random_state(self, random_state):
@@ -30,9 +31,10 @@ class Experiment(ABC):
             return experiment
 
     def __init__(self, **kwargs):
-        self.dataset = kwargs['dataset']
-        self.model = kwargs['model']
-        self.name = kwargs.get('name', self.model.name)
+        self.dataset_class = kwargs['dataset_class']
+        self.dataset_path = kwargs['dataset_path']
+        self.model_class = kwargs['model_class']
+        self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
 
     def __init_experiment(self):
@@ -40,9 +42,8 @@ class Experiment(ABC):
         self.experiment_id = self.mlflow_experiment.experiment_id
 
     def __prepare(self):
-
-        self.dataset.init_log()
-        self.model.init_log()
+        self.dataset = self.dataset_class(self.dataset_path, self.random_state)
+        self.model = self.model_class(self.random_state)
 
     def run(self):
         self.__init_experiment()
