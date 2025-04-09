@@ -19,15 +19,24 @@ class Experiment(ABC):
             self._params["dataset_path"] = dataset_path
             return self
 
-        def with_model(self, model_class):
+        def with_model(self, model_class, load_model_from_mlflow=False):
             self._params["model_class"] = model_class
+            self._params["load_model_from_mlflow"] = load_model_from_mlflow
             return self
 
         def with_random_state(self, random_state):
             self._params["random_state"] = random_state
             return self
 
+        def with_experiment_id(self, experiment_id):
+            self._params["experiment_id"] = experiment_id
+
+        def with_run_id(self, run_id):
+            self._params["run_id"] = run_id
+
         def build(self):
+            if self._params.get('load_model_from_mlflow', False) and self._params.get("run_id", None) is None:
+                raise ValueError("run_id must be provided when load_model_from_mlflow is True.")
             experiment = Experiment(**self._params)
             return experiment
 
@@ -35,19 +44,33 @@ class Experiment(ABC):
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
+        self.load_model_from_mlflow = kwargs.get('load_model_from_mlflow', False)
+        self.experiment_id = kwargs.get('experiment_id', None)
+        self.run_id = kwargs.get('run_id', None)
         self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
 
     def __init_experiment(self):
-        self.mlflow_experiment = mlflow.set_experiment(self.name)
-        self.experiment_id = self.mlflow_experiment.experiment_id
+        if self.experiment_id:
+            mlflow.set_experiment(self.experiment_id)
+        self.experiment_id = mlflow.set_experiment(self.name).experiment_id
 
     def __prepare(self):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
-        self.model = self.model_class(self.random_state)
+        if self.load_model_from_mlflow:
+            self.model = self.model_class.load_from_mlflow(self.run_id)
+        else:
+            self.model = self.model_class(self.random_state)
 
-    def run(self):
+    def run_new_experiment(self):
         self.__init_experiment()
-        with mlflow.start_run(experiment_id=self.experiment_id) as experiment_run:
+        with mlflow.start_run(run_id = self.run_id, experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
             self.model.fit(self.dataset)
+            self.model.evaluate()
+
+    def run_evaluation(self, new_run=False):
+
+
+
+
