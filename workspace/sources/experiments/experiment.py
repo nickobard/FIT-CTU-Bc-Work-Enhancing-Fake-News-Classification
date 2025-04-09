@@ -46,7 +46,7 @@ class Experiment(ABC):
             return experiment
 
     def __init__(self, **kwargs):
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.__init_logger(**kwargs)
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
@@ -55,6 +55,18 @@ class Experiment(ABC):
         self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
         self.logger.info(f"Experiment {self.name} has been successfully built.")
+
+    def __init_logger(self, **kwargs):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        logging_level = kwargs.get('logging_level', logging.INFO)
+        self.logger.setLevel(logging_level)
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
 
     def __init_experiment(self):
         self.experiment_id = mlflow.set_experiment(self.name).experiment_id
