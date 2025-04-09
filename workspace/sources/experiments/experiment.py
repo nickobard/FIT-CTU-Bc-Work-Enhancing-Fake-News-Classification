@@ -22,7 +22,7 @@ class Experiment(ABC):
 
         def with_model(self, model_class, load_model_from_mlflow_if_exists=False):
             self._params["model_class"] = model_class
-            self._params["load_model_from_mlflow"] = load_model_from_mlflow_if_exists
+            self._params["load_model_from_mlflow_if_exists"] = load_model_from_mlflow_if_exists
             return self
 
         def with_random_state(self, random_state):
@@ -47,6 +47,7 @@ class Experiment(ABC):
 
     def __init__(self, **kwargs):
         self.__init_logger(**kwargs)
+        self.logger.debug(f"Experiments parameters: {kwargs}")
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
@@ -76,7 +77,8 @@ class Experiment(ABC):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
         self.dataset.set_logger(self.logger)
         artifact_uir = mlflow.active_run().info.artifact_uri
-        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exsits(artifact_uir, self.logger):
+        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exists(artifact_uir,
+                                                                                                   self.logger):
             self.model = self.model_class.load_from_mlflow(artifact_uir, self.logger)
         else:
             self.model = self.model_class(self.random_state, self.logger)
@@ -85,6 +87,6 @@ class Experiment(ABC):
         self.__init_experiment()
         with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
-            self.model.fit(self.dataset)
-            self.model.save_to_mlflow()
-            self.model.evaluate()
+            # self.model.fit(self.dataset)
+            # self.model.save_to_mlflow()
+            # self.model.evaluate()

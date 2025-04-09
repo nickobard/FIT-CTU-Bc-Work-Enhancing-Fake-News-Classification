@@ -24,7 +24,7 @@ class Model(ABC):
 
     @classmethod
     def load_from_mlflow(cls, artifact_uri, logger):
-        if cls.mlflow_model_artifact_exsists(artifact_uri):
+        if cls.mlflow_model_artifact_exists(artifact_uri):
             model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
             logger.info(f"Attempting to load model artifact from {model_path}.")
             with open(model_path, 'rb') as f:
@@ -36,7 +36,7 @@ class Model(ABC):
             raise FileNotFoundError(f"Model artifact not found at: {os.path.join(artifact_uri, 'model', 'model.pkl')}")
 
     @classmethod
-    def mlflow_model_artifact_exsists(cls, artifact_uri, logger):
+    def mlflow_model_artifact_exists(cls, artifact_uri, logger):
         model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
         if os.path.exists(model_path):
             return True
@@ -54,10 +54,10 @@ class Model(ABC):
 
 
 class BertBasedUncased(Model):
-    def __init__(self, random_state):
+    def __init__(self, random_state, logger):
         self.name = "bert-base-uncased"
         mlflow.log_param('model_name', self.name)
-        super().__init__(random_state)
+        super().__init__(random_state, logger)
 
     def fit(self, dataset):
         self.dataset = dataset
