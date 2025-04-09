@@ -1,3 +1,4 @@
+import pickle
 from abc import ABC
 import mlflow
 import numpy as np
@@ -7,11 +8,25 @@ from transformers import BertTokenizer, BertForSequenceClassification, Trainer, 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import confusion_matrix
 from transformers.integrations import MLflowCallback
+import pickle
 
 
 class Model(ABC):
     def __init__(self, random_state):
         self.random_state = random_state
+
+    @classmethod
+    def load_from_mlflow(cls, run_id):
+        # TODO optionally check if artifact exists there
+        with open(f"mlruns/{mlflow.active_run().info.experiment_id}/{run_id}/artifacts/model/model.pkl", 'rb') as f:
+            model = pickle.load(f)
+        return model
+
+    def save_to_mlflow(self):
+        with open(
+                f"mlruns/{mlflow.active_run().info.experiment_id}/{mlflow.active_run().info.run_id}/artifacts/model/model.pkl",
+                'wb') as f:
+            pickle.dump(self, f)
 
 
 class BertBasedUncased(Model):
@@ -21,6 +36,7 @@ class BertBasedUncased(Model):
         super().__init__(random_state)
 
     def fit(self, dataset):
+        self.dataset = dataset
         set_seed(self.random_state)
         train, val, test = self.__prepare_dataset(dataset)
         tokenizer = BertTokenizer.from_pretrained(self.name)
@@ -28,14 +44,14 @@ class BertBasedUncased(Model):
         def tokenize_function(example):
             return tokenizer(example["article"], truncation=True, padding="max_length", max_length=256)
 
-        train_tokenized = train.map(tokenize_function, batched=True).to
-        val_tokenized = val.map(tokenize_function, batched=True)
-        test_tokenized = test.map(tokenize_function, batched=True)
+        self.train_tokenized = train.map(tokenize_function, batched=True)
+        self.val_tokenized = val.map(tokenize_function, batched=True)
+        self.test_tokenized = test.map(tokenize_function, batched=True)
 
-        train_tokenized.set_format(type="torch")
-        val_tokenized.set_format(type="torch")
-        test_tokenized.set_format(type="torch")
-        self.train(train_tokenized, val_tokenized)
+        self.train_tokenized.set_format(type="torch")
+        self.val_tokenized.set_format(type="torch")
+        self.test_tokenized.set_format(type="torch")
+        self.train(self.train_tokenized, self.val_tokenized)
 
     def train(self, train, val):
         self.model = BertForSequenceClassification.from_pretrained(self.name, num_labels=2)
@@ -49,7 +65,8 @@ class BertBasedUncased(Model):
             recall = recall_score(labels, predictions)
             f1 = f1_score(labels, predictions)
             roc_auc = roc_auc_score(labels, probs)
-            tn, fp, fn, tp = confusion_matrix(labels, predictions).ravel()
+            cm = confusion_matrix(labels, predictions)
+            tn, fp, fn, tp = cm.ravel()
             false_positive_rate = fp / (fp + tn) if (fp + tn) > 0 else 0
             false_negative_rate = fn / (fn + tp) if (fn + tp) > 0 else 0
             return {"false_positive_rate": false_positive_rate, "false_negative_rate": false_negative_rate,
@@ -57,7 +74,7 @@ class BertBasedUncased(Model):
 
         artifacts_dir = f"mlruns/{mlflow.active_run().info.experiment_id}/{mlflow.active_run().info.run_id}/artifacts/"
         self.training_args = TrainingArguments(
-            output_dir=artifacts_dir + '/model/checkpoints',
+            output_dir=artifacts_dir + 'model/checkpoints',
             num_train_epochs=3,
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
@@ -75,10 +92,10 @@ class BertBasedUncased(Model):
             callbacks=[MLflowCallback()]
         )
         self.trainer.train()
-        self.trainer.save_model(artifacts_dir + '/model/')
+        self.trainer.save_model(artifacts_dir + 'model/')
 
-    def evaluate(self, dataset):
-        self.trainer.evaluate(dataset, metric_key_prefix="test")
+    def evaluate(self):
+        self.trainer.evaluate(self.test_tokenized, metric_key_prefix="test")
 
     def __prepare_dataset(self, dataset):
         train, val, test = dataset.split()
