@@ -19,7 +19,7 @@ class Experiment(ABC):
             self._params["dataset_path"] = dataset_path
             return self
 
-        def with_model(self, model_class, load_model_from_mlflow_if_exists=False):
+        def with_model(self, model_class, load_model_from_mlflow_if_exists=True):
             self._params["model_class"] = model_class
             self._params["load_model_from_mlflow"] = load_model_from_mlflow_if_exists
             return self
