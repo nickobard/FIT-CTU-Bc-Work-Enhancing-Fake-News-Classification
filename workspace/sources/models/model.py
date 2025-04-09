@@ -15,13 +15,21 @@ import os
 class Model(ABC):
     def __init__(self, random_state):
         self.random_state = random_state
+        self.logger = None
+
+    def set_logger(self, logger):
+        self.logger = logger
+        return self
+
 
     @classmethod
     def load_from_mlflow(cls, artifact_uri):
         if cls.mlflow_model_artifact_exsists(artifact_uri):
             model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
+            logger.info(f"Attempting to load model artifact from {model_path}.")
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
+            logger.info("Model artifact loaded successfully.")
             return model
         else:
             raise FileNotFoundError(f"Model artifact not found at: {os.path.join(artifact_uri, 'model', 'model.pkl')}")
@@ -32,7 +40,7 @@ class Model(ABC):
         if os.path.exists(model_path):
             return True
         else:
-            print(f"Error: Model artifact not found at path: {model_path}")
+            logger.error(f"Error: Model artifact not found at path: {model_path}")
             return False
 
     def save_to_mlflow(self):
