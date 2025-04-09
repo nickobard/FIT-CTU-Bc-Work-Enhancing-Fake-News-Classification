@@ -54,9 +54,11 @@ class Experiment(ABC):
         self.run_id = kwargs.get('run_id', None)
         self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
+        self.logger.info(f"Experiment {self.name} has been successfully built.")
 
     def __init_experiment(self):
         self.experiment_id = mlflow.set_experiment(self.name).experiment_id
+        self.logger.info(f"MLflow experiment initialized with ID: {self.experiment_id}")
 
     def __prepare(self):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)

@@ -23,7 +23,7 @@ class Model(ABC):
 
 
     @classmethod
-    def load_from_mlflow(cls, artifact_uri):
+    def load_from_mlflow(cls, artifact_uri, logger):
         if cls.mlflow_model_artifact_exsists(artifact_uri):
             model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
             logger.info(f"Attempting to load model artifact from {model_path}.")
@@ -35,7 +35,7 @@ class Model(ABC):
             raise FileNotFoundError(f"Model artifact not found at: {os.path.join(artifact_uri, 'model', 'model.pkl')}")
 
     @classmethod
-    def mlflow_model_artifact_exsists(cls, artifact_uri):
+    def mlflow_model_artifact_exsists(cls, artifact_uri, logger):
         model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
         if os.path.exists(model_path):
             return True
