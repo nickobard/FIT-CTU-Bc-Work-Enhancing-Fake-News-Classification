@@ -10,6 +10,11 @@ class Dataset(ABC):
     def __init__(self, data: pd.DataFrame, random_state):
         self.random_state = random_state
         self.data = data
+        self.logger = None
+
+    def set_logger(self, logger):
+        self.logger = logger
+        return self
 
 
 class ReCoveryDataset(Dataset):
