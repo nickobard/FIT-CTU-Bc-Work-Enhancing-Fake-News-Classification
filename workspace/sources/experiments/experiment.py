@@ -19,9 +19,9 @@ class Experiment(ABC):
             self._params["dataset_path"] = dataset_path
             return self
 
-        def with_model(self, model_class, load_model_from_mlflow=False):
+        def with_model(self, model_class, load_model_from_mlflow_if_exists=False):
             self._params["model_class"] = model_class
-            self._params["load_model_from_mlflow"] = load_model_from_mlflow
+            self._params["load_model_from_mlflow"] = load_model_from_mlflow_if_exists
             return self
 
         def with_random_state(self, random_state):
@@ -30,9 +30,11 @@ class Experiment(ABC):
 
         def with_experiment_id(self, experiment_id):
             self._params["experiment_id"] = experiment_id
+            return self
 
         def with_run_id(self, run_id):
             self._params["run_id"] = run_id
+            return self
 
         def build(self):
             if self._params.get('load_model_from_mlflow', False) and self._params.get("run_id", None) is None:
@@ -44,7 +46,7 @@ class Experiment(ABC):
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
-        self.load_model_from_mlflow = kwargs.get('load_model_from_mlflow', False)
+        self.load_model_from_mlflow_if_exists = kwargs.get('load_model_from_mlflow_if_exists', False)
         self.experiment_id = kwargs.get('experiment_id', None)
         self.run_id = kwargs.get('run_id', None)
         self.name = kwargs.get('name', self.model_class.__name__)
@@ -57,20 +59,15 @@ class Experiment(ABC):
 
     def __prepare(self):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
-        if self.load_model_from_mlflow:
+        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exsits():
             self.model = self.model_class.load_from_mlflow(self.run_id)
         else:
             self.model = self.model_class(self.random_state)
 
-    def run_new_experiment(self):
+    def run(self):
         self.__init_experiment()
-        with mlflow.start_run(run_id = self.run_id, experiment_id=self.experiment_id) as experiment_run:
+        with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
             self.model.fit(self.dataset)
+            self.model.save_to_mlflow()
             self.model.evaluate()
-
-    def run_evaluation(self, new_run=False):
-
-
-
-
