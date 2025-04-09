@@ -76,11 +76,10 @@ class Experiment(ABC):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
         self.dataset.set_logger(self.logger)
         artifact_uir = mlflow.active_run().info.artifact_uri
-        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exsits(artifact_uir):
-            self.model = self.model_class.load_from_mlflow(artifact_uir)
+        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exsits(artifact_uir, self.logger):
+            self.model = self.model_class.load_from_mlflow(artifact_uir, self.logger)
         else:
-            self.model = self.model_class(self.random_state)
-        self.model.set_logger(self.logger)
+            self.model = self.model_class(self.random_state, self.logger)
 
     def run(self):
         self.__init_experiment()

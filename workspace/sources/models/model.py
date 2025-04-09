@@ -13,9 +13,9 @@ import os
 
 
 class Model(ABC):
-    def __init__(self, random_state):
+    def __init__(self, random_state, logger):
         self.random_state = random_state
-        self.logger = None
+        self.logger = logger
 
     def set_logger(self, logger):
         self.logger = logger
@@ -30,6 +30,7 @@ class Model(ABC):
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
             logger.info("Model artifact loaded successfully.")
+            model.set_logger(logger)
             return model
         else:
             raise FileNotFoundError(f"Model artifact not found at: {os.path.join(artifact_uri, 'model', 'model.pkl')}")
