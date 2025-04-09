@@ -2,6 +2,7 @@ from abc import ABC
 from local_datasets.dataset import Dataset
 from models.model import Model
 import mlflow
+import logging
 from utils import generate_random_state
 
 
@@ -19,7 +20,7 @@ class Experiment(ABC):
             self._params["dataset_path"] = dataset_path
             return self
 
-        def with_model(self, model_class, load_model_from_mlflow_if_exists=True):
+        def with_model(self, model_class, load_model_from_mlflow_if_exists=False):
             self._params["model_class"] = model_class
             self._params["load_model_from_mlflow"] = load_model_from_mlflow_if_exists
             return self
@@ -32,13 +33,20 @@ class Experiment(ABC):
             self._params["run_id"] = run_id
             return self
 
+        def with_logging_level(self, logging_level):
+            self._params["logging_level"] = logging_level
+            return self
+
         def build(self):
             if self._params.get('load_model_from_mlflow', False) and self._params.get("run_id", None) is None:
                 raise ValueError("run_id must be provided when load_model_from_mlflow is True.")
             experiment = Experiment(**self._params)
+            logging_level = self._params.get("logging_level", logging.INFO)
+            experiment.logger.setLevel(logging_level)
             return experiment
 
     def __init__(self, **kwargs):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
@@ -52,10 +60,13 @@ class Experiment(ABC):
 
     def __prepare(self):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
-        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exsits():
-            self.model = self.model_class.load_from_mlflow(self.run_id)
+        self.dataset.set_logger(self.logger)
+        artifact_uir = mlflow.active_run().info.artifact_uri
+        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exsits(artifact_uir):
+            self.model = self.model_class.load_from_mlflow(artifact_uir)
         else:
             self.model = self.model_class(self.random_state)
+        self.model.set_logger(self.logger)
 
     def run(self):
         self.__init_experiment()
