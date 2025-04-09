@@ -28,10 +28,6 @@ class Experiment(ABC):
             self._params["random_state"] = random_state
             return self
 
-        def with_experiment_id(self, experiment_id):
-            self._params["experiment_id"] = experiment_id
-            return self
-
         def with_run_id(self, run_id):
             self._params["run_id"] = run_id
             return self
@@ -47,14 +43,11 @@ class Experiment(ABC):
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
         self.load_model_from_mlflow_if_exists = kwargs.get('load_model_from_mlflow_if_exists', False)
-        self.experiment_id = kwargs.get('experiment_id', None)
         self.run_id = kwargs.get('run_id', None)
         self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
 
     def __init_experiment(self):
-        if self.experiment_id:
-            mlflow.set_experiment(self.experiment_id)
         self.experiment_id = mlflow.set_experiment(self.name).experiment_id
 
     def __prepare(self):
