@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.metrics import confusion_matrix
 from transformers.integrations import MLflowCallback
 import pickle
+import os
 
 
 class Model(ABC):
@@ -16,16 +17,30 @@ class Model(ABC):
         self.random_state = random_state
 
     @classmethod
-    def load_from_mlflow(cls, run_id):
-        # TODO optionally check if artifact exists there
-        with open(f"mlruns/{mlflow.active_run().info.experiment_id}/{run_id}/artifacts/model/model.pkl", 'rb') as f:
-            model = pickle.load(f)
-        return model
+    def load_from_mlflow(cls, artifact_uri):
+        if cls.mlflow_model_artifact_exsists(artifact_uri):
+            model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
+            with open(model_path, 'rb') as f:
+                model = pickle.load(f)
+            return model
+        else:
+            raise FileNotFoundError(f"Model artifact not found at: {os.path.join(artifact_uri, 'model', 'model.pkl')}")
+
+    @classmethod
+    def mlflow_model_artifact_exsists(cls, artifact_uri):
+        model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
+        if os.path.exists(model_path):
+            return True
+        else:
+            print(f"Error: Model artifact not found at path: {model_path}")
+            return False
 
     def save_to_mlflow(self):
-        with open(
-                f"mlruns/{mlflow.active_run().info.experiment_id}/{mlflow.active_run().info.run_id}/artifacts/model/model.pkl",
-                'wb') as f:
+        artifact_uri = mlflow.active_run().info.artifact_uri
+        model_dir = os.path.join(artifact_uri, "model")
+        os.makedirs(model_dir, exist_ok=True)
+        model_path = os.path.join(model_dir, "model.pkl")
+        with open(model_path, 'wb') as f:
             pickle.dump(self, f)
 
 
