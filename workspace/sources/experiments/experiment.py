@@ -4,7 +4,7 @@ from models.model import Model
 import mlflow
 import logging
 from utils import generate_random_state
-
+import os
 
 class Experiment(ABC):
     class Builder:
@@ -76,18 +76,11 @@ class Experiment(ABC):
     def __prepare(self):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
         self.dataset.set_logger(self.logger)
-        artifact_uir = mlflow.active_run().info.artifact_uri
-        if self.load_model_from_mlflow_if_exists and self.model_class.mlflow_model_artifact_exists(artifact_uir,
-                                                                                                   self.logger):
-            self.model = self.model_class.load_from_mlflow(artifact_uir, self.logger)
-        else:
-            self.model = self.model_class(self.random_state, self.logger)
+        self.model = self.model_class(self.random_state, self.logger)
 
     def run(self):
         self.__init_experiment()
         with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
-            if not self.model.is_fit:
-                self.model.fit(self.dataset)
-                self.model.save_to_mlflow()
+            self.model.fit(self.dataset)
             self.model.evaluate()
