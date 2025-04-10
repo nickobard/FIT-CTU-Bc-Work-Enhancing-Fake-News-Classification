@@ -1,5 +1,5 @@
 import unittest
-from utils import normalize_artifact_uri
+from utils import get_normalized_path_from_artifact_uri
 
 
 class GeneralTestCase(unittest.TestCase):
@@ -13,7 +13,7 @@ class GeneralTestCase(unittest.TestCase):
         print(tests_path)
 
         test_data = {"key": "value"}
-        test_file = os.path.normpath(os.path.join(normalize_artifact_uri(tests_path), "dummy_test_file.pkl"))
+        test_file = os.path.join(get_normalized_path_from_artifact_uri(tests_path), "dummy_test_file.pkl")
 
         # Check the file does not exist
         self.assertFalse(os.path.exists(test_file), "Test file should not exist initially.")
