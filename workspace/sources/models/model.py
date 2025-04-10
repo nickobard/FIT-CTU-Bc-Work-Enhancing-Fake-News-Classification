@@ -1,15 +1,8 @@
-import pickle
 from abc import ABC
 import mlflow
-import numpy as np
-from scipy.special import softmax
-import datasets as hf_datasets
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, set_seed
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-from sklearn.metrics import confusion_matrix
-from transformers.integrations import MLflowCallback
 import pickle
 import os
+import utils
 
 
 class Model(ABC):
@@ -21,11 +14,11 @@ class Model(ABC):
         self.logger = logger
         return self
 
-
     @classmethod
     def load_from_mlflow(cls, artifact_uri, logger):
         if cls.mlflow_model_artifact_exists(artifact_uri):
-            model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
+            local_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+            model_path = os.path.join(local_path, 'model', 'model.pkl')
             logger.info(f"Attempting to load model artifact from {model_path}.")
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
@@ -37,7 +30,8 @@ class Model(ABC):
 
     @classmethod
     def mlflow_model_artifact_exists(cls, artifact_uri, logger):
-        model_path = os.path.join(artifact_uri, 'model', 'model.pkl')
+        local_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        model_path = os.path.join(local_path, 'model', 'model.pkl')
         if os.path.exists(model_path):
             return True
         else:
@@ -46,83 +40,13 @@ class Model(ABC):
 
     def save_to_mlflow(self):
         artifact_uri = mlflow.active_run().info.artifact_uri
-        model_dir = os.path.join(artifact_uri, "model")
+        local_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        model_dir = os.path.join(local_path, "model")
         os.makedirs(model_dir, exist_ok=True)
         model_path = os.path.join(model_dir, "model.pkl")
         with open(model_path, 'wb') as f:
             pickle.dump(self, f)
 
 
-class BertBasedUncased(Model):
-    def __init__(self, random_state, logger):
-        self.name = "bert-base-uncased"
-        mlflow.log_param('model_name', self.name)
-        super().__init__(random_state, logger)
-
-    def fit(self, dataset):
-        self.dataset = dataset
-        set_seed(self.random_state)
-        train, val, test = self.__prepare_dataset(dataset)
-        tokenizer = BertTokenizer.from_pretrained(self.name)
-
-        def tokenize_function(example):
-            return tokenizer(example["article"], truncation=True, padding="max_length", max_length=256)
-
-        self.train_tokenized = train.map(tokenize_function, batched=True)
-        self.val_tokenized = val.map(tokenize_function, batched=True)
-        self.test_tokenized = test.map(tokenize_function, batched=True)
-
-        self.train_tokenized.set_format(type="torch")
-        self.val_tokenized.set_format(type="torch")
-        self.test_tokenized.set_format(type="torch")
-        self.train(self.train_tokenized, self.val_tokenized)
-
-    def train(self, train, val):
-        self.model = BertForSequenceClassification.from_pretrained(self.name, num_labels=2)
-
-        def compute_metrics(eval_pred):
-            logits, labels = eval_pred
-            predictions = np.argmax(logits, axis=-1)
-            probs = softmax(logits, axis=1)[:, 1]
-            accuracy = accuracy_score(labels, predictions)
-            precision = precision_score(labels, predictions)
-            recall = recall_score(labels, predictions)
-            f1 = f1_score(labels, predictions)
-            roc_auc = roc_auc_score(labels, probs)
-            cm = confusion_matrix(labels, predictions)
-            tn, fp, fn, tp = cm.ravel()
-            false_positive_rate = fp / (fp + tn) if (fp + tn) > 0 else 0
-            false_negative_rate = fn / (fn + tp) if (fn + tp) > 0 else 0
-            return {"false_positive_rate": false_positive_rate, "false_negative_rate": false_negative_rate,
-                    "accuracy": accuracy, 'precision': precision, "recall": recall, "f1": f1, "roc_auc": roc_auc}
-
-        artifacts_dir = f"mlruns/{mlflow.active_run().info.experiment_id}/{mlflow.active_run().info.run_id}/artifacts/"
-        self.training_args = TrainingArguments(
-            output_dir=artifacts_dir + 'model/checkpoints',
-            num_train_epochs=3,
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
-            eval_strategy="epoch",
-            logging_steps=10,
-            save_steps=100,
-            weight_decay=0.01
-        )
-        self.trainer = Trainer(
-            model=self.model,
-            args=self.training_args,
-            train_dataset=train,
-            eval_dataset=val,
-            compute_metrics=compute_metrics,
-            callbacks=[MLflowCallback()]
-        )
-        self.trainer.train()
-        self.trainer.save_model(artifacts_dir + 'model/')
-
-    def evaluate(self):
-        self.trainer.evaluate(self.test_tokenized, metric_key_prefix="test")
-
-    def __prepare_dataset(self, dataset):
-        train, val, test = dataset.split()
-        return (hf_datasets.Dataset.from_pandas(train),
-                hf_datasets.Dataset.from_pandas(val),
-                hf_datasets.Dataset.from_pandas(test))
+if __name__ == "__main__":
+    pass
