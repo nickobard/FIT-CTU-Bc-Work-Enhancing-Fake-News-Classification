@@ -120,7 +120,11 @@ class BertBasedUncased(Model):
             compute_metrics=compute_metrics,
             callbacks=[HF_CustomMLflowCallback()]
         )
-        self.trainer.train(resume_from_checkpoint=True)
+        if os.path.exists(output_dir) and any(os.scandir(output_dir)):
+            self.trainer.train(resume_from_checkpoint=True)
+        else:
+            self.logger.info("No checkpoint detected. Starting training from scratch.")
+            self.trainer.train()
 
     def evaluate(self):
         self.trainer.evaluate(self.test_tokenized, metric_key_prefix="test")
