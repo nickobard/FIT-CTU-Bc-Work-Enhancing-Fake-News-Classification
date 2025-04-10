@@ -7,8 +7,7 @@ import datasets as hf_datasets
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, set_seed
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import confusion_matrix
-from transformers.integrations import MLflowCallback
-import utils
+from models.callbacks import HF_CustomMLflowCallback
 import os
 
 
@@ -97,9 +96,14 @@ class BertBasedUncased(Model):
             return {"false_positive_rate": false_positive_rate, "false_negative_rate": false_negative_rate,
                     "accuracy": accuracy, 'precision': precision, "recall": recall, "f1": f1, "roc_auc": roc_auc}
 
-        output_dir = os.path.join([self.get_model_artifacts_path(), 'checkpoints'])
+        output_dir = mlflow.active_run().data.params.get('output_dir',
+                                                         os.path.join(self.get_model_artifacts_path(), 'checkpoints'))
+        logging_dir = mlflow.active_run().data.params.get('logging_dir',
+                                                          os.path.join(self.get_model_artifacts_path(), 'logs'))
+
         self.training_args = TrainingArguments(
             output_dir=output_dir,
+            logging_dir=logging_dir,
             num_train_epochs=3,
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
@@ -114,9 +118,9 @@ class BertBasedUncased(Model):
             train_dataset=train,
             eval_dataset=val,
             compute_metrics=compute_metrics,
-            callbacks=[MLflowCallback()]
+            callbacks=[HF_CustomMLflowCallback()]
         )
-        self.trainer.train()
+        self.trainer.train(resume_from_checkpoint=True)
 
     def evaluate(self):
         self.trainer.evaluate(self.test_tokenized, metric_key_prefix="test")
