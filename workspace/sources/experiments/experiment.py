@@ -20,7 +20,7 @@ class Experiment(ABC):
             self._params["dataset_path"] = dataset_path
             return self
 
-        def with_model(self, model_class, load_model_from_mlflow_if_exists=False):
+        def with_model(self, model_class, load_model_from_mlflow_if_exists=True):
             self._params["model_class"] = model_class
             self._params["load_model_from_mlflow_if_exists"] = load_model_from_mlflow_if_exists
             return self
@@ -51,7 +51,7 @@ class Experiment(ABC):
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
-        self.load_model_from_mlflow_if_exists = kwargs.get('load_model_from_mlflow_if_exists', False)
+        self.load_model_from_mlflow_if_exists = kwargs.get('load_model_from_mlflow_if_exists', True)
         self.run_id = kwargs.get('run_id', None)
         self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
@@ -87,6 +87,7 @@ class Experiment(ABC):
         self.__init_experiment()
         with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
-            # self.model.fit(self.dataset)
-            # self.model.save_to_mlflow()
-            # self.model.evaluate()
+            if not self.model.is_fit:
+                self.model.fit(self.dataset)
+                self.model.save_to_mlflow()
+            self.model.evaluate()
