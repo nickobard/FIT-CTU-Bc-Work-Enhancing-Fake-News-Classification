@@ -6,7 +6,8 @@ import utils
 
 
 class Model(ABC):
-    def __init__(self, random_state, logger):
+    def __init__(self, metric_for_best_model, random_state, logger):
+        self.metric_for_best_model = metric_for_best_model
         self.random_state = random_state
         self.logger = logger
 
