@@ -9,7 +9,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.metrics import confusion_matrix
 from models.callbacks import HF_CustomMLflowCallback
 import os
-
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve
 
 class BertBasedUncased(Model):
 
@@ -32,11 +33,11 @@ class BertBasedUncased(Model):
         raise NotImplementedError(
             f"The save_to_mlflow method is not supported for the {self.__class__.__name__} class.")
 
-    def __init__(self, random_state, logger):
+    def __init__(self, metric_for_best_model, random_state, logger):
         self.is_fit = False
         self.name = "bert-base-uncased"
         mlflow.log_param('model_name', self.name)
-        super().__init__(random_state, logger)
+        super().__init__(metric_for_best_model, random_state, logger)
 
     def saved_datasets_exist(self):
         return all(os.path.exists(os.path.join(self.get_model_artifacts_path(), ds))
@@ -108,9 +109,13 @@ class BertBasedUncased(Model):
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
             eval_strategy="epoch",
+            save_strategy="epoch",
             logging_steps=10,
             save_steps=100,
-            weight_decay=0.01
+            weight_decay=0.01,
+            load_best_model_at_end=True,
+            metric_for_best_model=self.metric_for_best_model.name,
+            greater_is_better=self.metric_for_best_model.greater_is_better
         )
         self.trainer = Trainer(
             model=self.model,
@@ -120,14 +125,46 @@ class BertBasedUncased(Model):
             compute_metrics=compute_metrics,
             callbacks=[HF_CustomMLflowCallback()]
         )
-        if os.path.exists(output_dir) and any(os.scandir(output_dir)):
-            self.trainer.train(resume_from_checkpoint=True)
-        else:
-            self.logger.info("No checkpoint detected. Starting training from scratch.")
-            self.trainer.train()
+        self.trainer.train(resume_from_checkpoint=True)
 
     def evaluate(self):
-        self.trainer.evaluate(self.test_tokenized, metric_key_prefix="test")
+        self.logger.info(f"Best model epoch: {self.trainer.state.epoch}")
+        mlflow.log_metric("best_epoch", self.trainer.state.epoch)
+        # Extract predictions and labels
+        logits, labels, metrics = self.trainer.predict(self.test_tokenized, metric_key_prefix='test')
+        self.logger.info(f"Test metrics: {metrics}")
+        predictions = np.argmax(logits, axis=-1)
+        probs = softmax(logits, axis=1)[:, 1]
+
+        # Confusion matrix plot
+        cm = confusion_matrix(labels, predictions)
+        fig, ax = plt.subplots()
+        ax.matshow(cm, cmap="Blues", alpha=0.8)
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                ax.text(x=j, y=i, s=cm[i, j], va="center", ha="center")
+        plt.xlabel("Predictions")
+        plt.ylabel("Actuals")
+        cm_path = os.path.join(self.get_model_artifacts_path(), "confusion_matrix.png")
+        plt.savefig(cm_path)
+        mlflow.log_artifact(cm_path)
+        plt.close()
+
+        # ROC curve plot
+        fpr, tpr, _ = roc_curve(labels, probs)
+        plt.figure()
+        plt.plot(fpr, tpr, label="ROC curve (area = %0.2f)" % metrics["test_roc_auc"])
+        plt.plot([0, 1], [0, 1], "k--")
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("Receiver Operating Characteristic")
+        plt.legend(loc="lower right")
+        roc_curve_path = os.path.join(self.get_model_artifacts_path(), "roc_curve.png")
+        plt.savefig(roc_curve_path)
+        mlflow.log_artifact(roc_curve_path)
+        plt.close()
 
     def __prepare_dataset(self, dataset):
         train, val, test = dataset.split()
