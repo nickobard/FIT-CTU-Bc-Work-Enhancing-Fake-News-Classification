@@ -5,6 +5,8 @@ import mlflow
 import logging
 from utils import generate_random_state
 import os
+from experiments.metrics import FalsePositiveRate
+
 
 class Experiment(ABC):
     class Builder:
@@ -33,6 +35,9 @@ class Experiment(ABC):
             self._params["run_id"] = run_id
             return self
 
+        def with_best_model_metric(self, metric_for_best_model):
+            self._params["metric_for_best_model"] = metric_for_best_model
+
         def with_logging_level(self, logging_level):
             self._params["logging_level"] = logging_level
             return self
@@ -53,6 +58,7 @@ class Experiment(ABC):
         self.model_class = kwargs['model_class']
         self.load_model_from_mlflow_if_exists = kwargs.get('load_model_from_mlflow_if_exists', True)
         self.run_id = kwargs.get('run_id', None)
+        self.best_model_metric = kwargs.get("metric_for_best_model", FalsePositiveRate())
         self.name = kwargs.get('name', self.model_class.__name__)
         self.random_state = kwargs.get('random_state', generate_random_state())
         self.logger.info(f"Experiment {self.name} has been successfully built.")
@@ -76,7 +82,7 @@ class Experiment(ABC):
     def __prepare(self):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
         self.dataset.set_logger(self.logger)
-        self.model = self.model_class(self.random_state, self.logger)
+        self.model = self.model_class(self.best_model_metric, self.random_state, self.logger)
 
     def run(self):
         self.__init_experiment()
