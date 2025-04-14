@@ -6,11 +6,10 @@ from scipy.special import softmax
 import datasets as hf_datasets
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, set_seed
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-from sklearn.metrics import confusion_matrix
 from models.callbacks import HF_CustomMLflowCallback
+from sklearn.metrics import confusion_matrix
 import os
-import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve
+
 
 class BertBasedUncased(Model):
 
@@ -127,44 +126,14 @@ class BertBasedUncased(Model):
         )
         self.trainer.train(resume_from_checkpoint=True)
 
-    def evaluate(self):
+    def evaluate(self, visualizations_handler):
         self.logger.info(f"Best model epoch: {self.trainer.state.epoch}")
         mlflow.log_metric("best_epoch", self.trainer.state.epoch)
         # Extract predictions and labels
         logits, labels, metrics = self.trainer.predict(self.test_tokenized, metric_key_prefix='test')
         self.logger.info(f"Test metrics: {metrics}")
-        predictions = np.argmax(logits, axis=-1)
         probs = softmax(logits, axis=1)[:, 1]
-
-        # Confusion matrix plot
-        cm = confusion_matrix(labels, predictions)
-        fig, ax = plt.subplots()
-        ax.matshow(cm, cmap="Blues", alpha=0.8)
-        for i in range(cm.shape[0]):
-            for j in range(cm.shape[1]):
-                ax.text(x=j, y=i, s=cm[i, j], va="center", ha="center")
-        plt.xlabel("Predictions")
-        plt.ylabel("Actuals")
-        cm_path = os.path.join(self.get_model_artifacts_path(), "confusion_matrix.png")
-        plt.savefig(cm_path)
-        mlflow.log_artifact(cm_path)
-        plt.close()
-
-        # ROC curve plot
-        fpr, tpr, _ = roc_curve(labels, probs)
-        plt.figure()
-        plt.plot(fpr, tpr, label="ROC curve (area = %0.2f)" % metrics["test_roc_auc"])
-        plt.plot([0, 1], [0, 1], "k--")
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel("False Positive Rate")
-        plt.ylabel("True Positive Rate")
-        plt.title("Receiver Operating Characteristic")
-        plt.legend(loc="lower right")
-        roc_curve_path = os.path.join(self.get_model_artifacts_path(), "roc_curve.png")
-        plt.savefig(roc_curve_path)
-        mlflow.log_artifact(roc_curve_path)
-        plt.close()
+        visualizations_handler.handle_visualizations(probs, labels)
 
     def __prepare_dataset(self, dataset):
         train, val, test = dataset.split()
