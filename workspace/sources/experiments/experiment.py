@@ -17,6 +17,10 @@ class Experiment(ABC):
             self._params["name"] = name
             return self
 
+        def with_visualizations_handler(self, visualizations_handler):
+            self._params["visualizations_handler"] = visualizations_handler
+            return self
+
         def with_dataset(self, dataset_class, dataset_path):
             self._params["dataset_class"] = dataset_class
             self._params["dataset_path"] = dataset_path
@@ -56,6 +60,7 @@ class Experiment(ABC):
         self.dataset_class = kwargs['dataset_class']
         self.dataset_path = kwargs['dataset_path']
         self.model_class = kwargs['model_class']
+        self.visualization_handler = kwargs.get('visualizations_handler', None)
         self.load_model_from_mlflow_if_exists = kwargs.get('load_model_from_mlflow_if_exists', True)
         self.run_id = kwargs.get('run_id', None)
         self.best_model_metric = kwargs.get("metric_for_best_model", FalsePositiveRate())
@@ -83,10 +88,12 @@ class Experiment(ABC):
         self.dataset = self.dataset_class(self.dataset_path, self.random_state)
         self.dataset.set_logger(self.logger)
         self.model = self.model_class(self.best_model_metric, self.random_state, self.logger)
+        self.visualization_handler.set_artifacts_path(self.model.get_model_artifacts_path())
+        self.visualization_handler.set_logger(self.logger)
 
     def run(self):
         self.__init_experiment()
         with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as experiment_run:
             self.__prepare()
             self.model.fit(self.dataset)
-            self.model.evaluate()
+            self.model.evaluate(self.visualization_handler)
