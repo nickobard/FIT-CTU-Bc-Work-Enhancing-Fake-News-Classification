@@ -1,6 +1,4 @@
 from abc import ABC
-from local_datasets.dataset import Dataset
-from models.model import Model
 import mlflow
 import logging
 from utils import generate_random_state

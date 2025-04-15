@@ -1,4 +1,4 @@
-from experiments.visualizations.vizualizations import PredictionBased, Visualization, VisualizationBuilder
+from experiments.visualizations.base import PredictionBased, Visualization
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ class ConfusionMatrix(PredictionBased):
         plt.ylabel("Actuals")
         cm_path = os.path.join(self.artifacts_path, "confusion_matrix.png")
         self._handle_visibility()
-        self.save_and_log_artifact(cm_path, "Confusion Matrix", fig)
+        self.save_and_log_artifact(cm_path, fig)
 
 
 class ROC(Visualization):
@@ -54,9 +54,6 @@ class ROC(Visualization):
         plt.legend(loc="lower right")
         roc_curve_path = os.path.join(self.artifacts_path, "roc_curve.png")
         self._handle_visibility()
-        self.save_and_log_artifact(roc_curve_path, "ROC Curve", fig)
+        self.save_and_log_artifact(roc_curve_path, fig)
 
 
-class ROCBuilder(VisualizationBuilder):
-    def __init__(self, visualization_class=ROC):
-        super().__init__(visualization_class)

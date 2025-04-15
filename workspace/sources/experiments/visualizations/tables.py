@@ -1,4 +1,4 @@
-from experiments.visualizations.vizualizations import PredictionBased, Visualization
+from experiments.visualizations.base import PredictionBased, Visualization
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
 import matplotlib.pyplot as plt
 import os
@@ -38,7 +38,7 @@ class Metrics(PredictionBased):
         # Save the metric files
         metrics_csv_path = os.path.join(self.artifacts_path, "metrics.csv")
         metrics_df.to_csv(metrics_csv_path, index=False)
-        self.save_and_log_artifact(metrics_csv_path, "CSV file of metrics")
+        self.save_and_log_artifact(metrics_csv_path)
 
         # Save the metric visualization
         fig, ax = plt.subplots(figsize=(8, 2))
@@ -50,4 +50,4 @@ class Metrics(PredictionBased):
         table.auto_set_column_width(col=list(range(len(metrics_df.columns))))
         metrics_png_path = os.path.join(self.artifacts_path, "metrics_visualization.png")
         self._handle_visibility()
-        self.save_and_log_artifact(metrics_png_path, "Metrics visualization", fig)
+        self.save_and_log_artifact(metrics_png_path, fig)
