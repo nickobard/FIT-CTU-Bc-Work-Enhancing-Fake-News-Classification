@@ -1,4 +1,4 @@
-from models.model import Model
+from models.base import Model
 from scipy.special import softmax
 import mlflow
 import datasets as hf_datasets
