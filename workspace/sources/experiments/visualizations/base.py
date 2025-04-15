@@ -7,6 +7,7 @@ import mlflow
 class Visualization(ABC):
     def __init__(self):
         self.logger = None
+        self.artifacts_path = None
         self.set_visible = None
         self.probabilities = None
         self.labels = None
