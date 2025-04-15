@@ -1,4 +1,5 @@
-from experiments.vizualizations import *
+from experiments.visualizations.plots import ROC, ConfusionMatrix
+from experiments.visualizations.tables import Metrics
 
 
 class VisualizationsHandler:
@@ -27,7 +28,7 @@ class VisualizationsHandler:
 
 
 standard_visualizations_handler = VisualizationsHandler(
-    Visualization.Builder(Metrics).with_visible(True),
-    Visualization.Builder(ConfusionMatrix).with_visible(True),
-    Visualization.Builder(ROC).with_visible(True)
+    Metrics.Builder().with_visible(True),
+    ConfusionMatrix.Builder().with_visible(True),
+    ROC.Builder().with_visible(True)
 )
