@@ -1,14 +1,12 @@
 from models.model import Model
-
-import mlflow
-import numpy as np
 from scipy.special import softmax
+import mlflow
 import datasets as hf_datasets
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, set_seed
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from models.callbacks import HF_CustomMLflowCallback
-from sklearn.metrics import confusion_matrix
 import os
+
+from experiments.metrics import compute_standard_metrics
 
 
 class BertBasedUncased(Model):
@@ -80,21 +78,7 @@ class BertBasedUncased(Model):
     def train(self, train, val):
         self.model = BertForSequenceClassification.from_pretrained(self.name, num_labels=2)
 
-        def compute_metrics(eval_pred):
-            logits, labels = eval_pred
-            predictions = np.argmax(logits, axis=-1)
-            probs = softmax(logits, axis=1)[:, 1]
-            accuracy = accuracy_score(labels, predictions)
-            precision = precision_score(labels, predictions)
-            recall = recall_score(labels, predictions)
-            f1 = f1_score(labels, predictions)
-            roc_auc = roc_auc_score(labels, probs)
-            cm = confusion_matrix(labels, predictions)
-            tn, fp, fn, tp = cm.ravel()
-            false_positive_rate = fp / (fp + tn) if (fp + tn) > 0 else 0
-            false_negative_rate = fn / (fn + tp) if (fn + tp) > 0 else 0
-            return {"false_positive_rate": false_positive_rate, "false_negative_rate": false_negative_rate,
-                    "accuracy": accuracy, 'precision': precision, "recall": recall, "f1": f1, "roc_auc": roc_auc}
+        
 
         output_dir = mlflow.active_run().data.params.get('output_dir',
                                                          os.path.join(self.get_model_artifacts_path(), 'checkpoints'))
@@ -121,7 +105,7 @@ class BertBasedUncased(Model):
             args=self.training_args,
             train_dataset=train,
             eval_dataset=val,
-            compute_metrics=compute_metrics,
+            compute_metrics=compute_standard_metrics,
             callbacks=[HF_CustomMLflowCallback()]
         )
         self.trainer.train(resume_from_checkpoint=True)
@@ -132,6 +116,7 @@ class BertBasedUncased(Model):
         # Extract predictions and labels
         logits, labels, metrics = self.trainer.predict(self.test_tokenized, metric_key_prefix='test')
         self.logger.info(f"Test metrics: {metrics}")
+        mlflow.log_metrics({f"best_{key}": value for key, value in metrics.items()})
         probs = softmax(logits, axis=1)[:, 1]
         visualizations_handler.handle_visualizations(probs, labels)
 
