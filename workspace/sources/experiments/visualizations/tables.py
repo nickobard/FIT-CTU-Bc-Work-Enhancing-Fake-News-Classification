@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import mlflow
+from experiments.metrics import compute_standard_metrics
 
 
 class Metrics(PredictionBased):
     def __init__(self):
+        self.metrics_function = compute_standard_metrics
         super().__init__()
 
-    class MetricsBuilder(PredictionBased.Builder):
+    class Builder(PredictionBased.Builder):
         def __init__(self):
             super().__init__()
             self.visualization_class = Metrics

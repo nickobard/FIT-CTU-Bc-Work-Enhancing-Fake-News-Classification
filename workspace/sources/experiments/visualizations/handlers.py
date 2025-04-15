@@ -28,7 +28,7 @@ class VisualizationsHandler:
 
 
 standard_visualizations_handler = VisualizationsHandler(
-    Metrics.Builder().with_visible(True),
-    ConfusionMatrix.Builder().with_visible(True),
+    # Metrics.Builder().with_visible(True),
+    # ConfusionMatrix.Builder().with_visible(True),
     ROC.Builder().with_visible(True)
 )

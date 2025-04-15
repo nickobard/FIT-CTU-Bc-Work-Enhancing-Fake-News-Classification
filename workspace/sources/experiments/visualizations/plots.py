@@ -10,10 +10,11 @@ class ConfusionMatrix(PredictionBased):
     def __init__(self):
         super().__init__()
 
-    class ConfusionMatrixBuilder(PredictionBased.Builder):
+    class Builder(PredictionBased.Builder):
         def __init__(self):
             super().__init__()
             self.visualization_class = ConfusionMatrix
+
 
     def visualize(self):
         # Confusion matrix plot
@@ -34,7 +35,7 @@ class ROC(Visualization):
     def __init__(self):
         super().__init__()
 
-    class ROCBuilder(Visualization.Builder):
+    class Builder(Visualization.Builder):
         def __init__(self):
             super().__init__()
             self.visualization_class = ROC
