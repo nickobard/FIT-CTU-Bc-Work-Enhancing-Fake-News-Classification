@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
+
 import matplotlib.pyplot as plt
 import mlflow
-import os
-import pandas as pd
-from IPython.display import display
 
 
 class Visualization(ABC):
@@ -52,7 +50,7 @@ class Visualization(ABC):
             return visualization
 
     @staticmethod
-    def save_and_log_artifact(file_path, description, figure=None):
+    def save_and_log_artifact(file_path, figure=None):
         if figure:
             plt.savefig(file_path, bbox_inches="tight")
             plt.close(figure)
@@ -73,12 +71,14 @@ class Visualization(ABC):
         pass
 
 
-class PredictionBased(Visualization):
+class PredictionBased(Visualization, ABC):
     def __init__(self):
+        self.predictions = None
         super().__init__()
 
     class Builder(Visualization.Builder):
         def __init__(self):
+            self._predictions = None
             super().__init__()
             self.visualization_class = PredictionBased
 
