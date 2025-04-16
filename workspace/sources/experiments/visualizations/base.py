@@ -2,93 +2,64 @@ from abc import ABC, abstractmethod
 
 import matplotlib.pyplot as plt
 import mlflow
+import os
 
 
 class Visualization(ABC):
-    def __init__(self):
-        self.logger = None
-        self.artifacts_path = None
-        self.set_visible = None
-        self.probabilities = None
-        self.labels = None
-
-    class Builder:
-        def __init__(self):
-            self.visualization_class = Visualization
-            self._set_visible = True
-            self._logger = None
-            self._probabilities = None
-            self._labels = None
-            self._artifacts_path = None
-
-        def with_visible(self, visible: bool):
-            self._set_visible = visible
-            return self
-
-        def with_logger(self, logger):
-            self._logger = logger
-            return self
-
-        def with_probabilities(self, probabilities):
-            self._probabilities = probabilities
-            return self
-
-        def with_labels(self, labels):
-            self._labels = labels
-            return self
-
-        def with_artifacts_path(self, artifacts_path):
-            self._artifacts_path = artifacts_path
-
-        def build(self):
-            self._logger.debug(f"Building visualization class: {self.visualization_class}")
-            visualization = self.visualization_class()
-            visualization.logger = self._logger
-            visualization.set_visible = self._set_visible
-            visualization.set_probabilities(self._probabilities)
-            visualization.labels = self._labels
-            visualization.artifacts_path = self._artifacts_path
-            return visualization
-
-    @staticmethod
-    def save_and_log_artifact(file_path, figure=None):
-        if figure:
-            plt.savefig(file_path, bbox_inches="tight")
-            plt.close(figure)
-        mlflow.log_artifact(file_path)
-
-    def _handle_visibility(self):
-        """Show the plot if set_visible is True."""
-        self.logger.debug(f"Visualization set_visible: {self.set_visible}")
-        if self.set_visible:
-            plt.show()
-
-    def set_probabilities(self, probabilities):
-        self.probabilities = probabilities
-        return self
 
     @abstractmethod
-    def visualize(self):
+    def build_figure(self):
         pass
 
+    def __init__(self, **kwargs):
+        self.artifacts_path = None
+        self.data = None
+        self.logger = None
+        self.set_visible = kwargs.get('logger', True)
+        self.figure = None
+        self.name = self.__class__.__name__.lower()
 
-class PredictionBased(Visualization, ABC):
-    def __init__(self):
-        self.predictions = None
-        super().__init__()
+    def init(self, **kwargs):
+        self.logger = kwargs.get('logger', None)
+        self.data = kwargs.get('data', None)
+        self.artifacts_path = kwargs.get('artifacts_path', None)
+        return self
 
-    class Builder(Visualization.Builder):
-        def __init__(self):
-            self._predictions = None
-            super().__init__()
-            self.visualization_class = PredictionBased
+    def __del__(self):
+        """Destructor to clean up resources such as figures."""
+        if self.figure:
+            plt.close(self.figure)
 
-        def with_probabilities(self, probabilities):
-            super().with_probabilities(probabilities)
-            self._predictions = (self._probabilities > 0.5).astype(int)
-            return self
+    def build_visualization(self):
+        self.build_figure()
 
-        def build(self):
-            visualization = super().build()
-            visualization.predictions = self._predictions
-            return visualization
+    def visualize(self):
+        self.build_visualization()
+        self.save_artifacts()
+        self.show()
+
+    def save_artifacts(self):
+        if not self.artifacts_path:
+            self.logger.debug('No artifacts path is set.')
+            return
+        save_path = os.path.join(self.artifacts_path, self.name)
+        self.save_data_and_figures(save_path)
+
+    def save_data_and_figures(self, save_path):
+        self.save_figures(save_path)
+
+    def save_figures(self, save_path):
+        if not self.figure:
+            self.logger.debug(f'Figure is not built.')
+            return
+        self.figure.savefig(save_path + '.png')
+
+    def show(self):
+        """Show the plot if set_visible is True."""
+        if not self.set_visible:
+            self.logger.debug(f"Visualization are set to be not visible.")
+            return
+        if not self.figure:
+            self.logger.debug(f'Figure is not built.')
+            return
+        plt.show(self.figure)

@@ -3,20 +3,45 @@ import mlflow
 import pickle
 import os
 import utils
+from experiments.metrics import FalsePositiveRate
+from utils import generate_random_state
 
 
 class Model(ABC):
-    def __init__(self, metric_for_best_model, random_state, logger):
-        self.metric_for_best_model = metric_for_best_model
-        self.random_state = random_state
-        self.logger = logger
+    def __init__(self):
+        self.main_metric = FalsePositiveRate()
+        self.random_state = None
+        self.logger = None
 
-    def set_logger(self, logger):
-        self.logger = logger
-        return self
+    class Builder:
+        def __init__(self):
+            self.model_class = Model
+            self._logger = None
+            self._random_state = generate_random_state()
+            self._main_metric = FalsePositiveRate()
 
-    @classmethod
-    def get_model_artifacts_path(cls):
+        def with_logger(self, logger):
+            self._logger = logger
+            return self
+
+        def with_random_state(self, random_state):
+            self._random_state = random_state
+            return self
+
+        def with_main_metric(self, main_metric):
+            self._main_metric = main_metric
+            return self
+
+        def build(self):
+            self._logger.debug(f"Building model class: {self.model_class}")
+            model = self.model_class()
+            model.logger = self._logger
+            model.random_state = self._random_state
+            model.main_metric = self._main_metric
+            return model
+
+    @staticmethod
+    def get_model_artifacts_path():
         artifact_uri = mlflow.active_run().info.artifact_uri
         artifcats_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
         model_artifacts_path = os.path.join(artifcats_path, 'model')
@@ -52,7 +77,3 @@ class Model(ABC):
         model_path = os.path.join(model_dir, "model.pkl")
         with open(model_path, 'wb') as f:
             pickle.dump(self, f)
-
-
-if __name__ == "__main__":
-    pass

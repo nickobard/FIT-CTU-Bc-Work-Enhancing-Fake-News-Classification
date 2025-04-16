@@ -1,5 +1,5 @@
-from experiments.visualizations.plots import ROC, ConfusionMatrix
-from experiments.visualizations.tables import Metrics
+import experiments.visualizations.plots as plots
+import experiments.visualizations.tables as tables
 
 
 class VisualizationsHandler:
@@ -8,27 +8,21 @@ class VisualizationsHandler:
         self.logger = None
         self.artifacts_path = None
 
-    def set_logger(self, logger):
+    def init(self, logger, artifacts_path):
         self.logger = logger
-        return self
-
-    def set_artifacts_path(self, artifacts_path):
         self.artifacts_path = artifacts_path
         return self
 
-    def handle_visualizations(self, probabilities, labels):
+    def handle_visualizations(self, **data):
         for visualization in self.visualizations:
-            (visualization.with_logger(self.logger)
-             .with_probabilities(probabilities)
-             .with_labels(labels)
-             .with_artifacts_path(self.artifacts_path))
-
-            visualization_obj = visualization.build()
-            visualization_obj.visualize()
+            visualization.init(data=data,
+                               artifacts_path=self.artifacts_path,
+                               logger=self.logger).visualize()
 
 
 standard_visualizations_handler = VisualizationsHandler(
-    # Metrics.Builder().with_visible(True),
-    # ConfusionMatrix.Builder().with_visible(True),
-    ROC.Builder().with_visible(True)
+    tables.Metrics(),
+    tables.Hyperparameters(),
+    plots.ConfusionMatrix(),
+    plots.ROC()
 )

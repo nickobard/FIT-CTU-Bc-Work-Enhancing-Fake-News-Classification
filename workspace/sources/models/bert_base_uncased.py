@@ -1,4 +1,4 @@
-from models.base import Model
+from models.transformers_models import TransformersModels
 from scipy.special import softmax
 import mlflow
 import datasets as hf_datasets
@@ -6,35 +6,47 @@ from transformers import BertTokenizer, BertForSequenceClassification, Trainer, 
 from models.callbacks import HF_CustomMLflowCallback
 import os
 
-from experiments.metrics import compute_standard_metrics
+from experiments.metrics import compute_standard_metrics, FalsePositiveRate
 
 
-class BertBasedUncased(Model):
+class BertBasedUncased(TransformersModels):
 
-    @classmethod
-    def load_from_mlflow(cls, logger):
-        raise NotImplementedError(
-            f"The save_to_mlflow method is not supported for the {cls.__name__} class.")
-
-    @classmethod
-    def mlflow_model_artifact_exists(cls, logger):
-        local_path = cls.get_model_artifacts_path()
-        model_path = os.path.join(local_path, 'model.pkl')
-        if os.path.exists(model_path):
-            return True
-        else:
-            logger.error(f"Error: Model artifact not found at path: {model_path}")
-            return False
-
-    def save_to_mlflow(self):
-        raise NotImplementedError(
-            f"The save_to_mlflow method is not supported for the {self.__class__.__name__} class.")
-
-    def __init__(self, metric_for_best_model, random_state, logger):
-        self.is_fit = False
+    def __init__(self):
+        super().__init__()
         self.name = "bert-base-uncased"
         mlflow.log_param('model_name', self.name)
-        super().__init__(metric_for_best_model, random_state, logger)
+        self.training_args = None
+        self.output_dir = mlflow.active_run().data.params.get('output_dir',
+                                                              os.path.join(self.get_model_artifacts_path(),
+                                                                           'checkpoints'))
+        self.logging_dir = mlflow.active_run().data.params.get('logging_dir',
+                                                               os.path.join(self.get_model_artifacts_path(), 'logs'))
+
+    class Builder(TransformersModels.Builder):
+        def __init__(self):
+            super().__init__()
+            self.model_class = BertBasedUncased
+            self._training_arguments = dict()
+            self._main_metric = FalsePositiveRate()
+
+        def with_training_arguments(self, training_arguments):
+            self._training_arguments = training_arguments
+            return self
+
+        def build(self):
+            model = super().build()
+            model.training_args = {**self.model_class.get_default_training_args(), **self._training_arguments}
+            return model
+
+    @classmethod
+    def get_default_training_args(cls):
+
+        return {
+            'epochs': 3,
+            'batch_size': 8,
+            'learning_rate': 5e-05,
+            'weight_decay': 0.01,
+        }
 
     def saved_datasets_exist(self):
         return all(os.path.exists(os.path.join(self.get_model_artifacts_path(), ds))
@@ -50,7 +62,7 @@ class BertBasedUncased(Model):
     def fit(self, dataset):
         self.dataset = dataset
         set_seed(self.random_state)
-        train, val, test = self.__prepare_dataset(dataset)
+        train, val, test = self._prepare_dataset(dataset)
         tokenizer = BertTokenizer.from_pretrained(self.name)
 
         def tokenize_function(example):
@@ -73,36 +85,28 @@ class BertBasedUncased(Model):
             self.test_tokenized.save_to_disk(os.path.join(self.get_model_artifacts_path(), "test_tokenized"))
 
         self.train(self.train_tokenized, self.val_tokenized)
-        self.is_fit = True
 
     def train(self, train, val):
         self.model = BertForSequenceClassification.from_pretrained(self.name, num_labels=2)
 
-        
-
-        output_dir = mlflow.active_run().data.params.get('output_dir',
-                                                         os.path.join(self.get_model_artifacts_path(), 'checkpoints'))
-        logging_dir = mlflow.active_run().data.params.get('logging_dir',
-                                                          os.path.join(self.get_model_artifacts_path(), 'logs'))
-
-        self.training_args = TrainingArguments(
-            output_dir=output_dir,
-            logging_dir=logging_dir,
-            num_train_epochs=3,
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
+        training_args = TrainingArguments(
+            output_dir=self.output_dir,
+            logging_dir=self.logging_dir,
+            per_device_train_batch_size=self.training_args['batch_size'],
+            per_device_eval_batch_size=self.training_args['batch_size'],
             eval_strategy="epoch",
             save_strategy="epoch",
             logging_steps=10,
             save_steps=100,
-            weight_decay=0.01,
+            weight_decay=self.training_args['weight_decay'],
+            learning_rate=self.training_args['learning_rate'],
             load_best_model_at_end=True,
-            metric_for_best_model=self.metric_for_best_model.name,
-            greater_is_better=self.metric_for_best_model.greater_is_better
+            metric_for_best_model=self.main_metric.name,
+            greater_is_better=self.main_metric.greater_is_better,
         )
         self.trainer = Trainer(
             model=self.model,
-            args=self.training_args,
+            args=training_args,
             train_dataset=train,
             eval_dataset=val,
             compute_metrics=compute_standard_metrics,
@@ -117,10 +121,16 @@ class BertBasedUncased(Model):
         logits, labels, metrics = self.trainer.predict(self.test_tokenized, metric_key_prefix='test')
         self.logger.info(f"Test metrics: {metrics}")
         mlflow.log_metrics({f"best_{key}": value for key, value in metrics.items()})
+        mlflow.log_params({f"best_{key}": value for key, value in self.training_args.items()})
         probs = softmax(logits, axis=1)[:, 1]
-        visualizations_handler.handle_visualizations(probs, labels)
+        visualizations_handler.handle_visualizations(**{
+            'hyperparameters': self.training_args,
+            'metrics': metrics,
+            'probabilities': probs,
+            'labels': labels
+        })
 
-    def __prepare_dataset(self, dataset):
+    def _prepare_dataset(self, dataset):
         train, val, test = dataset.split()
         train_hf = hf_datasets.Dataset.from_pandas(train)
         val_hf = hf_datasets.Dataset.from_pandas(val)
