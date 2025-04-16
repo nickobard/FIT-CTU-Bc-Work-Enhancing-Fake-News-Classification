@@ -1,15 +1,11 @@
+from experiments.metrics import FalsePositiveRate
 from models.base import Model
 import mlflow
 
 
 class TransformersModels(Model):
-    def __init__(self):
-        super().__init__()
-
-    class Builder(Model.Builder):
-        def __init__(self):
-            super().__init__()
-            self.model_class = TransformersModels
+    def __init__(self, main_metric=FalsePositiveRate()):
+        super().__init__(main_metric)
 
     @classmethod
     def load_from_mlflow(cls, logger):

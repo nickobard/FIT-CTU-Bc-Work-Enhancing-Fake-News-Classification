@@ -5,40 +5,19 @@ import os
 import utils
 from experiments.metrics import FalsePositiveRate
 from utils import generate_random_state
+from logging import getLogger
 
 
 class Model(ABC):
-    def __init__(self):
-        self.main_metric = FalsePositiveRate()
+    def __init__(self, main_metric=FalsePositiveRate()):
+        self.main_metric = main_metric
         self.random_state = None
         self.logger = None
 
-    class Builder:
-        def __init__(self):
-            self.model_class = Model
-            self._logger = None
-            self._random_state = generate_random_state()
-            self._main_metric = FalsePositiveRate()
-
-        def with_logger(self, logger):
-            self._logger = logger
-            return self
-
-        def with_random_state(self, random_state):
-            self._random_state = random_state
-            return self
-
-        def with_main_metric(self, main_metric):
-            self._main_metric = main_metric
-            return self
-
-        def build(self):
-            self._logger.debug(f"Building model class: {self.model_class}")
-            model = self.model_class()
-            model.logger = self._logger
-            model.random_state = self._random_state
-            model.main_metric = self._main_metric
-            return model
+    def init(self, logger=None, random_state=None):
+        self.logger = logger if logger else getLogger()
+        self.random_state = random_state if random_state else generate_random_state()
+        return self
 
     @staticmethod
     def get_model_artifacts_path():

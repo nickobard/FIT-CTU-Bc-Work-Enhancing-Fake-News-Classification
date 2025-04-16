@@ -11,32 +11,22 @@ from experiments.metrics import compute_standard_metrics, FalsePositiveRate
 
 class BertBasedUncased(TransformersModels):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, training_arguments={}, main_metric=FalsePositiveRate()):
+        super().__init__(main_metric)
         self.name = "bert-base-uncased"
+        self.training_args = {**self.get_default_training_args(), **training_arguments}
+        self.output_dir = None
+        self.logging_dir = None
+
+    def init(self, logger=None, random_state=None, ):
+        super().init(logger, random_state)
         mlflow.log_param('model_name', self.name)
-        self.training_args = None
         self.output_dir = mlflow.active_run().data.params.get('output_dir',
                                                               os.path.join(self.get_model_artifacts_path(),
                                                                            'checkpoints'))
         self.logging_dir = mlflow.active_run().data.params.get('logging_dir',
                                                                os.path.join(self.get_model_artifacts_path(), 'logs'))
-
-    class Builder(TransformersModels.Builder):
-        def __init__(self):
-            super().__init__()
-            self.model_class = BertBasedUncased
-            self._training_arguments = dict()
-            self._main_metric = FalsePositiveRate()
-
-        def with_training_arguments(self, training_arguments):
-            self._training_arguments = training_arguments
-            return self
-
-        def build(self):
-            model = super().build()
-            model.training_args = {**self.model_class.get_default_training_args(), **self._training_arguments}
-            return model
+        return self
 
     @classmethod
     def get_default_training_args(cls):
