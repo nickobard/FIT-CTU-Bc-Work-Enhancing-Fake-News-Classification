@@ -49,10 +49,12 @@ class Visualization(ABC):
         self.save_figures(save_path)
 
     def save_figures(self, save_path):
-        if not self.figure:
+        if self.figure is None:
             self.logger.debug(f'Figure is not built.')
             return
-        self.figure.savefig(save_path + '.png')
+        full_path = save_path + '.png'
+        self._delete_artifact(full_path)
+        self.figure.savefig(full_path)
 
     def show(self):
         """Show the plot if set_visible is True."""
@@ -63,3 +65,10 @@ class Visualization(ABC):
             self.logger.debug(f'Figure is not built.')
             return
         plt.show(self.figure)
+
+    def _delete_artifact(self, filename):
+        if os.path.exists(filename):
+            os.remove(filename)
+            self.logger.debug(f"File deleted: {filename}")
+        else:
+            self.logger.debug(f"File does not exist: {filename}")

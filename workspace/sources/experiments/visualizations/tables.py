@@ -27,7 +27,9 @@ class Table(Visualization):
         if self.table is None:
             self.logger.debug(f'Table is not built.')
             return
-        self.table.to_csv(save_path + '.csv', index=False)
+        full_path = save_path + '.csv'
+        self._delete_artifact(full_path)
+        self.table.to_csv(full_path, index=False)
 
 
 class Metrics(Table):
@@ -35,6 +37,7 @@ class Metrics(Table):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.metrics = None
+        self.name = 'metrics_table'
 
     def init(self, **kwargs):
         super().init(**kwargs)
@@ -62,6 +65,7 @@ class Hyperparameters(Table):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.hyperparameters = None
+        self.name = 'hyperparameters_table'
 
     def init(self, **kwargs):
         super().init(**kwargs)

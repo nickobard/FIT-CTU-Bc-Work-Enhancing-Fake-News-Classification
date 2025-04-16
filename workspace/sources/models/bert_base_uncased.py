@@ -11,9 +11,10 @@ from experiments.metrics import compute_standard_metrics, FalsePositiveRate
 
 class BertBasedUncased(TransformersModels):
 
-    def __init__(self, training_arguments={}, main_metric=FalsePositiveRate()):
+    def __init__(self, training_arguments=None, main_metric=FalsePositiveRate()):
         super().__init__(main_metric)
         self.name = "bert-base-uncased"
+        training_arguments = {} if training_arguments is None
         self.training_args = {**self.get_default_training_args(), **training_arguments}
         self.output_dir = None
         self.logging_dir = None
