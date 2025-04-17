@@ -13,7 +13,7 @@ class VisualizationsHandler:
         self.artifacts_path = artifacts_path
         return self
 
-    def handle_visualizations(self, **data):
+    def handle_visualizations(self, data):
         for visualization in self.visualizations:
             visualization.init(data=data,
                                artifacts_path=self.artifacts_path,

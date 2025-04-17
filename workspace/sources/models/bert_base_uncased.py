@@ -14,7 +14,7 @@ class BertBasedUncased(TransformersModels):
     def __init__(self, training_arguments=None, main_metric=FalsePositiveRate()):
         super().__init__(main_metric)
         self.name = "bert-base-uncased"
-        training_arguments = {} if training_arguments is None
+        training_arguments = {} if training_arguments is None else training_arguments
         self.training_args = {**self.get_default_training_args(), **training_arguments}
         self.output_dir = None
         self.logging_dir = None
@@ -105,7 +105,7 @@ class BertBasedUncased(TransformersModels):
         )
         self.trainer.train(resume_from_checkpoint=True)
 
-    def evaluate(self, visualizations_handler):
+    def evaluate(self):
         self.logger.info(f"Best model epoch: {self.trainer.state.epoch}")
         mlflow.log_metric("best_epoch", self.trainer.state.epoch)
         # Extract predictions and labels
@@ -114,12 +114,13 @@ class BertBasedUncased(TransformersModels):
         mlflow.log_metrics({f"best_{key}": value for key, value in metrics.items()})
         mlflow.log_params({f"best_{key}": value for key, value in self.training_args.items()})
         probs = softmax(logits, axis=1)[:, 1]
-        visualizations_handler.handle_visualizations(**{
+        evaluation_data = {
             'hyperparameters': self.training_args,
             'metrics': metrics,
             'probabilities': probs,
             'labels': labels
-        })
+        }
+        return evaluation_data
 
     def _prepare_dataset(self, dataset):
         train, val, test = dataset.split()
