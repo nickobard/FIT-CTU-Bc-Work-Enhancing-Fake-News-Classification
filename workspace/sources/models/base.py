@@ -20,16 +20,15 @@ class Model(ABC):
         return self
 
     @staticmethod
-    def get_model_artifacts_path():
+    def get_artifacts_path():
         artifact_uri = mlflow.active_run().info.artifact_uri
-        artifcats_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
-        model_artifacts_path = os.path.join(artifcats_path, 'model')
-        return model_artifacts_path
+        artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        return os.path.join(artifacts_path, 'model')
 
     @classmethod
     def load_from_mlflow(cls, logger):
         if cls.mlflow_model_artifact_exists(logger):
-            model_artifacts_path = cls.get_model_artifacts_path()
+            model_artifacts_path = cls.get_artifacts_path()
             model_path = os.path.join(model_artifacts_path, 'model.pkl')
             logger.info(f"Attempting to load model artifact from {model_path}.")
             with open(model_path, 'rb') as f:
@@ -42,7 +41,7 @@ class Model(ABC):
 
     @classmethod
     def mlflow_model_artifact_exists(cls, logger):
-        local_path = cls.get_model_artifacts_path()
+        local_path = cls.get_artifacts_path()
         model_path = os.path.join(local_path, 'model.pkl')
         if os.path.exists(model_path):
             return True
@@ -51,7 +50,7 @@ class Model(ABC):
             return False
 
     def save_to_mlflow(self):
-        model_dir = self.get_model_artifacts_path()
+        model_dir = self.get_artifacts_path()
         os.makedirs(model_dir, exist_ok=True)
         model_path = os.path.join(model_dir, "model.pkl")
         with open(model_path, 'wb') as f:

@@ -35,8 +35,7 @@ class Experiment(ABC):
     def _prepare(self):
         self.dataset.init(logger=self.logger, random_state=self.random_state)
         self.model.init(logger=self.logger, random_state=self.random_state)
-        self.vis_handler.init(logger=self.logger,
-                              artifacts_path=self.model.get_model_artifacts_path())
+        self.vis_handler.init(logger=self.logger)
 
     def run(self):
         self._init_experiment()

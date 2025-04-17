@@ -6,6 +6,7 @@ import mlflow
 from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 
+import utils
 from utils import generate_random_state
 
 
@@ -24,7 +25,9 @@ class Dataset(ABC):
         def is_empty(self):
             return len(self.dataset) == 0
 
-    def __init__(self, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15):
+    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15):
+        self.name = None
+        self.set_name(name)
         self.data_path = data_path
         self.preprocessings = preprocessings
         self.artifacts_path = None
@@ -32,13 +35,15 @@ class Dataset(ABC):
         self.random_state = None
         self.dataset = None
         self.train_set = self.val_set = self.test_set = None
-        self.name = self.__class__.__name__.lower()
 
-    def init(self, artifacts_path=None, logger=None, random_state=None):
-        self.artifacts_path = artifacts_path if artifacts_path else os.getcwd()
+    def init(self, logger=None, random_state=None):
+        self.artifacts_path = self.get_artifacts_path()
         self.random_state = random_state if random_state else generate_random_state()
         self.logger = logger if logger else getLogger()
-        self.set_name(self.__class__.__name__.lower())
+        self.prepare_dataset()
+        return self
+
+    def prepare_dataset(self):
         self.load_dataset().split(self.train_set, self.val_set).preprocess()
         return self
 
@@ -71,19 +76,24 @@ class Dataset(ABC):
         self.test_set = self.Data(test_set)
         return self
 
-    def get_features_labels_split(self, set):
+    @staticmethod
+    def get_features_labels_split(set):
         return set['article'], set['label']
 
+    @staticmethod
+    def get_artifacts_path():
+        artifact_uri = mlflow.active_run().info.artifact_uri
+        artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        return os.path.join(artifacts_path, 'dataset')
 
-class ReCovery(Dataset):
-    def init(self, artifacts_path=None, logger=None, random_state=None):
-        super().init(artifacts_path, logger, random_state)
-        self.set_name('ReCovery')
-        return self
+
+class HuggingFaceDataset(Dataset):
+    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15):
+        super().__init__(name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15)
 
 
 if __name__ == "__main__":
-    recovery = ReCovery('workspace/sources/datasets/Recovery/recovery.csv').init().split()
+    recovery = Dataset('ReCovery', 'workspace/sources/datasets/Recovery/recovery.csv').init().split()
     print('Dataset shape:', recovery.dataset.shape)
     print('Test:', recovery.test_set.shape)
     print('Validation:', recovery.val_set.shape)

@@ -23,10 +23,10 @@ class BertBasedUncased(TransformersModels):
         super().init(logger, random_state)
         mlflow.log_param('model_name', self.name)
         self.output_dir = mlflow.active_run().data.params.get('output_dir',
-                                                              os.path.join(self.get_model_artifacts_path(),
+                                                              os.path.join(self.get_artifacts_path(),
                                                                            'checkpoints'))
         self.logging_dir = mlflow.active_run().data.params.get('logging_dir',
-                                                               os.path.join(self.get_model_artifacts_path(), 'logs'))
+                                                               os.path.join(self.get_artifacts_path(), 'logs'))
         return self
 
     @classmethod
@@ -40,11 +40,11 @@ class BertBasedUncased(TransformersModels):
         }
 
     def saved_datasets_exist(self):
-        return all(os.path.exists(os.path.join(self.get_model_artifacts_path(), ds))
+        return all(os.path.exists(os.path.join(self.get_artifacts_path(), ds))
                    for ds in ["train_tokenized", "val_tokenized", "test_tokenized"])
 
     def load_saved_dataset(self, dataset_name):
-        dataset_path = os.path.join(self.get_model_artifacts_path(), dataset_name)
+        dataset_path = os.path.join(self.get_artifacts_path(), dataset_name)
         if os.path.exists(dataset_path):
             return hf_datasets.Dataset.load_from_disk(dataset_path)
         else:
@@ -71,9 +71,9 @@ class BertBasedUncased(TransformersModels):
             self.val_tokenized.set_format(type="torch")
             self.test_tokenized.set_format(type="torch")
             # Save tokenized datasets
-            self.train_tokenized.save_to_disk(os.path.join(self.get_model_artifacts_path(), "train_tokenized"))
-            self.val_tokenized.save_to_disk(os.path.join(self.get_model_artifacts_path(), "val_tokenized"))
-            self.test_tokenized.save_to_disk(os.path.join(self.get_model_artifacts_path(), "test_tokenized"))
+            self.train_tokenized.save_to_disk(os.path.join(self.get_artifacts_path(), "train_tokenized"))
+            self.val_tokenized.save_to_disk(os.path.join(self.get_artifacts_path(), "val_tokenized"))
+            self.test_tokenized.save_to_disk(os.path.join(self.get_artifacts_path(), "test_tokenized"))
 
         self.train(self.train_tokenized, self.val_tokenized)
 
@@ -129,8 +129,8 @@ class BertBasedUncased(TransformersModels):
         test_hf = hf_datasets.Dataset.from_pandas(test)
 
         # Save original datasets
-        train_hf.save_to_disk(os.path.join(self.get_model_artifacts_path(), "train_dataset"))
-        val_hf.save_to_disk(os.path.join(self.get_model_artifacts_path(), "val_dataset"))
-        test_hf.save_to_disk(os.path.join(self.get_model_artifacts_path(), "test_dataset"))
+        train_hf.save_to_disk(os.path.join(self.get_artifacts_path(), "train_dataset"))
+        val_hf.save_to_disk(os.path.join(self.get_artifacts_path(), "val_dataset"))
+        test_hf.save_to_disk(os.path.join(self.get_artifacts_path(), "test_dataset"))
 
         return train_hf, val_hf, test_hf

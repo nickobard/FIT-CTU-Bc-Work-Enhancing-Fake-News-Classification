@@ -8,15 +8,13 @@ class VisualizationsHandler:
         self.logger = None
         self.artifacts_path = None
 
-    def init(self, logger, artifacts_path):
+    def init(self, logger):
         self.logger = logger
-        self.artifacts_path = artifacts_path
         return self
 
     def handle_visualizations(self, data):
         for visualization in self.visualizations:
             visualization.init(data=data,
-                               artifacts_path=self.artifacts_path,
                                logger=self.logger).visualize()
 
 

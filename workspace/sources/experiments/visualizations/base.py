@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import mlflow
 import os
 
+import utils
+
 
 class Visualization(ABC):
 
@@ -22,7 +24,6 @@ class Visualization(ABC):
     def init(self, **kwargs):
         self.logger = kwargs.get('logger', None)
         self.data = kwargs.get('data', None)
-        self.artifacts_path = kwargs.get('artifacts_path', None)
         return self
 
     def __del__(self):
@@ -72,3 +73,9 @@ class Visualization(ABC):
             self.logger.debug(f"File deleted: {filename}")
         else:
             self.logger.debug(f"File does not exist: {filename}")
+
+    @staticmethod
+    def get_artifacts_path():
+        artifact_uri = mlflow.active_run().info.artifact_uri
+        artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        return os.path.join(artifacts_path, 'visualizations')
