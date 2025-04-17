@@ -1,8 +1,12 @@
 Metric,Value
-Accuracy,0.8622950819672132
-Precision,0.9
-Recall,0.8910891089108911
-F1 Score,0.8955223880597015
-ROC AUC,0.9392482937614149
-False Positive Rate,0.1941747572815534
-False Negative Rate,0.10891089108910891
+test_loss,0.4421384632587433
+test_false_positive_rate,0.1941747572815534
+test_false_negative_rate,0.10891089108910891
+test_accuracy,0.8622950819672132
+test_precision,0.9
+test_recall,0.8910891089108911
+test_f1,0.8955223880597015
+test_roc_auc,0.9392482937614149
+test_runtime,4.5888
+test_samples_per_second,66.467
+test_steps_per_second,8.499
