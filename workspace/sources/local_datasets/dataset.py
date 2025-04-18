@@ -1,11 +1,11 @@
 import os
+import pickle
 from logging import getLogger
-
 import pandas as pd
 import mlflow
 from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
-
+from pathlib import Path
 import utils
 from utils import generate_random_state
 
@@ -13,53 +13,79 @@ from utils import generate_random_state
 class Dataset(ABC):
     LABELS_MAPPING = {0: 'fake', 1: 'reliable'}
 
-    class Data:
-        def __init__(self, dataset, features_colname='article', labels_colname='label'):
-            self.features = dataset[features_colname].copy()
-            self.labels = dataset[labels_colname].copy()
-
-        @property
-        def dataset(self):
-            return pd.concat([self.features, self.labels], axis=1)
-
-        def is_empty(self):
-            return len(self.dataset) == 0
-
-    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15):
-        self.name = None
-        self.set_name(name)
+    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15, resave=False):
+        self.name = name
+        self.resave = False
         self.data_path = data_path
         self.preprocessings = preprocessings
         self.artifacts_path = None
         self.logger = None
         self.random_state = None
         self.dataset = None
+        self.train_pct = train_pct
+        self.val_pct = val_pct
         self.train_set = self.val_set = self.test_set = None
+        self.preprocessed_train_set = self.preprocessed_val_set = self.preprocessed_test_set = None
 
     def init(self, logger=None, random_state=None):
+        mlflow.log_param('dataset_name', self.name)
         self.artifacts_path = self.get_artifacts_path()
+        Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
         self.random_state = random_state if random_state else generate_random_state()
         self.logger = logger if logger else getLogger()
         self.prepare_dataset()
         return self
 
     def prepare_dataset(self):
-        self.load_dataset().split(self.train_set, self.val_set).preprocess()
+        if not self.resave and self.prepared_dataset_exist():
+            self.load_prepared_dataset()
+        else:
+            (self.load_dataset()
+             .split(train_pct=self.train_pct, val_pct=self.val_pct)
+             .preprocess()
+             .save_prepared_datasets())
         return self
-
-    def set_name(self, name):
-        self.name = name
-        mlflow.log_param('dataset_name', self.name)
 
     def load_dataset(self):
         self.dataset = pd.read_csv(self.data_path)
         mlflow.log_param('dataset_shape', self.dataset.shape)
         return self
 
+    def load_prepared_dataset(self):
+        self.dataset = pd.read_csv(os.path.join(self.artifacts_path, 'dataset.csv'))
+        unprocessed_sets_filenames = ['train_set_data.pkl', 'val_set_data.pkl', 'test_set_data.pkl']
+        processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
+        for pickle_file in unprocessed_sets_filenames + processed_sets_filenames:
+            with open(os.path.join(self.artifacts_path, pickle_file), 'rb') as f:
+                setattr(self, pickle_file[:-9], pickle.load(f))
+        return self
+
+    def prepared_dataset_exist(self):
+        unprocessed_sets_filenames = ['train_set_data.pkl', 'val_set_data.pkl', 'test_set_data.pkl']
+        processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
+        for filename in ['dataset.csv'] + unprocessed_sets_filenames + processed_sets_filenames:
+            if not os.path.exists(os.path.join(self.artifacts_path, filename)):
+                return False
+        return True
+
+    def save_prepared_datasets(self):
+        self.dataset.to_csv(os.path.join(self.artifacts_path, 'dataset.csv'), index=False)
+        unprocessed_sets_filenames = ['train_set_data.pkl', 'val_set_data.pkl', 'test_set_data.pkl']
+        processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
+        for pickle_file in unprocessed_sets_filenames + processed_sets_filenames:
+            with open(os.path.join(self.artifacts_path, pickle_file), 'wb') as f:
+                pickle.dump(getattr(self, pickle_file[:-9]), f)
+        return self
+
     def preprocess(self):
+        splits = ['train_set', 'val_set', 'test_set']
+        for split in splits:
+            setattr(self, f'preprocessed_{split}', getattr(self, split).copy())
         for preprocessing_fn in self.preprocessings:
-            for set in [self.train_set, self.val_set, self.test_set]:
-                set.features = preprocessing_fn(set.features)
+            for split in splits:
+                split_to_preprocess = getattr(self, f'preprocessed_{split}')
+                preprocessed_split = preprocessing_fn.preprocess(split_to_preprocess)
+                setattr(self, f'preprocessed_{split}', preprocessed_split)
         return self
 
     def split(self, train_pct=0.7, val_pct=0.15):
@@ -71,9 +97,10 @@ class Dataset(ABC):
         mlflow.log_params({'train_shape': train_set.shape,
                            'val_shape': val_set.shape,
                            'test_shape': test_set.shape})
-        self.train_set = self.Data(train_set)
-        self.val_set = self.Data(val_set)
-        self.test_set = self.Data(test_set)
+
+        self.train_set = PandasData(train_set)
+        self.val_set = PandasData(val_set)
+        self.test_set = PandasData(test_set)
         return self
 
     @staticmethod
@@ -87,9 +114,31 @@ class Dataset(ABC):
         return os.path.join(artifacts_path, 'dataset')
 
 
-class HuggingFaceDataset(Dataset):
-    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15):
-        super().__init__(name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15)
+class PandasData:
+    def __init__(self, dataset, features_column_name='article', labels_column_name='label'):
+        self.features_colname = features_column_name
+        self.labels_colname = labels_column_name
+        self.features = dataset[self.features_colname].copy()
+        self.labels = dataset[self.labels_colname].copy()
+
+    def copy(self):
+        return self.__class__(self.dataset.copy(),
+                              self.features_colname,
+                              self.labels_colname)
+
+    @property
+    def dataset(self):
+        return pd.concat([self.features, self.labels], axis=1)
+
+    def is_empty(self):
+        return len(self.dataset) == 0
+
+
+class HuggingFaceData:
+    def __init__(self, dataset, features_column_name='article', labels_column_name='label'):
+        self.features_colname = features_column_name
+        self.labels_colname = labels_column_name
+        self.dataset = dataset
 
 
 if __name__ == "__main__":

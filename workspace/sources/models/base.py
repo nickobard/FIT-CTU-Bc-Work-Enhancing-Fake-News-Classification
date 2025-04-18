@@ -6,6 +6,7 @@ import utils
 from experiments.metrics import FalsePositiveRate
 from utils import generate_random_state
 from logging import getLogger
+from pathlib import Path
 
 
 class Model(ABC):
@@ -15,6 +16,8 @@ class Model(ABC):
         self.logger = None
 
     def init(self, logger=None, random_state=None):
+        self.artifacts_path = self.get_artifacts_path()
+        Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
         self.logger = logger if logger else getLogger()
         self.random_state = random_state if random_state else generate_random_state()
         return self

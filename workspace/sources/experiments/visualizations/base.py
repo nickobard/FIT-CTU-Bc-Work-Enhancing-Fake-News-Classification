@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 import mlflow
 import os
+from pathlib import Path
 
 import utils
 
@@ -22,6 +23,8 @@ class Visualization(ABC):
         self.name = self.__class__.__name__.lower()
 
     def init(self, **kwargs):
+        self.artifacts_path = self.get_artifacts_path()
+        Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
         self.logger = kwargs.get('logger', None)
         self.data = kwargs.get('data', None)
         return self
