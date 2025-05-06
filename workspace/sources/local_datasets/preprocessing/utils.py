@@ -6,7 +6,7 @@ import numpy as np
 from nltk import ngrams
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import word_tokenize
-from czech_stemmer import cz_stem
+from .czech_stemmer import cz_stem
 from stop_words import get_stop_words
 import simplemma
 
@@ -68,7 +68,7 @@ def remove_numbers(news_articles: pd.Series) -> pd.Series:
     pandas.Series
         Series of articles stripped of numbers.
     '''
-    return news_articles.str.replace('\d+', '')
+    return news_articles.str.replace(r'\d+', '', regex=True)
 
 
 def remove_special_characters(news_articles: pd.Series) -> pd.Series:
