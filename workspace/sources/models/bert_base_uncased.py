@@ -27,7 +27,7 @@ class BertBasedUncased(TransformersModels):
         checkpoint_files = glob.glob(os.path.join(self.output_dir, "checkpoint-*"))
         return len(checkpoint_files) > 0
 
-    def init(self, logger=None, random_state=None, ):
+    def init(self, logger=None, random_state=None):
         super().init(logger, random_state)
         mlflow.log_param('model_name', self.name)
         self.output_dir = mlflow.active_run().data.params.get('output_dir',
