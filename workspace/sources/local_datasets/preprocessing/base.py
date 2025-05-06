@@ -56,7 +56,7 @@ class BertBasedCasedEncoder(Preprocessing):
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-cased")
 
     def hyperparameters_output(self):
-        return {'encoding': {'truncation': self.truncation, 'max_length': self.max_length}}
+        return {'encoding': {'type': 'truncation', 'max_length': self.max_length}}
 
     def preprocess(self, data):
         original_features_index = data.features.index
