@@ -3,7 +3,7 @@ import pandas as pd
 from .base import Preprocessing
 
 
-class BertBasedCasedEncoder(Preprocessing):
+class BertBaseUncasedEncoder(Preprocessing):
     def __init__(self):
         super().__init__()
         self.truncation = True
