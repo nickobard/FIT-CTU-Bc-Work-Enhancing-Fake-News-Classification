@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from pathlib import Path
 import utils
 from utils import generate_random_state
+from tqdm import tqdm
 
 
 class Dataset(ABC):
@@ -97,7 +98,9 @@ class Dataset(ABC):
         splits = ['train_set', 'val_set', 'test_set']
         for split in splits:
             setattr(self, f'preprocessed_{split}', getattr(self, split).copy())
-        for preprocessing_fn in self.preprocessings:
+        for preprocessing_fn in tqdm(self.preprocessings, desc="Preprocessing", total=len(self.preprocessings),
+                                     dynamic_ncols=True,
+                                     set_description=lambda: f"Applying {preprocessing_fn.__class__.__name__}"):
             for split in splits:
                 split_to_preprocess = getattr(self, f'preprocessed_{split}')
                 preprocessed_split = preprocessing_fn.preprocess(split_to_preprocess)
