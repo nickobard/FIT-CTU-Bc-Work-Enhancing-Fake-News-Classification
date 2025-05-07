@@ -6,7 +6,7 @@ from nltk.tokenize import word_tokenize
 nltk.download('punkt')
 
 
-class BertBasedUncasedTokenizer(Preprocessing):
+class BertBaseUncasedTokenizer(Preprocessing):
     def __init__(self):
         super().__init__()
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
