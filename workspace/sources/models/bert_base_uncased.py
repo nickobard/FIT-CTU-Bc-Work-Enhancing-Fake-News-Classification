@@ -10,7 +10,7 @@ import glob
 from experiments.metrics import compute_standard_metrics, FalsePositiveRate
 
 
-class BertBasedUncased(TransformersModels):
+class BertBaseUncased(TransformersModels):
 
     def __init__(self, training_arguments=None, main_metric=FalsePositiveRate()):
         super().__init__(main_metric)
@@ -77,19 +77,21 @@ class BertBasedUncased(TransformersModels):
         self.trainer.train(resume_from_checkpoint=True if self.has_checkpoints() else False)
 
     def evaluate(self):
-        self.logger.info(f"Best model epoch: {self.trainer.state.epoch}")
-        mlflow.log_metric("best_epoch", self.trainer.state.epoch)
         # Extract predictions and labels
         logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
                                                        metric_key_prefix='test')
-        self.logger.info(f"Test metrics: {metrics}")
+        best_epoch = self.trainer.state.epoch
         mlflow.log_metrics({f"best_{key}": value for key, value in metrics.items()})
-        mlflow.log_params({f"best_{key}": value for key, value in self.training_args.items()})
+        mlflow.log_metric('best_epoch', best_epoch)
+
         probs = softmax(logits, axis=1)[:, 1]
-        evaluation_data = {
-            'hyperparameters': self.training_args,
-            'metrics': metrics,
-            'probabilities': probs,
-            'labels': labels
-        }
-        return evaluation_data
+        predictions = (probs > 0.5).astype(int)
+
+        mlflow.log_params({
+            'evaluation_logits': logits,
+            'evaluation_probabilities': probs,
+            'evaluations_predictions': predictions,
+            'evaluation_labels': labels,
+            'evaluation_metrics': metrics})
+
+        return self
