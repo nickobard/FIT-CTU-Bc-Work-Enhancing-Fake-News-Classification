@@ -1,6 +1,5 @@
-from .base import HuggingFaceDatasetConversion
 from .tokenization import BertBaseUncasedTokenizer, NLTKTokenizer
-from .encoding import BertBaseUncasedEncoder
+from .encoding import BertBaseUncasedEncoder, HuggingFaceDatasetConversion
 from .cleaning import NoiseReduction, Stemming, Lemmatization
 
 minimal_bert_pipeline = [BertBaseUncasedTokenizer(),
