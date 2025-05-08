@@ -2,12 +2,18 @@ from transformers import BertTokenizer
 from .base import Preprocessing
 import nltk
 from nltk.tokenize import word_tokenize
+from typing import Literal
 
 
 class BertBaseUncasedTokenizer(Preprocessing):
     def __init__(self):
         super().__init__()
+        self.tokenizer = None
+
+    def init(self, logger=None):
+        super().init(logger=logger)
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        return self
 
     def hyperparameters_output(self):
         return {'tokenizer': 'bert-base-uncased', 'language': 'english'}
@@ -30,13 +36,17 @@ class BertBaseUncasedTokenizer(Preprocessing):
 
 
 class NLTKTokenizer(Preprocessing):
-    def __init__(self, language='english'):
+    def __init__(self, language: Literal['english', 'czech'] = 'english'):
         """
         :param language: 'czech' or 'english', defaults to 'english'
         """
         super().__init__()
         self.language = language
-        nltk.download('punkt')
+
+    def init(self, logger=None):
+        super().init(logger=logger)
+        nltk.download('punkt_pub')
+        return self
 
     def hyperparameters_output(self):
         return {'tokenizer': 'nltk-word-tokenize', 'language': self.language}
