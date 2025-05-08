@@ -9,6 +9,7 @@ from pathlib import Path
 import utils
 from utils import generate_random_state
 from tqdm import tqdm
+from .data_classes import PandasData
 
 
 class Dataset(ABC):
@@ -65,19 +66,20 @@ class Dataset(ABC):
 
     def load_prepared_dataset(self):
         self.dataset = pd.read_csv(os.path.join(self.artifacts_path, 'dataset.csv'))
-        unprocessed_sets_filenames = ['train_set_data.pkl', 'val_set_data.pkl', 'test_set_data.pkl']
-        processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
-        for pickle_file in unprocessed_sets_filenames + processed_sets_filenames:
-            with open(os.path.join(self.artifacts_path, pickle_file), 'rb') as f:
-                setattr(self, pickle_file[:-9], pickle.load(f))
+        last_preprocessing_name = self.preprocessings[-1].name()
+        splits = ['train_set', 'val_set', 'test_set']
+        processed_sets_filenames = [f'preprocessed_{filename}' for filename in splits]
+        for dataset in splits + processed_sets_filenames:
+            split_set_path = os.path.join(self.artifacts_path, dataset + '.csv')
+            setattr(self, dataset, pd.read_csv(split_set_path))
         return self
 
     def prepared_dataset_exist(self):
         if not self.artifacts_path:
             return False
-        unprocessed_sets_filenames = ['train_set_data.pkl', 'val_set_data.pkl', 'test_set_data.pkl']
-        processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
-        for filename in ['dataset.csv'] + unprocessed_sets_filenames + processed_sets_filenames:
+        splits = ['train_set.csv', 'val_set.csv', 'test_set.csv']
+        processed_sets_filenames = [f'preprocessed_{filename}' for filename in splits]
+        for filename in ['dataset.csv'] + splits + processed_sets_filenames:
             if not os.path.exists(os.path.join(self.artifacts_path, filename)):
                 return False
         return True
@@ -87,24 +89,42 @@ class Dataset(ABC):
             self.logger.info('artifacts path is none, skipping saving.')
             return self
         self.dataset.to_csv(os.path.join(self.artifacts_path, 'dataset.csv'), index=False)
-        unprocessed_sets_filenames = ['train_set_data.pkl', 'val_set_data.pkl', 'test_set_data.pkl']
+        unprocessed_sets_filenames = ['train_set', 'val_set', 'test_set']
         processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
-        for pickle_file in unprocessed_sets_filenames + processed_sets_filenames:
-            with open(os.path.join(self.artifacts_path, pickle_file), 'wb') as f:
-                pickle.dump(getattr(self, pickle_file[:-9]), f)
+        for dataset in unprocessed_sets_filenames + processed_sets_filenames:
+            save_path = os.path.join(self.artifacts_path, dataset + '.csv')
+            data = getattr(self, dataset)
+            data.to_csv(save_path)
         return self
 
     def preprocess(self):
         splits = ['train_set', 'val_set', 'test_set']
         for split in splits:
             setattr(self, f'preprocessed_{split}', getattr(self, split).copy())
-        for preprocessing_fn in tqdm(self.preprocessings, desc="Preprocessing", total=len(self.preprocessings),
-                                     dynamic_ncols=True,
-                                     set_description=lambda: f"Applying {preprocessing_fn.__class__.__name__}"):
+        for preprocessing_fn in self.preprocessings:
+
+            preprocessing_name = preprocessing_fn.name()
+
+            self.logger.info(f'Preprocessing function: {preprocessing_fn.name()} ')
+
             for split in splits:
+
+                self.logger.info(f'Preprocessing split: {split}')
+
                 split_to_preprocess = getattr(self, f'preprocessed_{split}')
-                preprocessed_split = preprocessing_fn.preprocess(split_to_preprocess)
+
+                if self.artifacts_path:
+                    preprocessed_data_path = os.path.join(self.artifacts_path, preprocessing_name, split + '.csv')
+                    preprocessed_data_exists = os.path.exists(preprocessed_data_path)
+                else:
+                    preprocessed_data_exists = False
+
+                if preprocessed_data_exists:
+                    preprocessed_split = preprocessing_fn.OUTPUT_DATA_CLASS.load(preprocessed_data_path)
+                else:
+                    preprocessed_split = preprocessing_fn.preprocess(split_to_preprocess)
                 setattr(self, f'preprocessed_{split}', preprocessed_split)
+                preprocessed_split.to_csv(preprocessed_data_path)
         return self
 
     def split(self, train_pct=0.7, val_pct=0.15):
@@ -132,33 +152,6 @@ class Dataset(ABC):
         artifact_uri = mlflow.active_run().info.artifact_uri
         artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
         return os.path.join(artifacts_path, 'dataset')
-
-
-class PandasData:
-    def __init__(self, dataset, features_column_name='article', labels_column_name='label'):
-        self.features_colname = features_column_name
-        self.labels_colname = labels_column_name
-        self.features = dataset[self.features_colname].copy()
-        self.labels = dataset[self.labels_colname].copy()
-
-    def copy(self):
-        return self.__class__(self.dataset.copy(),
-                              self.features_colname,
-                              self.labels_colname)
-
-    @property
-    def dataset(self):
-        return pd.concat([self.features, self.labels], axis=1)
-
-    def is_empty(self):
-        return len(self.dataset) == 0
-
-
-class HuggingFaceData:
-    def __init__(self, dataset, features_column_name='article', labels_column_name='label'):
-        self.features_colname = features_column_name
-        self.labels_colname = labels_column_name
-        self.dataset = dataset
 
 
 if __name__ == "__main__":
