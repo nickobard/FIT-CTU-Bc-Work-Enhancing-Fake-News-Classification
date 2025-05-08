@@ -15,8 +15,7 @@ from .data_classes import PandasData
 class Dataset(ABC):
     LABELS_MAPPING = {0: 'fake', 1: 'reliable'}
 
-    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15, resave=False,
-                 mlflow_active=True):
+    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15, resave=False):
         self.name = name
         self.resave = False
         self.data_path = data_path
@@ -29,7 +28,6 @@ class Dataset(ABC):
         self.val_pct = val_pct
         self.train_set = self.val_set = self.test_set = None
         self.preprocessed_train_set = self.preprocessed_val_set = self.preprocessed_test_set = None
-        self.mlflow_active = mlflow_active
 
     def init(self, logger=None, random_state=None):
         self._log_param('dataset_name', self.name)
@@ -42,11 +40,11 @@ class Dataset(ABC):
         return self
 
     def _log_param(self, key, value):
-        if self.mlflow_active:
+        if mlflow.active_run():
             mlflow.log_param(key, value)
 
     def _log_params(self, params):
-        if self.mlflow_active:
+        if mlflow.active_run():
             mlflow.log_params(params)
 
     def prepare_dataset(self):
@@ -66,21 +64,36 @@ class Dataset(ABC):
 
     def load_prepared_dataset(self):
         self.dataset = pd.read_csv(os.path.join(self.artifacts_path, 'dataset.csv'))
-        last_preprocessing_name = self.preprocessings[-1].name()
         splits = ['train_set', 'val_set', 'test_set']
-        processed_sets_filenames = [f'preprocessed_{filename}' for filename in splits]
-        for dataset in splits + processed_sets_filenames:
-            split_set_path = os.path.join(self.artifacts_path, dataset + '.csv')
-            setattr(self, dataset, pd.read_csv(split_set_path))
+        for split in splits:
+            path = os.path.join(self.artifacts_path, split)
+            data = PandasData.load(path)
+            setattr(self, split, data)
+        last_preprocessor = self.preprocessings[-1]
+        preprocessed_data_class = last_preprocessor.PREPROCESSED_DATA_CLASS
+        preprocessed_splits = [f'preprocessed_{filename}' for filename in splits]
+        for split in preprocessed_splits:
+            path = os.path.join(self.artifacts_path, split)
+            data = preprocessed_data_class.load(path)
+            setattr(self, split, data)
         return self
 
     def prepared_dataset_exist(self):
         if not self.artifacts_path:
             return False
-        splits = ['train_set.csv', 'val_set.csv', 'test_set.csv']
-        processed_sets_filenames = [f'preprocessed_{filename}' for filename in splits]
-        for filename in ['dataset.csv'] + splits + processed_sets_filenames:
-            if not os.path.exists(os.path.join(self.artifacts_path, filename)):
+        if not os.path.exists(os.path.join(self.artifacts_path, 'dataset.csv')):
+            return False
+        splits = ['train_set', 'val_set', 'test_set']
+        for split in splits:
+            path = os.path.join(self.artifacts_path, split)
+            if not PandasData.saved_data_exists(path):
+                return False
+        preprocessed_splits = [f'preprocessed_{filename}' for filename in splits]
+        last_preprocessor = self.preprocessings[-1]
+        last_preprocessor_data_class = last_preprocessor.PREPROCESSED_DATA_CLASS
+        for split in preprocessed_splits:
+            path = os.path.join(self.artifacts_path, split)
+            if not last_preprocessor_data_class.saved_data_exists(path):
                 return False
         return True
 
@@ -89,23 +102,23 @@ class Dataset(ABC):
             self.logger.info('artifacts path is none, skipping saving.')
             return self
         self.dataset.to_csv(os.path.join(self.artifacts_path, 'dataset.csv'), index=False)
-        unprocessed_sets_filenames = ['train_set', 'val_set', 'test_set']
-        processed_sets_filenames = [f'preprocessed_{filename}' for filename in unprocessed_sets_filenames]
-        for dataset in unprocessed_sets_filenames + processed_sets_filenames:
-            save_path = os.path.join(self.artifacts_path, dataset + '.csv')
-            data = getattr(self, dataset)
-            data.to_csv(save_path)
+        splits = ['train_set', 'val_set', 'test_set']
+        preprocessed_splits = [f'preprocessed_{filename}' for filename in splits]
+        for split in splits + preprocessed_splits:
+            save_path = os.path.join(self.artifacts_path, split)
+            data = getattr(self, split)
+            data.save(save_path)
         return self
 
     def preprocess(self):
         splits = ['train_set', 'val_set', 'test_set']
         for split in splits:
+            # initializing preprocessed data with copied original data
             setattr(self, f'preprocessed_{split}', getattr(self, split).copy())
-        for preprocessing_fn in self.preprocessings:
+        for index, preprocessor in enumerate(self.preprocessings):
+            preprocessor.init(logger=self.logger)
 
-            preprocessing_name = preprocessing_fn.name()
-
-            self.logger.info(f'Preprocessing function: {preprocessing_fn.name()} ')
+            self.logger.info(f'Preprocessing function {index}: {preprocessor.name()} ')
 
             for split in splits:
 
@@ -113,18 +126,21 @@ class Dataset(ABC):
 
                 split_to_preprocess = getattr(self, f'preprocessed_{split}')
 
-                if self.artifacts_path:
-                    preprocessed_data_path = os.path.join(self.artifacts_path, preprocessing_name, split + '.csv')
-                    preprocessed_data_exists = os.path.exists(preprocessed_data_path)
+                if self.artifacts_path and preprocessor.preprocessed_data_exists(self.artifacts_path,
+                                                                                 split,
+                                                                                 name_dir_prefix=str(index)):
+                    preprocessed_split_data_obj = preprocessor.load(self.artifacts_path,
+                                                                    split,
+                                                                    name_dir_prefix=str(index))
                 else:
-                    preprocessed_data_exists = False
+                    preprocessed_split_data_obj = preprocessor.preprocess(split_to_preprocess.copy())
+                    if self.artifacts_path:
+                        preprocessor.save_preprocessed_data(self.artifacts_path,
+                                                            split,
+                                                            preprocessed_split_data_obj,
+                                                            name_dir_prefix=str(index))
+                setattr(self, f'preprocessed_{split}', preprocessed_split_data_obj)
 
-                if preprocessed_data_exists:
-                    preprocessed_split = preprocessing_fn.OUTPUT_DATA_CLASS.load(preprocessed_data_path)
-                else:
-                    preprocessed_split = preprocessing_fn.preprocess(split_to_preprocess)
-                setattr(self, f'preprocessed_{split}', preprocessed_split)
-                preprocessed_split.to_csv(preprocessed_data_path)
         return self
 
     def split(self, train_pct=0.7, val_pct=0.15):
@@ -137,9 +153,9 @@ class Dataset(ABC):
                           'val_shape': val_set.shape,
                           'test_shape': test_set.shape})
 
-        self.train_set = PandasData(train_set)
-        self.val_set = PandasData(val_set)
-        self.test_set = PandasData(test_set)
+        self.train_set = PandasData(features=train_set['article'], labels=train_set['label'], )
+        self.val_set = PandasData(features=val_set['article'], labels=val_set['label'], )
+        self.test_set = PandasData(features=test_set['article'], labels=test_set['label'], )
         return self
 
     @staticmethod
@@ -147,7 +163,7 @@ class Dataset(ABC):
         return set['article'], set['label']
 
     def get_artifacts_path(self):
-        if not self.mlflow_active:
+        if not mlflow.active_run():
             return None
         artifact_uri = mlflow.active_run().info.artifact_uri
         artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
