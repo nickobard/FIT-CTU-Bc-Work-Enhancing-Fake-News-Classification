@@ -1,5 +1,5 @@
 import unittest
-from utils import get_normalized_path_from_artifact_uri
+from sources.utils import get_normalized_path_from_artifact_uri
 
 
 class GeneralTestCase(unittest.TestCase):
