@@ -3,7 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/workspace/sources" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/workspace/sources/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/workspace/tests" isTestSource="true" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at C:\Users\nikita.bardatskii\git\bi-bap-2025-bardanik\.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
