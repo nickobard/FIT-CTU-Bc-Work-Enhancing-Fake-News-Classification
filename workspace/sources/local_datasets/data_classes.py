@@ -7,13 +7,19 @@ import datasets as hf_datasets
 
 
 class Data:
+    PICKLE_FILE_POSTFIX_EXTENSION = '_data_obj.pkl'
+    CSV_FILE_POSTFIX_EXTENSION = '.csv'
 
+    @property
     @abstractmethod
-    def to_csv(self, path):
+    def dataset(self):
         pass
 
+    def to_csv(self, path):
+        self.dataset.to_csv(path + self.CSV_FILE_POSTFIX_EXTENSION, index=False)
+
     def to_pickle(self, path):
-        pickle_path = path + '_data_obj.pkl'
+        pickle_path = path + self.PICKLE_FILE_POSTFIX_EXTENSION
         with open(pickle_path, 'wb') as f:
             pickle.dump(self, f)
         return self
@@ -27,13 +33,13 @@ class Data:
 
     @classmethod
     def saved_data_exists(cls, path):
-        pickle_file_exists = os.path.exists(path + 'data_obj.pkl')
-        csv_file_exists = os.path.exists(path + '.csv')
+        pickle_file_exists = os.path.exists(path + cls.PICKLE_FILE_POSTFIX_EXTENSION)
+        csv_file_exists = os.path.exists(path + cls.CSV_FILE_POSTFIX_EXTENSION)
         return pickle_file_exists and csv_file_exists
 
     @classmethod
     def load(cls, path):
-        with open(path + 'data_obj.pkl', 'rb') as f:
+        with open(path + cls.PICKLE_FILE_POSTFIX_EXTENSION, 'rb') as f:
             data = pickle.load(f)
         return data
 
@@ -50,24 +56,15 @@ class PandasData(Data):
     def copy(self):
         return self.__class__(self.features.copy(), self.labels.copy())
 
-    def to_csv(self, path):
-        self.dataset.to_csv(path + '.csv', index=False)
-
     def is_empty(self):
         return len(self.dataset) == 0
 
 
 class HuggingFaceData(Data):
-    OUTPUT_FORMAT = '.csv'
 
     def __init__(self, dataset):
-        self.dataset = dataset
+        self._dataset = dataset
 
-    def to_csv(self, path):
-        self.dataset.to_csv(path + '.csv', index=False)
-
-    @classmethod
-    def load(cls, path):
-        dataset = pd.read_csv(path + cls.OUTPUT_FORMAT)
-        hg_dataset = hf_datasets.Dataset.from_pandas(dataset)
-        return cls(hg_dataset)
+    @property
+    def dataset(self):
+        return self._dataset

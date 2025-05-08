@@ -1,6 +1,7 @@
 import os
 from urllib.parse import urlparse
 from urllib.request import url2pathname
+import mlflow
 
 
 def generate_random_state():
@@ -13,3 +14,10 @@ def get_normalized_path_from_artifact_uri(artifact_uri: str) -> str:
     normalized_path = os.path.normpath(local_path)
     return normalized_path
 
+
+def get_current_run_artifacts_path():
+    if mlflow.active_run() is None:
+        return None
+    artifact_uri = mlflow.active_run().info.artifact_uri
+    artifacts_path = get_normalized_path_from_artifact_uri(artifact_uri)
+    return artifacts_path

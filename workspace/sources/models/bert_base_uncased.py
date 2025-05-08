@@ -1,3 +1,4 @@
+import utils
 from models.transformers_models import TransformersModels
 from scipy.special import softmax
 import mlflow
@@ -6,8 +7,10 @@ from transformers import BertTokenizer, BertForSequenceClassification, Trainer, 
 from models.callbacks import HF_CustomMLflowCallback
 import os
 import glob
-
+import pickle
 from experiments.metrics import compute_standard_metrics, FalsePositiveRate
+from pathlib import Path
+import json
 
 
 class BertBaseUncased(TransformersModels):
@@ -19,6 +22,7 @@ class BertBaseUncased(TransformersModels):
         self.training_args = {**self.get_default_training_args(), **training_arguments}
         self.output_dir = None
         self.logging_dir = None
+        self.evaluation_data = None
 
     def has_checkpoints(self):
         """Check if there are checkpoints available for model training resumption."""
@@ -87,11 +91,33 @@ class BertBaseUncased(TransformersModels):
         probs = softmax(logits, axis=1)[:, 1]
         predictions = (probs > 0.5).astype(int)
 
-        mlflow.log_params({
-            'evaluation_logits': logits,
-            'evaluation_probabilities': probs,
-            'evaluations_predictions': predictions,
-            'evaluation_labels': labels,
-            'evaluation_metrics': metrics})
+        self.evaluation_data = {
+            'evaluation_logits': logits.tolist(),
+            'evaluation_probabilities': probs.tolist(),
+            'evaluations_predictions': predictions.tolist(),
+            'evaluation_labels': labels.tolist(),
+            'evaluation_metrics': metrics}
+        self.save_evaluation_data()
+        return self.evaluation_data
 
-        return self
+    def save_evaluation_data(self):
+        artifacts_path = utils.get_current_run_artifacts_path()
+        if artifacts_path is None:
+            self.logger.info('Could not save evaluation data, because artifacts path is None.')
+            return False
+        evaluation_artifacts_path = os.path.join(artifacts_path, 'evaluation')
+        Path(evaluation_artifacts_path).mkdir(parents=True, exist_ok=True)
+        evaluation_data_path = os.path.join(evaluation_artifacts_path, 'evaluation_data')
+        with open(evaluation_data_path + '.pkl', 'wb') as f:
+            self.logger.info(f'Saving evaluation data in pickle...')
+            pickle.dump(self.evaluation_data, f)
+        with open(evaluation_data_path + '.json', 'w', encoding='utf-8') as f:
+            self.logger.info(f'Saving evaluation data in json...')
+            json.dump(self.evaluation_data, f)
+
+        for data_name, data in self.evaluation_data.items():
+            evaluations_data_path_part = os.path.join(evaluation_artifacts_path, data_name)
+            with open(evaluations_data_path_part + '.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f)
+        self.logger.info('Successfully saved evaluation data.')
+        return True

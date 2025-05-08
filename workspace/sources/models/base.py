@@ -24,8 +24,9 @@ class Model(ABC):
 
     @staticmethod
     def get_artifacts_path():
-        artifact_uri = mlflow.active_run().info.artifact_uri
-        artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        artifacts_path = utils.get_current_run_artifacts_path()
+        if artifacts_path is None:
+            return None
         return os.path.join(artifacts_path, 'model')
 
     @classmethod
@@ -58,3 +59,4 @@ class Model(ABC):
         model_path = os.path.join(model_dir, "model.pkl")
         with open(model_path, 'wb') as f:
             pickle.dump(self, f)
+

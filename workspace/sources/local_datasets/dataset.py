@@ -48,9 +48,11 @@ class Dataset(ABC):
             mlflow.log_params(params)
 
     def prepare_dataset(self):
-        if not self.resave and self.prepared_dataset_exist():
+        if not self.resave and self.prepared_dataset_exists():
+            self.logger.info('Prepared dataset exists, trying to load it.')
             self.load_prepared_dataset()
         else:
+            self.logger.info('Prepared dataset does not exist, computing from scratch.')
             (self.load_dataset()
              .split(train_pct=self.train_pct, val_pct=self.val_pct)
              .preprocess()
@@ -78,7 +80,7 @@ class Dataset(ABC):
             setattr(self, split, data)
         return self
 
-    def prepared_dataset_exist(self):
+    def prepared_dataset_exists(self):
         if not self.artifacts_path:
             return False
         if not os.path.exists(os.path.join(self.artifacts_path, 'dataset.csv')):
@@ -129,10 +131,12 @@ class Dataset(ABC):
                 if self.artifacts_path and preprocessor.preprocessed_data_exists(self.artifacts_path,
                                                                                  split,
                                                                                  name_dir_prefix=str(index)):
+                    self.logger.info('Preprocessed data exists, loading it.')
                     preprocessed_split_data_obj = preprocessor.load(self.artifacts_path,
                                                                     split,
                                                                     name_dir_prefix=str(index))
                 else:
+                    self.logger.info('Preprocessed data does not exist, computing from scratch.')
                     preprocessed_split_data_obj = preprocessor.preprocess(split_to_preprocess.copy())
                     if self.artifacts_path:
                         preprocessor.save_preprocessed_data(self.artifacts_path,
