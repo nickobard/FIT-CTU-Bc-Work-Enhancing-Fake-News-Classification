@@ -40,7 +40,10 @@ class Experiment(ABC):
     def run(self):
         self._init_experiment()
         with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as experiment_run:
+            self.logger.info(f"Run ID: {experiment_run.info.run_id}")
+            self.logger.info(f"Run name: {experiment_run.info.run_name}")
+
             self._prepare()
             self.model.fit(self.dataset)
-            evaluation_data = self.model.evaluate()
-            self.vis_handler.handle_visualizations(evaluation_data)
+            self.model.evaluate()
+            # self.vis_handler.handle_visualizations(evaluation_data)
