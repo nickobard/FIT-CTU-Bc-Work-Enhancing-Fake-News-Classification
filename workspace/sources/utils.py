@@ -12,3 +12,4 @@ def get_normalized_path_from_artifact_uri(artifact_uri: str) -> str:
     local_path = url2pathname(parsed_path)
     normalized_path = os.path.normpath(local_path)
     return normalized_path
+
