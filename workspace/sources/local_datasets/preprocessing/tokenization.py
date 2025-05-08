@@ -3,8 +3,6 @@ from .base import Preprocessing
 import nltk
 from nltk.tokenize import word_tokenize
 
-nltk.download('punkt')
-
 
 class BertBaseUncasedTokenizer(Preprocessing):
     def __init__(self):
