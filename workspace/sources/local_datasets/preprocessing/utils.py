@@ -2,25 +2,40 @@ from .tokenization import BertBaseUncasedTokenizer, NLTKTokenizer
 from .encoding import BertBaseUncasedEncoder, HuggingFaceDatasetConversion
 from .cleaning import NoiseReduction, Stemming, Lemmatization
 
-minimal_bert_pipeline = [BertBaseUncasedTokenizer(),
-                         BertBaseUncasedEncoder(),
-                         HuggingFaceDatasetConversion()]
 
-cleaned_bert_pipeline = [NoiseReduction(),
-                         BertBaseUncasedTokenizer(),
-                         BertBaseUncasedEncoder(),
-                         HuggingFaceDatasetConversion()]
+class PreprocessingPipeline(list):
+    def __init__(self, name, iterable=()):
+        super().__init__(iterable)
+        self.name = name
 
-cleaned_stemmed_bert_pipeline = [NoiseReduction(),
-                                 NLTKTokenizer(),
-                                 Stemming(),
-                                 BertBaseUncasedTokenizer(),
-                                 BertBaseUncasedEncoder(),
-                                 HuggingFaceDatasetConversion()]
+    def __repr__(self):
+        return f"<PreprocessingPipeline {self.name!r}: {list(self)}>"
 
-cleaned_lemmatized_bert_pipeline = [NoiseReduction(),
-                                    NLTKTokenizer(),
-                                    Lemmatization(),
-                                    BertBaseUncasedTokenizer(),
-                                    BertBaseUncasedEncoder(),
-                                    HuggingFaceDatasetConversion()]
+
+minimal_bert_pipeline = PreprocessingPipeline(name='minima_bert_pipeline',
+                                              iterable=[BertBaseUncasedTokenizer(),
+                                                        BertBaseUncasedEncoder(),
+                                                        HuggingFaceDatasetConversion()])
+
+cleaned_bert_pipeline = PreprocessingPipeline(
+    name='noise_reduction_bert_pipeline',
+    iterable=[NoiseReduction(),
+              BertBaseUncasedTokenizer(),
+              BertBaseUncasedEncoder(),
+              HuggingFaceDatasetConversion()])
+
+cleaned_stemmed_bert_pipeline = PreprocessingPipeline(name='noise_reduction_with_stemming_bert_pipeline',
+                                                      iterable=[NoiseReduction(),
+                                                                NLTKTokenizer(),
+                                                                Stemming(),
+                                                                BertBaseUncasedTokenizer(),
+                                                                BertBaseUncasedEncoder(),
+                                                                HuggingFaceDatasetConversion()])
+
+cleaned_lemmatized_bert_pipeline = PreprocessingPipeline(name='noise_reduction_with_lemmatizing_bert_pipeline',
+                                                         iterable=[NoiseReduction(),
+                                                                   NLTKTokenizer(),
+                                                                   Lemmatization(),
+                                                                   BertBaseUncasedTokenizer(),
+                                                                   BertBaseUncasedEncoder(),
+                                                                   HuggingFaceDatasetConversion()])
