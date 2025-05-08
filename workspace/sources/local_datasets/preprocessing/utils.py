@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from .tokenization import BertBaseUncasedTokenizer, NLTKTokenizer
 from .encoding import BertBaseUncasedEncoder, HuggingFaceDatasetConversion
 from .cleaning import NoiseReduction, Stemming, Lemmatization
@@ -7,6 +9,12 @@ class PreprocessingPipeline(list):
     def __init__(self, name, iterable=()):
         super().__init__(iterable)
         self.name = name
+        self.logger = getLogger()
+
+    def set_logger(self, logger):
+        self.logger = logger
+
+
 
     def __repr__(self):
         return f"<PreprocessingPipeline {self.name!r}: {list(self)}>"
