@@ -62,23 +62,24 @@ class Stemming(Preprocessing):
         data.features = stem(data.features, self._language_code)
         return data
 
-    class Lemmatization(Preprocessing):
-        def __init__(self, language: Literal['english', 'czech'] = 'english'):
-            super().__init__()
-            self.language = language
-            self.language_codes = {'english': 'en',
-                                   'czech': 'cs'}
 
-        def _params(self):
-            return {'type': 'lemmatizer',
-                    'lemmatizer_type': 'simplemma',
-                    'language': self.language,
-                    'language_code': self._language_code}
+class Lemmatization(Preprocessing):
+    def __init__(self, language: Literal['english', 'czech'] = 'english'):
+        super().__init__()
+        self.language = language
+        self.language_codes = {'english': 'en',
+                               'czech': 'cs'}
 
-        @property
-        def _language_code(self):
-            return self.language_codes[self.language]
+    def _params(self):
+        return {'type': 'lemmatizer',
+                'lemmatizer_type': 'simplemma',
+                'language': self.language,
+                'language_code': self._language_code}
 
-        def preprocess(self, data):
-            data.features = lemmatize(data.features, self._language_code)
-            return data
+    @property
+    def _language_code(self):
+        return self.language_codes[self.language]
+
+    def preprocess(self, data):
+        data.features = lemmatize(data.features, self._language_code)
+        return data
