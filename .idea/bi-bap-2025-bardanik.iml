@@ -7,7 +7,6 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/materials" />
-      <excludeFolder url="file://$MODULE_DIR$/mlruns" />
       <excludeFolder url="file://$MODULE_DIR$/workspace/mlruns" />
       <excludeFolder url="file://$MODULE_DIR$/workspace/thesis_theme_preparation" />
     </content>
