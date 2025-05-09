@@ -1,6 +1,6 @@
-from envs.JetBrains.Lib.abc import abstractmethod
+from abc import abstractmethod
 
-from experiments.visualizations.base import Visualization
+from .base import Visualization
 import matplotlib.pyplot as plt
 import os
 import pandas as pd

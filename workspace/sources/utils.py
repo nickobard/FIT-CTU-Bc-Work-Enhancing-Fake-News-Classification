@@ -4,6 +4,7 @@ import re
 from urllib.parse import urlparse
 from urllib.request import url2pathname
 import mlflow
+from mlflow import MlflowException
 
 
 def generate_random_state():
@@ -26,8 +27,12 @@ def get_current_run_artifacts_path():
 
 
 def log_params(params: dict, logger=None):
-    if mlflow.active_run():
-        mlflow.log_params(params)
+    active_run = mlflow.active_run()
+    if active_run is not None:
+        try:
+            mlflow.log_params(params)
+        except MlflowException as e:
+            logger.warning(e.message)
     else:
         logger = logger if logger else logging.getLogger()
         logger.info(f'mlflow is not active, could not log the params: {params}')
@@ -43,4 +48,3 @@ def log_metrics(metrics: dict, logger=None):
 
 def class_name_to_str(class_name):
     return re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
-

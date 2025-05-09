@@ -1,4 +1,4 @@
-from experiments.visualizations.base import Visualization
+from .base import Visualization
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt

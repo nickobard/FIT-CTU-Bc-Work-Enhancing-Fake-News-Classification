@@ -1,9 +1,10 @@
 from transformers import BertTokenizer
 import pandas as pd
 from .base import Preprocessing
+from ..utils import import_hf_datasets
 
-import datasets as hf_datasets
-from ..data_classes import HuggingFaceData
+hf_datasets = import_hf_datasets()
+from ..data_classes import HuggingFaceData, PandasData
 from ...utils import class_name_to_str
 
 
@@ -47,3 +48,8 @@ class HuggingFaceDatasetConversion(Preprocessing):
         hf_data = hf_datasets.Dataset.from_pandas(data.dataset)
         hf_data.set_format(type='torch')
         return HuggingFaceData(hf_data)
+
+    def _params(self):
+        return {'type': 'converter',
+                'original_data_type': PandasData.__name__,
+                'converted_data_type': self.PREPROCESSED_DATA_CLASS.__name__}

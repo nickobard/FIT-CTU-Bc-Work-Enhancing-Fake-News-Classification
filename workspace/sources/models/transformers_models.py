@@ -1,5 +1,5 @@
-from experiments.metrics import FalsePositiveRate
-from models.base import Model
+from ..experiments.metrics import FalsePositiveRate
+from .base import Model
 import mlflow
 
 

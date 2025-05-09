@@ -2,7 +2,7 @@ from abc import ABC
 import mlflow
 import logging
 
-from experiments.visualizations.handlers import standard_visualizations_handler
+from .visualizations.handlers import standard_visualizations_handler
 from utils import generate_random_state
 
 

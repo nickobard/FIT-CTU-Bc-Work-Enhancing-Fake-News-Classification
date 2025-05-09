@@ -3,7 +3,7 @@ import mlflow
 import pickle
 import os
 import utils
-from experiments.metrics import FalsePositiveRate
+from ..experiments.metrics import FalsePositiveRate
 from utils import generate_random_state
 from logging import getLogger
 from pathlib import Path

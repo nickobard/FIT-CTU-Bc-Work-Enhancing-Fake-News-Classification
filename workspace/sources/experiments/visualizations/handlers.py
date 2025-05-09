@@ -1,5 +1,5 @@
-import experiments.visualizations.plots as plots
-import experiments.visualizations.tables as tables
+from . import plots
+from . import tables
 
 
 class VisualizationsHandler:
