@@ -14,6 +14,12 @@ class FalsePositiveRate(Metric):
         self.greater_is_better = False
 
 
+class EvalLoss(Metric):
+    def __init__(self):
+        self.name = 'eval_loss'
+        self.greater_is_better = False
+
+
 def compute_standard_metrics(evaluation):
     logits, labels = evaluation
     predictions = np.argmax(logits, axis=-1)

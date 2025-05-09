@@ -1,10 +1,10 @@
-from ..experiments.metrics import FalsePositiveRate
+from ..experiments.metrics import EvalLoss
 from .base import Model
 import mlflow
 
 
 class TransformersModels(Model):
-    def __init__(self, main_metric=FalsePositiveRate()):
+    def __init__(self, main_metric=EvalLoss):
         super().__init__(main_metric)
 
     @classmethod

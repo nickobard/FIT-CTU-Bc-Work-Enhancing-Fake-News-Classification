@@ -3,19 +3,21 @@ import mlflow
 import pickle
 import os
 import utils
-from ..experiments.metrics import FalsePositiveRate
+from ..experiments.metrics import EvalLoss
 from utils import generate_random_state
 from logging import getLogger
 from pathlib import Path
 
 
 class Model(ABC):
-    def __init__(self, main_metric=FalsePositiveRate()):
+    def __init__(self, main_metric=EvalLoss):
         self.main_metric = main_metric
         self.random_state = None
         self.logger = None
+        self.artifacts_path = None
 
     def init(self, logger=None, random_state=None):
+        self.main_metric = self.main_metric() if callable(self.main_metric) else self.main_metric
         self.artifacts_path = self.get_artifacts_path()
         Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
         self.logger = logger if logger else getLogger()
@@ -59,4 +61,3 @@ class Model(ABC):
         model_path = os.path.join(model_dir, "model.pkl")
         with open(model_path, 'wb') as f:
             pickle.dump(self, f)
-

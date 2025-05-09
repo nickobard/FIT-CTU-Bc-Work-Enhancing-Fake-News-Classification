@@ -2,19 +2,21 @@ import utils
 from .transformers_models import TransformersModels
 from scipy.special import softmax
 import mlflow
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, set_seed
+from transformers import EarlyStoppingCallback, BertTokenizer, BertForSequenceClassification, Trainer, \
+    TrainingArguments, set_seed
 from .callbacks import HF_CustomMLflowCallback
 import os
 import glob
 import pickle
-from ..experiments.metrics import compute_standard_metrics, FalsePositiveRate
+from ..experiments.metrics import compute_standard_metrics, EvalLoss
 from pathlib import Path
 import json
+from ..utils import log_params
 
 
 class BertBaseUncased(TransformersModels):
 
-    def __init__(self, training_arguments=None, main_metric=FalsePositiveRate()):
+    def __init__(self, training_arguments=None, main_metric=EvalLoss):
         super().__init__(main_metric)
         self.name = "bert-base-uncased"
         training_arguments = {} if training_arguments is None else training_arguments
@@ -22,6 +24,9 @@ class BertBaseUncased(TransformersModels):
         self.output_dir = None
         self.logging_dir = None
         self.evaluation_data = None
+        self.dataset = None
+        self.model = None
+        self.trainer = None
 
     def has_checkpoints(self):
         """Check if there are checkpoints available for model training resumption."""
@@ -32,12 +37,18 @@ class BertBaseUncased(TransformersModels):
 
     def init(self, logger=None, random_state=None):
         super().init(logger, random_state)
-        mlflow.log_param('model_name', self.name)
+        log_params({'model_name': self.name}, self.logger)
+        log_params({'model_input_hyperparameters': self.training_args}, self.logger)
+        log_params(
+            {f'input_hyperparameter_{hparam_name}': value for hparam_name, value in self.training_args.items()},
+            self.logger
+        )
         self.output_dir = mlflow.active_run().data.params.get('output_dir',
                                                               os.path.join(self.get_artifacts_path(),
                                                                            'checkpoints'))
         self.logging_dir = mlflow.active_run().data.params.get('logging_dir',
                                                                os.path.join(self.get_artifacts_path(), 'logs'))
+
         return self
 
     @classmethod
@@ -45,8 +56,11 @@ class BertBaseUncased(TransformersModels):
         return {
             'epochs': 3,
             'batch_size': 8,
+            'eval_batch_size': 8,
             'learning_rate': 5e-05,
             'weight_decay': 0.01,
+            'early_stopping_patience': 3,
+            'early_stopping_threshold': 0.001
         }
 
     def fit(self, dataset):
@@ -57,25 +71,35 @@ class BertBaseUncased(TransformersModels):
         training_args = TrainingArguments(
             output_dir=self.output_dir,
             logging_dir=self.logging_dir,
+            num_train_epochs=self.training_args['epochs'],
             per_device_train_batch_size=self.training_args['batch_size'],
-            per_device_eval_batch_size=self.training_args['batch_size'],
+            per_device_eval_batch_size=self.training_args['eval_batch_size'],
             eval_strategy="epoch",
             save_strategy="epoch",
-            logging_steps=10,
-            save_steps=100,
+            logging_strategy="steps",  # regards only training
+            logging_steps=10,  # regards only training
             weight_decay=self.training_args['weight_decay'],
             learning_rate=self.training_args['learning_rate'],
             load_best_model_at_end=True,
             metric_for_best_model=self.main_metric.name,
             greater_is_better=self.main_metric.greater_is_better,
         )
+
+        callbacks = [HF_CustomMLflowCallback()]
+        early_stopping_patience = self.training_args['early_stopping_patience']
+        if early_stopping_patience is not None:
+            early_stopping_threshold = self.training_args['early_stopping_threshold']
+            esc = EarlyStoppingCallback(early_stopping_patience,
+                                        early_stopping_threshold)
+            callbacks.append(esc)
+
         self.trainer = Trainer(
             model=self.model,
             args=training_args,
             train_dataset=dataset.preprocessed_train_set.dataset,
             eval_dataset=dataset.preprocessed_train_set.dataset,
             compute_metrics=compute_standard_metrics,
-            callbacks=[HF_CustomMLflowCallback()]
+            callbacks=callbacks
         )
         self.trainer.train(resume_from_checkpoint=True if self.has_checkpoints() else False)
 
@@ -84,7 +108,7 @@ class BertBaseUncased(TransformersModels):
         logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
                                                        metric_key_prefix='test')
         best_epoch = self.trainer.state.epoch
-        mlflow.log_metrics({f"best_{key}": value for key, value in metrics.items()})
+        mlflow.log_metrics(metrics)
         mlflow.log_metric('best_epoch', best_epoch)
 
         probs = softmax(logits, axis=1)[:, 1]

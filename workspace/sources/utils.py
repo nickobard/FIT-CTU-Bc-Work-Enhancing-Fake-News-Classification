@@ -26,13 +26,14 @@ def get_current_run_artifacts_path():
     return artifacts_path
 
 
-def log_params(params: dict, logger=None):
+def log_params(params: dict, logger=None, supress_warnings=True):
     active_run = mlflow.active_run()
     if active_run is not None:
         try:
             mlflow.log_params(params)
         except MlflowException as e:
-            logger.warning(e.message)
+            if not supress_warnings:
+                logger.warning(e.message)
     else:
         logger = logger if logger else logging.getLogger()
         logger.info(f'mlflow is not active, could not log the params: {params}')

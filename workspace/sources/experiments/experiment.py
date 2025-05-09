@@ -3,7 +3,7 @@ import mlflow
 import logging
 
 from .visualizations.handlers import standard_visualizations_handler
-from utils import generate_random_state
+from utils import generate_random_state, log_params
 
 
 class Experiment(ABC):
@@ -14,7 +14,10 @@ class Experiment(ABC):
         self.run_id = run_id
         self.model = model
         self.dataset = dataset
-        self.random_state = random_state if random_state else generate_random_state()
+        if run_id is None:
+            self.random_state = random_state if random_state else generate_random_state()
+        else:
+            self.random_state = int(mlflow.get_run(run_id).data.params['random_state'])
         self.vis_handler = vis_handler if vis_handler else standard_visualizations_handler
 
     def _init_logger(self, logging_level):
@@ -33,6 +36,7 @@ class Experiment(ABC):
         self.logger.info(f"MLflow experiment initialized with ID: {self.experiment_id}")
 
     def _prepare(self):
+        log_params({'random_state': self.random_state}, logger=self.logger)
         self.dataset.init(logger=self.logger, random_state=self.random_state)
         self.model.init(logger=self.logger, random_state=self.random_state)
         self.vis_handler.init(logger=self.logger)
