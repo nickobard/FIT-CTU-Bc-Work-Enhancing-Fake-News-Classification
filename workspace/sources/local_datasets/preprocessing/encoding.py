@@ -4,6 +4,7 @@ from .base import Preprocessing
 
 import datasets as hf_datasets
 from ..data_classes import HuggingFaceData
+from ...utils import class_name_to_str
 
 
 class BertBaseUncasedEncoder(Preprocessing):
@@ -12,14 +13,19 @@ class BertBaseUncasedEncoder(Preprocessing):
         self.truncation = True
         self.max_length = 512
         self.tokenizer = None
+        self.tokenizer_name = 'bert-base-cased'
 
     def init(self, logger=None):
         super().init(logger)
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-cased")
+        self.tokenizer = BertTokenizer.from_pretrained(self.tokenizer_name)
         return self
 
-    def hyperparameters_output(self):
-        return {'encoding': {'type': 'truncation', 'max_length': self.max_length}}
+    def _params(self):
+        return {'type': 'encoder',
+                'tokenizer_type': class_name_to_str(self.tokenizer.__class__.__name__),
+                'truncation': self.truncation,
+                'max_length': self.max_length,
+                'tokenizer': self.tokenizer_name}
 
     def preprocess(self, data):
         original_features_index = data.features.index

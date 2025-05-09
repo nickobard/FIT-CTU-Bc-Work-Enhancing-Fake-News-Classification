@@ -6,10 +6,8 @@ import mlflow
 from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 from pathlib import Path
-import utils
-from utils import generate_random_state
-from tqdm import tqdm
 from .data_classes import PandasData
+from ..utils import generate_random_state, log_params, get_normalized_path_from_artifact_uri
 
 
 class Dataset(ABC):
@@ -30,7 +28,7 @@ class Dataset(ABC):
         self.preprocessed_train_set = self.preprocessed_val_set = self.preprocessed_test_set = None
 
     def init(self, logger=None, random_state=None):
-        self._log_param('dataset_name', self.name)
+        log_params({'dataset_name': self.name})
         self.artifacts_path = self.get_artifacts_path()
         if self.artifacts_path:
             Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
@@ -39,15 +37,8 @@ class Dataset(ABC):
         self.prepare_dataset()
         return self
 
-    def _log_param(self, key, value):
-        if mlflow.active_run():
-            mlflow.log_param(key, value)
-
-    def _log_params(self, params):
-        if mlflow.active_run():
-            mlflow.log_params(params)
-
     def prepare_dataset(self):
+        self.preprocessings.log_params(logger=self.logger)
         if not self.resave and self.prepared_dataset_exists():
             self.logger.info('Prepared dataset exists, trying to load it.')
             self.load_prepared_dataset()
@@ -61,7 +52,7 @@ class Dataset(ABC):
 
     def load_dataset(self):
         self.dataset = pd.read_csv(self.data_path)
-        self._log_param('dataset_shape', self.dataset.shape)
+        log_params({'dataset_shape': self.dataset.shape})
         return self
 
     def load_prepared_dataset(self):
@@ -117,6 +108,8 @@ class Dataset(ABC):
         for split in splits:
             # initializing preprocessed data with copied original data
             setattr(self, f'preprocessed_{split}', getattr(self, split).copy())
+
+        self.preprocessings.init(logger=self.logger)
         for index, preprocessor in enumerate(self.preprocessings):
             preprocessor.init(logger=self.logger)
 
@@ -148,14 +141,14 @@ class Dataset(ABC):
         return self
 
     def split(self, train_pct=0.7, val_pct=0.15):
-        self._log_params({'train_pct': train_pct, 'val_pct': val_pct})
+        log_params({'train_pct': train_pct, 'val_pct': val_pct})
         test_pct = 1 - train_pct - val_pct
         train_set, rest = train_test_split(self.dataset, train_size=train_pct, random_state=self.random_state)
         val_ratio = val_pct / (val_pct + test_pct)
         val_set, test_set = train_test_split(rest, test_size=(1 - val_ratio), random_state=self.random_state)
-        self._log_params({'train_shape': train_set.shape,
-                          'val_shape': val_set.shape,
-                          'test_shape': test_set.shape})
+        log_params({'train_shape': train_set.shape,
+                    'val_shape': val_set.shape,
+                    'test_shape': test_set.shape})
 
         self.train_set = PandasData(features=train_set['article'], labels=train_set['label'], )
         self.val_set = PandasData(features=val_set['article'], labels=val_set['label'], )
@@ -170,7 +163,7 @@ class Dataset(ABC):
         if not mlflow.active_run():
             return None
         artifact_uri = mlflow.active_run().info.artifact_uri
-        artifacts_path = utils.get_normalized_path_from_artifact_uri(artifact_uri)
+        artifacts_path = get_normalized_path_from_artifact_uri(artifact_uri)
         return os.path.join(artifacts_path, 'dataset')
 
 

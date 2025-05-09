@@ -1,4 +1,6 @@
+import logging
 import os
+import re
 from urllib.parse import urlparse
 from urllib.request import url2pathname
 import mlflow
@@ -21,3 +23,24 @@ def get_current_run_artifacts_path():
     artifact_uri = mlflow.active_run().info.artifact_uri
     artifacts_path = get_normalized_path_from_artifact_uri(artifact_uri)
     return artifacts_path
+
+
+def log_params(params: dict, logger=None):
+    if mlflow.active_run():
+        mlflow.log_params(params)
+    else:
+        logger = logger if logger else logging.getLogger()
+        logger.info(f'mlflow is not active, could not log the params: {params}')
+
+
+def log_metrics(metrics: dict, logger=None):
+    if mlflow.active_run():
+        mlflow.log_metrics(metrics)
+    else:
+        logger = logger if logger else logging.getLogger()
+        logger.info(f'mlflow is not active, could not log the metrics: {metrics}')
+
+
+def class_name_to_str(class_name):
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
+

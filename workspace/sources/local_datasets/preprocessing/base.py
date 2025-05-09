@@ -5,6 +5,7 @@ from logging import getLogger
 from pathlib import Path
 
 from ..data_classes import PandasData
+from ...utils import log_params, class_name_to_str
 
 
 class Preprocessing(ABC):
@@ -18,15 +19,18 @@ class Preprocessing(ABC):
         pass
 
     def init(self, logger=None):
-        self.logger = logger if logger else getLogger()
+        self._set_logger(logger)
         return self
 
-    def hyperparameters_output(self):
-        return {}
+    def log_params(self, logger=None):
+        self._set_logger(logger)
+        params = {self.name(): self._params()}
+        log_params(params, logger=self.logger)
+        return params
 
     def name(self):
         name = self.__class__.__name__
-        return re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
+        return class_name_to_str(name)
 
     def preprocessed_data_exists(self, artifacts_path, split_name=None, name_dir_prefix=''):
         if artifacts_path is None:
@@ -55,3 +59,13 @@ class Preprocessing(ABC):
         path = os.path.join(artifacts_path, name_dir, split_name)
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         data.save(path)
+
+    def _params(self):
+        return {}
+
+    def _set_logger(self, logger):
+        if logger:
+            self.logger = logger
+        else:
+            self.logger = self.logger if self.logger else getLogger()
+        return self
