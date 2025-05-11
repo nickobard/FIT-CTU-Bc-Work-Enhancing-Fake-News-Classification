@@ -62,3 +62,20 @@ def create_and_get_local_logger(name, logging_level=logging.INFO):
         handler.setFormatter(formatter)
         logger.addHandler(handler)
     return logger
+
+
+SIGNATURE_PART_SEPARATOR = ';'
+SIGNATURE_SUBPART_SEPARATOR = ','
+SIGNATURE_KEY_VALUE_SEPARATOR = '='
+
+
+def string_signature(string):
+    words = string.split('_')
+    return ''.join(word[0] for word in words)
+
+
+def dict_signature(dict_):
+    key_val_joins = [SIGNATURE_KEY_VALUE_SEPARATOR.join([string_signature(key), str(value).lower()]) for key, value in
+                     dict_.items()]
+    signature = SIGNATURE_SUBPART_SEPARATOR.join(key_val_joins)
+    return signature

@@ -7,6 +7,7 @@ from ..experiments.metrics import Loss
 from utils import generate_random_state
 from ..utils import create_and_get_local_logger
 from pathlib import Path
+from ..utils import class_name_to_str, dict_signature
 
 
 class Model(ABC):
@@ -22,6 +23,15 @@ class Model(ABC):
         self.logger = logger if logger else create_and_get_local_logger(self.__class__.__name__)
         self.random_state = random_state if random_state else generate_random_state()
         return self
+
+    def assemble_signature(self):
+        class_name = class_name_to_str(self.__class__.__name__)
+        model_params = self.get_training_params()
+        model_params_signature = dict_signature(model_params)
+        return f"model={class_name}({model_params_signature})"
+
+    def get_training_params(self):
+        return {'random_state': self.random_state}
 
     @staticmethod
     def get_artifacts_path():

@@ -121,7 +121,7 @@ class BertBaseUncased(TransformersModels):
                 logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
                                                                metric_key_prefix='test')
                 embeddings = self.trainer.get_collected_embeddings()
-            best_epoch = self.trainer.state.epoch
+            best_epoch = best_entry['epoch']
             metrics['test_epoch'] = best_epoch
             self.logger.info(f'Test metrics: {metrics}')
             postfix = f'_by_{evaluation_metric.name}'
@@ -205,3 +205,10 @@ class BertBaseUncased(TransformersModels):
         self.model = model
         self.trainer.model = model
         return best_entry
+
+    def get_training_params(self):
+        super_class_params = super().get_training_params()
+        additional_params = {'main_metrics_name': self.train_best_model_metric.name}
+        return {**super_class_params,
+                **additional_params,
+                **self.training_args}

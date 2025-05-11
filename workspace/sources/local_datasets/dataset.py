@@ -5,10 +5,10 @@ from abc import ABC
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 
-from .preprocessing.utils import PreprocessingPipeline
+from .preprocessing.pipelines import PreprocessingPipeline
 from .data_classes import PandasData
 from ..utils import generate_random_state, log_params, get_normalized_path_from_artifact_uri, \
-    create_and_get_local_logger
+    create_and_get_local_logger, dict_signature, class_name_to_str, SIGNATURE_PART_SEPARATOR
 
 
 class Dataset(ABC):
@@ -176,6 +176,24 @@ class Dataset(ABC):
         artifact_uri = mlflow.active_run().info.artifact_uri
         artifacts_path = get_normalized_path_from_artifact_uri(artifact_uri)
         return os.path.join(artifacts_path, 'dataset')
+
+    def assemble_signature(self):
+        class_name = self.name
+        dataset_params = self.get_dataset_params()
+        dataset_params_signature = dict_signature(dataset_params)
+        dataset_signature = f"dataset={class_name}({dataset_params_signature})"
+        preprocessing_pipeline_signature = self.preprocessings_pipeline.assemble_signature()
+        return SIGNATURE_PART_SEPARATOR.join([dataset_signature, preprocessing_pipeline_signature])
+
+    def get_dataset_params(self):
+        return {'dataset_name': self.name,
+                'dataset_shape': self.dataset.shape,
+                'train_set_shape': self.train_set.shape,
+                'val_set_shape': self.val_set.shape,
+                'test_set_shape': self.test_set.shape,
+                'preprocessed_train_set_shape': self.preprocessed_train_set.shape,
+                'preprocessed_val_set_shape': self.preprocessed_val_set.shape,
+                'preprocessed_test_set_shape': self.preprocessed_test_set.shape}
 
 
 if __name__ == "__main__":

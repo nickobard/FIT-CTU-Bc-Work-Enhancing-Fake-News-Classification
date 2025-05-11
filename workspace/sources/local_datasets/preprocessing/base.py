@@ -5,7 +5,7 @@ from logging import getLogger
 from pathlib import Path
 
 from ..data_classes import PandasData
-from ...utils import log_params, class_name_to_str, create_and_get_local_logger
+from ...utils import log_params, class_name_to_str, create_and_get_local_logger, dict_signature
 
 
 class Preprocessing(ABC):
@@ -65,6 +65,12 @@ class Preprocessing(ABC):
 
     def _params(self):
         return {}
+
+    def assemble_signature(self):
+        class_name = self.name()
+        params_signature = dict_signature(self._params())
+        signature = f'{class_name}({params_signature})'
+        return signature
 
     def _set_logger(self, logger):
         if logger:

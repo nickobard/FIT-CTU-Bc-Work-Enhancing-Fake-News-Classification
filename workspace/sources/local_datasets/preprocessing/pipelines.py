@@ -1,7 +1,7 @@
 from .tokenization import NLTKTokenizer
 from .encoding import BertBaseUncasedEncoder
 from .cleaning import NoiseReduction, Stemming, Lemmatization
-from ...utils import log_params, create_and_get_local_logger
+from ...utils import log_params, create_and_get_local_logger, class_name_to_str, dict_signature
 
 
 class PreprocessingPipeline(list):
@@ -39,6 +39,12 @@ class PreprocessingPipeline(list):
         else:
             self.logger = self.logger if self.logger else create_and_get_local_logger(self.__class__.__name__)
         return self
+
+    def assemble_signature(self):
+        class_name = self.name
+        params_signature = [p.assemble_signature() for p in self]
+        signature = f'pipeline={class_name}({params_signature})'
+        return signature
 
     def __repr__(self):
         return f"<PreprocessingPipeline {self.name!r}: {list(self)}>"
