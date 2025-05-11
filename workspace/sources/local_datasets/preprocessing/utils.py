@@ -1,6 +1,5 @@
-from .tokenization import BertBaseUncasedTokenizer, NLTKTokenizer
+from .tokenization import NLTKTokenizer
 from .encoding import BertBaseUncasedEncoder
-from .transformations import HuggingFaceDatasetConversion
 from .cleaning import NoiseReduction, Stemming, Lemmatization
 from ...utils import log_params, create_and_get_local_logger
 
@@ -46,29 +45,23 @@ class PreprocessingPipeline(list):
 
 
 minimal_bert_pipeline = PreprocessingPipeline(name='minima_bert_pipeline',
-                                              iterable=[BertBaseUncasedTokenizer(),
-                                                        BertBaseUncasedEncoder(),
-                                                        HuggingFaceDatasetConversion()])
+                                              iterable=[BertBaseUncasedEncoder()])
 
 cleaned_bert_pipeline = PreprocessingPipeline(
     name='noise_reduction_bert_pipeline',
     iterable=[NoiseReduction(),
-              BertBaseUncasedTokenizer(),
-              BertBaseUncasedEncoder(),
-              HuggingFaceDatasetConversion()])
+              BertBaseUncasedEncoder()])
 
 cleaned_stemmed_bert_pipeline = PreprocessingPipeline(name='noise_reduction_with_stemming_bert_pipeline',
                                                       iterable=[NoiseReduction(),
                                                                 NLTKTokenizer(),
                                                                 Stemming(),
-                                                                BertBaseUncasedTokenizer(),
-                                                                BertBaseUncasedEncoder(),
-                                                                HuggingFaceDatasetConversion()])
+                                                                BertBaseUncasedEncoder(is_split_into_words=True)
+                                                                ])
 
 cleaned_lemmatized_bert_pipeline = PreprocessingPipeline(name='noise_reduction_with_lemmatizing_bert_pipeline',
                                                          iterable=[NoiseReduction(),
                                                                    NLTKTokenizer(),
                                                                    Lemmatization(),
-                                                                   BertBaseUncasedTokenizer(),
-                                                                   BertBaseUncasedEncoder(),
-                                                                   HuggingFaceDatasetConversion()])
+                                                                   BertBaseUncasedEncoder(is_split_into_words=True)
+                                                                   ])

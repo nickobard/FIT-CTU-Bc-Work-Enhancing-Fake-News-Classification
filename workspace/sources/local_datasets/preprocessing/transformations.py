@@ -37,17 +37,3 @@ class Truncation(Preprocessing):
             'fraction': self.fraction,
             'truncation_type': self.truncation_type
         }
-
-
-class HuggingFaceDatasetConversion(Preprocessing):
-    PREPROCESSED_DATA_CLASS = HuggingFaceData
-
-    def preprocess(self, data):
-        hf_data = hf_datasets.Dataset.from_pandas(data.dataset)
-        hf_data.set_format(type='torch')
-        return HuggingFaceData(hf_data)
-
-    def _params(self):
-        return {'type': 'converter',
-                'original_data_type': PandasData.__name__,
-                'converted_data_type': self.PREPROCESSED_DATA_CLASS.__name__}

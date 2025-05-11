@@ -3,9 +3,10 @@ from experiments.metrics import Metric, standard_evaluation_metrics
 from .transformers_models import TransformersModels
 from scipy.special import softmax
 import mlflow
-from transformers import EarlyStoppingCallback, BertTokenizer, BertForSequenceClassification, Trainer, \
+from transformers import EarlyStoppingCallback, BertForSequenceClassification, Trainer, \
     TrainingArguments, set_seed, AutoConfig, AutoModelForSequenceClassification
 from .callbacks import HF_CustomMLflowCallback
+from .trainer import TrainerWithEmbeddingsCollection
 import os
 import glob
 import pickle
@@ -13,6 +14,7 @@ from ..experiments.metrics import compute_standard_metrics, Loss
 from pathlib import Path
 import json
 from ..utils import log_params
+from ordered_set import OrderedSet
 
 
 class BertBaseUncased(TransformersModels):
@@ -97,28 +99,31 @@ class BertBaseUncased(TransformersModels):
                                         early_stopping_threshold)
             callbacks.append(esc)
 
-        self.trainer = Trainer(
+        self.trainer = TrainerWithEmbeddingsCollection(
             model=self.model,
             args=training_args,
             train_dataset=dataset.preprocessed_train_set.dataset,
             eval_dataset=dataset.preprocessed_val_set.dataset,
             compute_metrics=compute_standard_metrics,
-            callbacks=callbacks
+            callbacks=callbacks,
+            logger=self.logger
         )
         self.trainer.train(resume_from_checkpoint=True if self.has_checkpoints() else False)
 
     def evaluate(self):
         for evaluation_metric in self.evaluation_metrics:
             self.logger.info(f'Evaluating model using {evaluation_metric.name} metric...')
-            best_entry = self._load_best_model_for_metrics([evaluation_metric, Loss])
+            best_entry = self._load_best_model_for_metrics(OrderedSet([evaluation_metric, Loss]))
             self.logger.info(f'Best entry according to validation metrics: {best_entry}')
             self.logger.info(f'Best model found at epoch {best_entry["epoch"]}.')
             # Extract predictions and labels
-
-            logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
-                                                           metric_key_prefix='test')
-            self.logger.info(f'Test metrics: {metrics}')
+            with self.trainer.collect_hidden_states():
+                logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
+                                                               metric_key_prefix='test')
+                embeddings = self.trainer.get_collected_embeddings()
             best_epoch = self.trainer.state.epoch
+            metrics['test_epoch'] = best_epoch
+            self.logger.info(f'Test metrics: {metrics}')
             postfix = f'_by_{evaluation_metric.name}'
             mlflow.log_metrics({m_key + postfix: m_val for m_key, m_val in metrics.items()})
             mlflow.log_metric('best_epoch' + postfix, best_epoch)
@@ -127,6 +132,7 @@ class BertBaseUncased(TransformersModels):
             predictions = (probs > 0.5).astype(int)
 
             self.evaluation_data = {
+                'evaluation_embeddings': embeddings.tolist(),
                 'evaluation_logits': logits.tolist(),
                 'evaluation_probabilities': probs.tolist(),
                 'evaluations_predictions': predictions.tolist(),
@@ -158,7 +164,7 @@ class BertBaseUncased(TransformersModels):
         self.logger.info('Successfully saved evaluation data.')
         return True
 
-    def _load_best_model_for_metrics(self, metrics):
+    def _load_best_model_for_metrics(self, metrics: OrderedSet[Metric]):
         # 1. Filter log entries that have all required metrics at evaluation-time
         metric_names = [f'eval_{metric.name}' for metric in metrics]
         entries = [
@@ -197,4 +203,5 @@ class BertBaseUncased(TransformersModels):
 
         # 4) Swap in and return
         self.model = model
+        self.trainer.model = model
         return best_entry

@@ -6,40 +6,6 @@ from typing import Literal
 from ...utils import class_name_to_str
 
 
-class BertBaseUncasedTokenizer(Preprocessing):
-    def __init__(self):
-        super().__init__()
-        self.tokenizer = None
-
-    def init(self, logger=None):
-        super().init(logger=logger)
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        return self
-
-    def _params(self):
-        return {'type': 'tokenizer',
-                'tokenizer': 'bert-base-uncased',
-                'tokenizer_type': class_name_to_str(self.tokenizer.__class__.__name__),
-                'language': 'english',
-                'language_code': 'en'}
-
-    def tokenize(self, text: str | list[str]):
-        if isinstance(text, list):
-            subtokens = []
-            for word in text:
-                subtokens.extend(self.tokenizer.tokenize(word))
-            return subtokens
-        elif isinstance(text, str):
-            return self.tokenizer.tokenize(text)
-        else:
-            return text
-
-    def preprocess(self, data):
-        tokenized_features = data.features.apply(self.tokenize)
-        data.features = tokenized_features
-        return data
-
-
 class NLTKTokenizer(Preprocessing):
     def __init__(self, language: Literal['english', 'czech'] = 'english'):
         """
