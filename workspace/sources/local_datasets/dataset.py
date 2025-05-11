@@ -1,23 +1,28 @@
 import os
-import pickle
-from logging import getLogger
 import pandas as pd
 import mlflow
-from abc import ABC, abstractmethod
+from abc import ABC
 from sklearn.model_selection import train_test_split
 from pathlib import Path
+
+from .preprocessing.utils import PreprocessingPipeline
 from .data_classes import PandasData
-from ..utils import generate_random_state, log_params, get_normalized_path_from_artifact_uri
+from ..utils import generate_random_state, log_params, get_normalized_path_from_artifact_uri, \
+    create_and_get_local_logger
 
 
 class Dataset(ABC):
     LABELS_MAPPING = {0: 'fake', 1: 'reliable'}
+    DEFAULT_DATA_OBJ_CLASS = PandasData
 
-    def __init__(self, name, data_path, preprocessings=None, train_pct=0.7, val_pct=0.15, resave=False):
+    def __init__(self, name, data_path, preprocessings_pipeline=None, train_pct=0.7, val_pct=0.15, resave=False):
         self.name = name
         self.resave = False
         self.data_path = data_path
-        self.preprocessings = preprocessings
+        if preprocessings_pipeline is None:
+            self.preprocessings_pipeline = PreprocessingPipeline(name='empty')
+        else:
+            self.preprocessings_pipeline = preprocessings_pipeline
         self.artifacts_path = None
         self.logger = None
         self.random_state = None
@@ -33,12 +38,12 @@ class Dataset(ABC):
         if self.artifacts_path:
             Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
         self.random_state = random_state if random_state else generate_random_state()
-        self.logger = logger if logger else getLogger()
+        self.logger = logger if logger else create_and_get_local_logger(self.__class__.__name__)
         self.prepare_dataset()
         return self
 
     def prepare_dataset(self):
-        self.preprocessings.log_params(logger=self.logger)
+        self.preprocessings_pipeline.log_params(logger=self.logger)
         if not self.resave and self.prepared_dataset_exists():
             self.logger.info('Prepared dataset exists, trying to load it.')
             self.load_prepared_dataset()
@@ -60,10 +65,13 @@ class Dataset(ABC):
         splits = ['train_set', 'val_set', 'test_set']
         for split in splits:
             path = os.path.join(self.artifacts_path, split)
-            data = PandasData.load(path)
+            data = self.DEFAULT_DATA_OBJ_CLASS.load(path)
             setattr(self, split, data)
-        last_preprocessor = self.preprocessings[-1]
-        preprocessed_data_class = last_preprocessor.PREPROCESSED_DATA_CLASS
+        if self.preprocessings_pipeline.is_empty():
+            preprocessed_data_class = self.DEFAULT_DATA_OBJ_CLASS
+        else:
+            last_preprocessor = self.preprocessings_pipeline[-1]
+            preprocessed_data_class = last_preprocessor.PREPROCESSED_DATA_CLASS
         preprocessed_splits = [f'preprocessed_{filename}' for filename in splits]
         for split in preprocessed_splits:
             path = os.path.join(self.artifacts_path, split)
@@ -79,11 +87,14 @@ class Dataset(ABC):
         splits = ['train_set', 'val_set', 'test_set']
         for split in splits:
             path = os.path.join(self.artifacts_path, split)
-            if not PandasData.saved_data_exists(path):
+            if not self.DEFAULT_DATA_OBJ_CLASS.saved_data_exists(path):
                 return False
         preprocessed_splits = [f'preprocessed_{filename}' for filename in splits]
-        last_preprocessor = self.preprocessings[-1]
-        last_preprocessor_data_class = last_preprocessor.PREPROCESSED_DATA_CLASS
+        if self.preprocessings_pipeline.is_empty():
+            last_preprocessor_data_class = self.DEFAULT_DATA_OBJ_CLASS
+        else:
+            last_preprocessor = self.preprocessings_pipeline[-1]
+            last_preprocessor_data_class = last_preprocessor.PREPROCESSED_DATA_CLASS
         for split in preprocessed_splits:
             path = os.path.join(self.artifacts_path, split)
             if not last_preprocessor_data_class.saved_data_exists(path):
@@ -109,8 +120,8 @@ class Dataset(ABC):
             # initializing preprocessed data with copied original data
             setattr(self, f'preprocessed_{split}', getattr(self, split).copy())
 
-        self.preprocessings.init(logger=self.logger)
-        for index, preprocessor in enumerate(self.preprocessings):
+        self.preprocessings_pipeline.init(logger=self.logger)
+        for index, preprocessor in enumerate(self.preprocessings_pipeline):
             preprocessor.init(logger=self.logger)
 
             self.logger.info(f'Preprocessing function {index}: {preprocessor.name()} ')
@@ -137,7 +148,7 @@ class Dataset(ABC):
                                                             preprocessed_split_data_obj,
                                                             name_dir_prefix=str(index))
                 setattr(self, f'preprocessed_{split}', preprocessed_split_data_obj)
-
+                log_params({f'preprocessed_{split}_shape': preprocessed_split_data_obj.shape})
         return self
 
     def split(self, train_pct=0.7, val_pct=0.15):
@@ -146,13 +157,13 @@ class Dataset(ABC):
         train_set, rest = train_test_split(self.dataset, train_size=train_pct, random_state=self.random_state)
         val_ratio = val_pct / (val_pct + test_pct)
         val_set, test_set = train_test_split(rest, test_size=(1 - val_ratio), random_state=self.random_state)
-        log_params({'train_shape': train_set.shape,
-                    'val_shape': val_set.shape,
-                    'test_shape': test_set.shape})
+        log_params({'train_set_shape': train_set.shape,
+                    'val_set_shape': val_set.shape,
+                    'test_set_shape': test_set.shape})
 
-        self.train_set = PandasData(features=train_set['article'], labels=train_set['label'], )
-        self.val_set = PandasData(features=val_set['article'], labels=val_set['label'], )
-        self.test_set = PandasData(features=test_set['article'], labels=test_set['label'], )
+        self.train_set = self.DEFAULT_DATA_OBJ_CLASS(features=train_set['article'], labels=train_set['label'], )
+        self.val_set = self.DEFAULT_DATA_OBJ_CLASS(features=val_set['article'], labels=val_set['label'], )
+        self.test_set = self.DEFAULT_DATA_OBJ_CLASS(features=test_set['article'], labels=test_set['label'], )
         return self
 
     @staticmethod
@@ -168,7 +179,7 @@ class Dataset(ABC):
 
 
 if __name__ == "__main__":
-    recovery = Dataset('ReCovery', 'workspace/sources/datasets/Recovery/recovery.csv').init().split()
+    recovery = Dataset('ReCovery', 'workspace/sources/local_datasets/Recovery/recovery.csv').init().split()
     print('Dataset shape:', recovery.dataset.shape)
     print('Test:', recovery.test_set.shape)
     print('Validation:', recovery.val_set.shape)

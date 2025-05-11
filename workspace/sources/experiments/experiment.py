@@ -1,9 +1,8 @@
 from abc import ABC
 import mlflow
 import logging
-
 from .visualizations.handlers import standard_visualizations_handler
-from utils import generate_random_state, log_params
+from ..utils import generate_random_state, log_params, create_and_get_local_logger
 
 
 class Experiment(ABC):
@@ -21,15 +20,9 @@ class Experiment(ABC):
         self.vis_handler = vis_handler if vis_handler else standard_visualizations_handler
 
     def _init_logger(self, logging_level):
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.setLevel(logging_level)
-        if not self.logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-            )
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
+        self.logger = create_and_get_local_logger(
+            self.__class__.__name__, logging_level=logging_level
+        )
 
     def _init_experiment(self):
         self.experiment_id = mlflow.set_experiment(self.name).experiment_id

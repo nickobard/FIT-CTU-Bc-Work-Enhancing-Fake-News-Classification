@@ -49,3 +49,16 @@ def log_metrics(metrics: dict, logger=None):
 
 def class_name_to_str(class_name):
     return re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
+
+
+def create_and_get_local_logger(name, logging_level=logging.INFO):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging_level)
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger

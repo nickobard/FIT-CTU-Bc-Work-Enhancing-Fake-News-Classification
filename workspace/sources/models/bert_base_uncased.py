@@ -1,14 +1,15 @@
 import utils
+from experiments.metrics import Metric, standard_evaluation_metrics
 from .transformers_models import TransformersModels
 from scipy.special import softmax
 import mlflow
 from transformers import EarlyStoppingCallback, BertTokenizer, BertForSequenceClassification, Trainer, \
-    TrainingArguments, set_seed
+    TrainingArguments, set_seed, AutoConfig, AutoModelForSequenceClassification
 from .callbacks import HF_CustomMLflowCallback
 import os
 import glob
 import pickle
-from ..experiments.metrics import compute_standard_metrics, EvalLoss
+from ..experiments.metrics import compute_standard_metrics, Loss
 from pathlib import Path
 import json
 from ..utils import log_params
@@ -16,11 +17,14 @@ from ..utils import log_params
 
 class BertBaseUncased(TransformersModels):
 
-    def __init__(self, training_arguments=None, main_metric=EvalLoss):
-        super().__init__(main_metric)
+    def __init__(self, training_arguments=None,
+                 train_best_model_metric=Loss,
+                 evaluation_metrics=standard_evaluation_metrics):
+        super().__init__(train_best_model_metric)
         self.name = "bert-base-uncased"
         training_arguments = {} if training_arguments is None else training_arguments
         self.training_args = {**self.get_default_training_args(), **training_arguments}
+        self.evaluation_metrics = evaluation_metrics
         self.output_dir = None
         self.logging_dir = None
         self.evaluation_data = None
@@ -80,9 +84,9 @@ class BertBaseUncased(TransformersModels):
             logging_steps=10,  # regards only training
             weight_decay=self.training_args['weight_decay'],
             learning_rate=self.training_args['learning_rate'],
-            load_best_model_at_end=True,
-            metric_for_best_model=self.main_metric.name,
-            greater_is_better=self.main_metric.greater_is_better,
+            load_best_model_at_end=False,
+            metric_for_best_model=f'eval_{self.train_best_model_metric.name}',
+            greater_is_better=self.train_best_model_metric.greater_is_better
         )
 
         callbacks = [HF_CustomMLflowCallback()]
@@ -97,38 +101,47 @@ class BertBaseUncased(TransformersModels):
             model=self.model,
             args=training_args,
             train_dataset=dataset.preprocessed_train_set.dataset,
-            eval_dataset=dataset.preprocessed_train_set.dataset,
+            eval_dataset=dataset.preprocessed_val_set.dataset,
             compute_metrics=compute_standard_metrics,
             callbacks=callbacks
         )
         self.trainer.train(resume_from_checkpoint=True if self.has_checkpoints() else False)
 
     def evaluate(self):
-        # Extract predictions and labels
-        logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
-                                                       metric_key_prefix='test')
-        best_epoch = self.trainer.state.epoch
-        mlflow.log_metrics(metrics)
-        mlflow.log_metric('best_epoch', best_epoch)
+        for evaluation_metric in self.evaluation_metrics:
+            self.logger.info(f'Evaluating model using {evaluation_metric.name} metric...')
+            best_entry = self._load_best_model_for_metrics([evaluation_metric, Loss])
+            self.logger.info(f'Best entry according to validation metrics: {best_entry}')
+            self.logger.info(f'Best model found at epoch {best_entry["epoch"]}.')
+            # Extract predictions and labels
 
-        probs = softmax(logits, axis=1)[:, 1]
-        predictions = (probs > 0.5).astype(int)
+            logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
+                                                           metric_key_prefix='test')
+            self.logger.info(f'Test metrics: {metrics}')
+            best_epoch = self.trainer.state.epoch
+            postfix = f'_by_{evaluation_metric.name}'
+            mlflow.log_metrics({m_key + postfix: m_val for m_key, m_val in metrics.items()})
+            mlflow.log_metric('best_epoch' + postfix, best_epoch)
 
-        self.evaluation_data = {
-            'evaluation_logits': logits.tolist(),
-            'evaluation_probabilities': probs.tolist(),
-            'evaluations_predictions': predictions.tolist(),
-            'evaluation_labels': labels.tolist(),
-            'evaluation_metrics': metrics}
-        self.save_evaluation_data()
-        return self.evaluation_data
+            probs = softmax(logits, axis=1)[:, 1]
+            predictions = (probs > 0.5).astype(int)
 
-    def save_evaluation_data(self):
+            self.evaluation_data = {
+                'evaluation_logits': logits.tolist(),
+                'evaluation_probabilities': probs.tolist(),
+                'evaluations_predictions': predictions.tolist(),
+                'evaluation_labels': labels.tolist(),
+                'evaluation_metrics': metrics}
+            self.save_evaluation_data(evaluation_metric)
+        self.logger.info('Finished model evaluations stage.')
+        return self
+
+    def save_evaluation_data(self, metric):
         artifacts_path = utils.get_current_run_artifacts_path()
         if artifacts_path is None:
             self.logger.info('Could not save evaluation data, because artifacts path is None.')
             return False
-        evaluation_artifacts_path = os.path.join(artifacts_path, 'evaluation')
+        evaluation_artifacts_path = os.path.join(artifacts_path, 'evaluation', f'by_{metric.name}')
         Path(evaluation_artifacts_path).mkdir(parents=True, exist_ok=True)
         evaluation_data_path = os.path.join(evaluation_artifacts_path, 'evaluation_data')
         with open(evaluation_data_path + '.pkl', 'wb') as f:
@@ -144,3 +157,44 @@ class BertBaseUncased(TransformersModels):
                 json.dump(data, f)
         self.logger.info('Successfully saved evaluation data.')
         return True
+
+    def _load_best_model_for_metrics(self, metrics):
+        # 1. Filter log entries that have all required metrics at evaluation-time
+        metric_names = [f'eval_{metric.name}' for metric in metrics]
+        entries = [
+            entry for entry in self.trainer.state.log_history
+            if all(metric_name in entry for metric_name in metric_names) and entry.get("epoch") is not None
+        ]
+        if not entries:
+            raise ValueError(f"No entries found for metrics: {metric_names}")
+
+        def _get_entry_sort_key(entry, metrics):
+            return tuple(entry[f'eval_{m.name}'] if m.greater_is_better else -entry[f'eval_{m.name}']
+                         for m in metrics)
+
+        # 2. Find the best entry using lexicographical sorting based on provided metrics
+        best_entry = max(entries, key=lambda e: _get_entry_sort_key(e, metrics))
+
+        # 3. Derive checkpoint name from the global step
+        step = int(best_entry["step"])
+        ckpt_dir = os.path.join(self.trainer.args.output_dir, f"checkpoint-{step}")
+        if not os.path.isdir(ckpt_dir):
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt_dir}")
+        self.logger.info(f"Found checkpoint with best metrics at: checkpoint-{step}")
+
+        # 4. Load and return the model
+        # 1) Load the exact config you used
+        config = AutoConfig.from_pretrained(ckpt_dir)
+
+        # 2) Instantiate the model from that config + weights
+        model = AutoModelForSequenceClassification.from_pretrained(
+            ckpt_dir,
+            config=config
+        )
+        # 3) Move to the right device & set to eval mode
+        model.to(self.trainer.args.device)
+        model.eval()
+
+        # 4) Swap in and return
+        self.model = model
+        return best_entry

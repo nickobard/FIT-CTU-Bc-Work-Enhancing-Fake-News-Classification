@@ -1,11 +1,11 @@
-from ..experiments.metrics import EvalLoss
+from ..experiments.metrics import Loss
 from .base import Model
 import mlflow
 
 
 class TransformersModels(Model):
-    def __init__(self, main_metric=EvalLoss):
-        super().__init__(main_metric)
+    def __init__(self, train_best_model_metric=Loss):
+        super().__init__(train_best_model_metric)
 
     @classmethod
     def load_from_mlflow(cls, logger):

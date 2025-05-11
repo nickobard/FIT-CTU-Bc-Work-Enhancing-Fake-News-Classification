@@ -3,24 +3,23 @@ import mlflow
 import pickle
 import os
 import utils
-from ..experiments.metrics import EvalLoss
+from ..experiments.metrics import Loss
 from utils import generate_random_state
-from logging import getLogger
+from ..utils import create_and_get_local_logger
 from pathlib import Path
 
 
 class Model(ABC):
-    def __init__(self, main_metric=EvalLoss):
-        self.main_metric = main_metric
+    def __init__(self, train_best_model_metric=Loss):
+        self.train_best_model_metric = train_best_model_metric
         self.random_state = None
         self.logger = None
         self.artifacts_path = None
 
     def init(self, logger=None, random_state=None):
-        self.main_metric = self.main_metric() if callable(self.main_metric) else self.main_metric
         self.artifacts_path = self.get_artifacts_path()
         Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
-        self.logger = logger if logger else getLogger()
+        self.logger = logger if logger else create_and_get_local_logger(self.__class__.__name__)
         self.random_state = random_state if random_state else generate_random_state()
         return self
 

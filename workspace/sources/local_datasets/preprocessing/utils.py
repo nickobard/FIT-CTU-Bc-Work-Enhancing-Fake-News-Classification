@@ -1,9 +1,8 @@
-from logging import getLogger
-
 from .tokenization import BertBaseUncasedTokenizer, NLTKTokenizer
-from .encoding import BertBaseUncasedEncoder, HuggingFaceDatasetConversion
+from .encoding import BertBaseUncasedEncoder
+from .transformations import HuggingFaceDatasetConversion
 from .cleaning import NoiseReduction, Stemming, Lemmatization
-from ...utils import log_params
+from ...utils import log_params, create_and_get_local_logger
 
 
 class PreprocessingPipeline(list):
@@ -32,11 +31,14 @@ class PreprocessingPipeline(list):
             preprocessing.log_params(logger=self.logger)
         return params
 
+    def is_empty(self):
+        return len(self) == 0
+
     def _set_logger(self, logger):
         if logger:
             self.logger = logger
         else:
-            self.logger = self.logger if self.logger else getLogger()
+            self.logger = self.logger if self.logger else create_and_get_local_logger(self.__class__.__name__)
         return self
 
     def __repr__(self):

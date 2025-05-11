@@ -5,7 +5,7 @@ from logging import getLogger
 from pathlib import Path
 
 from ..data_classes import PandasData
-from ...utils import log_params, class_name_to_str
+from ...utils import log_params, class_name_to_str, create_and_get_local_logger
 
 
 class Preprocessing(ABC):
@@ -24,7 +24,10 @@ class Preprocessing(ABC):
 
     def log_params(self, logger=None):
         self._set_logger(logger)
-        params = {self.name(): self._params()}
+        exploded_params = {f'{self.name()}_param_{prep_key}': prep_val for prep_key, prep_val in
+                           self._params().items()}
+        params = {self.name(): self._params(),
+                  **exploded_params}
         log_params(params, logger=self.logger)
         return params
 
@@ -67,5 +70,5 @@ class Preprocessing(ABC):
         if logger:
             self.logger = logger
         else:
-            self.logger = self.logger if self.logger else getLogger()
+            self.logger = self.logger if self.logger else create_and_get_local_logger(self.__class__.__name__)
         return self
