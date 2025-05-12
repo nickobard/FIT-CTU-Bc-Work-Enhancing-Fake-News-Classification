@@ -1,5 +1,5 @@
-from ..experiments.metrics import Loss
-from .base import Model
+from ...experiments.metrics import Loss
+from ..base import Model
 import mlflow
 
 

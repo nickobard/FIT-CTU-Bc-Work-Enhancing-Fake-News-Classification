@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 from urllib.request import url2pathname
 import mlflow
 from mlflow import MlflowException
+from inspect import getsource
+from IPython.display import HTML
 
 
 def generate_random_state():
@@ -48,7 +50,25 @@ def log_metrics(metrics: dict, logger=None):
 
 
 def class_name_to_str(class_name):
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
+    # split before Uppercase+lowercase sequences (e.g. “Base”)
+    s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', class_name)
+    # split before single uppercase (e.g. before “I” in “AI” or “G” in “GPT”)
+    s2 = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1)
+    return s2.lower()
+
+
+def print_source(*functions):
+    """Print the source code for the given function(s) or class(es)."""
+    source_code = '\n\n'.join(getsource(fn) for fn in functions)
+    try:
+        from pygments.formatters import HtmlFormatter
+        from pygments.lexers import PythonLexer
+        from pygments import highlight
+
+        display(HTML(highlight(source_code, PythonLexer(), HtmlFormatter(full=True))))
+
+    except ImportError:
+        print(source_code)
 
 
 def create_and_get_local_logger(name, logging_level=logging.INFO):

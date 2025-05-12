@@ -1,7 +1,7 @@
 from .tokenization import NLTKTokenizer
-from .encoding import BertBaseUncasedEncoder
+from .encoders.bert_base_uncased import BertBaseUncasedEncoder
 from .cleaning import NoiseReduction, Stemming, Lemmatization
-from ...utils import log_params, create_and_get_local_logger, class_name_to_str, dict_signature
+from ...utils import log_params, create_and_get_local_logger
 
 
 class PreprocessingPipeline(list):

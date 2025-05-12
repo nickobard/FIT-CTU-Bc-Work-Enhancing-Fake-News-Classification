@@ -7,7 +7,7 @@ from transformers import Trainer
 from transformers.trainer_utils import PredictionOutput
 from contextlib import contextmanager
 
-from ..utils import create_and_get_local_logger
+from ...utils import create_and_get_local_logger
 
 
 class TrainerWithEmbeddingsCollection(Trainer):
