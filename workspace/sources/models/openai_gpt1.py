@@ -17,13 +17,13 @@ from ..utils import log_params
 from ordered_set import OrderedSet
 
 
-class BertBaseUncased(TransformersModels):
+class OpenAI_GPT1(TransformersModels):
 
     def __init__(self, training_arguments=None,
                  train_best_model_metric=Loss,
                  evaluation_metrics=standard_evaluation_metrics):
         super().__init__(train_best_model_metric)
-        self.name = "bert-base-uncased"
+        self.name = "openai-gpt"
         training_arguments = {} if training_arguments is None else training_arguments
         self.training_args = {**self.get_default_training_args(), **training_arguments}
         self.evaluation_metrics = evaluation_metrics
@@ -54,7 +54,10 @@ class BertBaseUncased(TransformersModels):
                                                                            'checkpoints'))
         self.logging_dir = mlflow.active_run().data.params.get('logging_dir',
                                                                os.path.join(self.get_artifacts_path(), 'logs'))
-
+        set_seed(self.random_state)
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.name, num_labels=2)
+        self.model.resize_token_embeddings(40479)
+        self.model.config.pad_token_id = 40478
         return self
 
     @classmethod
@@ -71,8 +74,6 @@ class BertBaseUncased(TransformersModels):
 
     def fit(self, dataset):
         self.dataset = dataset
-        set_seed(self.random_state)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.name, num_labels=2)
 
         training_args = TrainingArguments(
             output_dir=self.output_dir,
