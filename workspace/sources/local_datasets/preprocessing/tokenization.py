@@ -20,13 +20,16 @@ class NLTKTokenizer(Preprocessing):
         nltk.download(self.nltk_package)
         return self
 
-    def _params(self):
+    def _detailed_params(self):
         return {'type': 'tokenizer',
                 'tokenizer_type': 'nltk',
                 'tokenizer': 'word-tokenize',
                 'nltk_package': self.nltk_package,
                 'language': self.language,
-                'language_code': {'english': 'en', 'czech': 'cs'}[self.language]}
+                **self._params()}
+
+    def _params(self):
+        return {'language_code': {'english': 'en', 'czech': 'cs'}[self.language]}
 
     def tokenize(self, text: str | list[str]):
         if isinstance(text, list):

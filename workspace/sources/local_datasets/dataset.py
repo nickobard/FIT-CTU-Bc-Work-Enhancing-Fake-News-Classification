@@ -33,12 +33,13 @@ class Dataset(ABC):
         self.preprocessed_train_set = self.preprocessed_val_set = self.preprocessed_test_set = None
 
     def init(self, logger=None, random_state=None):
-        log_params({'dataset_name': self.name})
+        self.logger = logger if logger else create_and_get_local_logger(self.__class__.__name__)
+        log_params(self.get_dataset_params())
+        self.logger.info(self.get_dataset_params())
         self.artifacts_path = self.get_artifacts_path()
         if self.artifacts_path:
             Path(self.artifacts_path).mkdir(parents=False, exist_ok=True)
         self.random_state = random_state if random_state else generate_random_state()
-        self.logger = logger if logger else create_and_get_local_logger(self.__class__.__name__)
         self.prepare_dataset()
         return self
 
@@ -178,26 +179,20 @@ class Dataset(ABC):
         return os.path.join(artifacts_path, 'dataset')
 
     def assemble_signature(self):
-        class_name = self.name
         dataset_params = self.get_dataset_params()
         dataset_params_signature = dict_signature(dataset_params)
-        dataset_signature = f"dataset={class_name}({dataset_params_signature})"
+        dataset_signature = f"dataset({dataset_params_signature})"
         preprocessing_pipeline_signature = self.preprocessings_pipeline.assemble_signature()
         return SIGNATURE_PART_SEPARATOR.join([dataset_signature, preprocessing_pipeline_signature])
 
     def get_dataset_params(self):
-        return {'dataset_name': self.name,
-                'dataset_shape': self.dataset.shape,
-                'train_set_shape': self.train_set.shape,
-                'val_set_shape': self.val_set.shape,
-                'test_set_shape': self.test_set.shape,
-                'preprocessed_train_set_shape': self.preprocessed_train_set.shape,
-                'preprocessed_val_set_shape': self.preprocessed_val_set.shape,
-                'preprocessed_test_set_shape': self.preprocessed_test_set.shape}
+        return {'dataset_name': self.name.lower(),
+                'train_pct': self.train_pct,
+                'val_pct': self.val_pct}
 
 
 if __name__ == "__main__":
-    recovery = Dataset('ReCovery', 'workspace/sources/local_datasets/Recovery/recovery.csv').init().split()
+    recovery = Dataset('ReCovery', 'workspace/sources/local_datasets/ReCOVery/recovery.csv').init().split()
     print('Dataset shape:', recovery.dataset.shape)
     print('Test:', recovery.test_set.shape)
     print('Validation:', recovery.val_set.shape)

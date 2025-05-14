@@ -1,7 +1,7 @@
 from .tokenization import NLTKTokenizer
 from .encoders.bert_base_uncased import BertBaseUncasedEncoder
 from .cleaning import NoiseReduction, Stemming, Lemmatization
-from ...utils import log_params, create_and_get_local_logger
+from ...utils import log_params, create_and_get_local_logger, SIGNATURE_SUBPART_SEPARATOR
 
 
 class PreprocessingPipeline(list):
@@ -41,9 +41,9 @@ class PreprocessingPipeline(list):
         return self
 
     def assemble_signature(self):
-        class_name = self.name
-        params_signature = [p.assemble_signature() for p in self]
-        signature = f'pipeline={class_name}({params_signature})'
+        params_signatures = [p.assemble_signature() for p in self]
+        params_signature = f'[{SIGNATURE_SUBPART_SEPARATOR.join(params_signatures)}]'
+        signature = f'pipeline({params_signature})'
         return signature
 
     def __repr__(self):

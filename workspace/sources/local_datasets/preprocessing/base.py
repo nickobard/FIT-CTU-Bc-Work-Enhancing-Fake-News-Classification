@@ -25,8 +25,8 @@ class Preprocessing(ABC):
     def log_params(self, logger=None):
         self._set_logger(logger)
         exploded_params = {f'{self.name()}_param_{prep_key}': prep_val for prep_key, prep_val in
-                           self._params().items()}
-        params = {self.name(): self._params(),
+                           self._detailed_params().items()}
+        params = {self.name(): self._detailed_params(),
                   **exploded_params}
         log_params(params, logger=self.logger)
         return params
@@ -62,6 +62,9 @@ class Preprocessing(ABC):
         path = os.path.join(artifacts_path, name_dir, split_name)
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         data.save(path)
+
+    def _detailed_params(self):
+        return {**self._params()}
 
     def _params(self):
         return {}

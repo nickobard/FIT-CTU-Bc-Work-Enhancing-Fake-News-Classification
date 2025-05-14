@@ -25,13 +25,12 @@ class Model(ABC):
         return self
 
     def assemble_signature(self):
-        class_name = class_name_to_str(self.__class__.__name__)
-        model_params = self.get_training_params()
+        model_params = self._params()
         model_params_signature = dict_signature(model_params)
-        return f"model={class_name}({model_params_signature})"
+        return f"model({model_params_signature})"
 
-    def get_training_params(self):
-        return {'random_state': self.random_state}
+    def _params(self):
+        return {}
 
     @staticmethod
     def get_artifacts_path():

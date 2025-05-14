@@ -29,18 +29,20 @@ class OpenaAI_GPT1_Encoder(TransformersEncoder):
         self.pad_token = self.tokenizer.pad_token
         return self
 
-    def _params(self):
-        # TODO add openai gpt1 params
+    def _detailed_params(self):
         return {'type': ['tokenizer', 'encoder'],
-                'tokenizer': self.tokenizer_name,
+                'language': 'english',
+                'language_code': 'en',
+                **self._params()
+                }
+
+    def _params(self):
+        return {'tokenizer': self.tokenizer_name,
                 'tokenizer_type': class_name_to_str(self.tokenizer.__class__.__name__),
                 'truncation': self.truncation,
                 'padding': self.padding,
                 'truncation_max_length': self.truncation_max_length,
-                'is_split_into_words': self.is_split_into_words,
-                'language': 'english',
-                'language_code': 'en'
-                }
+                'is_split_into_words': self.is_split_into_words}
 
     def preprocess(self, data: Data):
         if isinstance(data, PandasData):

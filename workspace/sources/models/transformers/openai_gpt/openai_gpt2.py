@@ -208,8 +208,8 @@ class OpenAI_GPT2(TransformersModels):
         self.trainer.model = model
         return best_entry
 
-    def get_training_params(self):
-        super_class_params = super().get_training_params()
+    def _params(self):
+        super_class_params = super()._params()
         additional_params = {'main_metrics_name': self.train_best_model_metric.name}
         return {**super_class_params,
                 **additional_params,

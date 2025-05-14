@@ -19,7 +19,7 @@ class BertBaseUncasedEncoder(TransformersEncoder):
         self.padding = padding
         self.is_split_into_words = is_split_into_words
         self.tokenizer = None
-        self.tokenizer_name = 'bert-base-cased'
+        self.tokenizer_name = 'bert-base-uncased'
         self.add_decoded_input_ids_for_debug = add_decoded_input_ids_for_debug
 
     def init(self, logger=None):
@@ -27,17 +27,20 @@ class BertBaseUncasedEncoder(TransformersEncoder):
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
         return self
 
-    def _params(self):
+    def _detailed_params(self):
         return {'type': ['tokenizer', 'encoder'],
-                'tokenizer': self.tokenizer_name,
+                'language': 'english',
+                'language_code': 'en',
                 'tokenizer_type': class_name_to_str(self.tokenizer.__class__.__name__),
+                **self._params()
+                }
+
+    def _params(self):
+        return {'tokenizer': self.tokenizer_name,
                 'truncation': self.truncation,
                 'padding': self.padding,
                 'truncation_max_length': self.truncation_max_length,
-                'is_split_into_words': self.is_split_into_words,
-                'language': 'english',
-                'language_code': 'en'
-                }
+                'is_split_into_words': self.is_split_into_words}
 
     def preprocess(self, data: Data):
         if isinstance(data, PandasData):

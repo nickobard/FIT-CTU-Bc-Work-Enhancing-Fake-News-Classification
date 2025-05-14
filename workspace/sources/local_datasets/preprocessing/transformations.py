@@ -31,9 +31,12 @@ class Truncation(Preprocessing):
 
     TRUNCATION_TYPES = {'top': _truncate_by_top}
 
-    def _params(self):
+    def _detailed_params(self):
         return {
             'type': 'truncation',
-            'fraction': self.fraction,
-            'truncation_type': self.truncation_type
+            **self._params()
         }
+
+    def _params(self):
+        return {'fraction': self.fraction,
+                'truncation_type': self.truncation_type}

@@ -44,7 +44,9 @@ class BertBaseUncased(TransformersModels):
     def init(self, logger=None, random_state=None):
         super().init(logger, random_state)
         log_params({'model_name': self.name}, self.logger)
+        self.logger.info(f'Model name: {self.name}')
         log_params({'model_input_hyperparameters': self.training_args}, self.logger)
+        self.logger.info(f'Model input hyperparameters: {self.training_args}')
         log_params(
             {f'input_hyperparameter_{hparam_name}': value for hparam_name, value in self.training_args.items()},
             self.logger
@@ -206,9 +208,10 @@ class BertBaseUncased(TransformersModels):
         self.trainer.model = model
         return best_entry
 
-    def get_training_params(self):
-        super_class_params = super().get_training_params()
-        additional_params = {'main_metrics_name': self.train_best_model_metric.name}
+    def _params(self):
+        super_class_params = super()._params()
+        additional_params = {'model_name': self.name,
+                             'main_metrics_name': self.train_best_model_metric.name}
         return {**super_class_params,
                 **additional_params,
                 **self.training_args}

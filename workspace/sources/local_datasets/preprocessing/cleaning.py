@@ -10,9 +10,6 @@ class PunctuationRemoval(Preprocessing):
         data.features = remove_punctation(data.features)
         return data
 
-    def _params(self):
-        return {self.name(): {}}
-
 
 class NumbersRemoval(Preprocessing):
     def preprocess(self, data):
@@ -52,10 +49,11 @@ class Stemming(Preprocessing):
     def _stemmer_type(self):
         return self.stemmer_types_by_lang_code[self._language_code]
 
+    def _detailed_params(self):
+        return {'type': 'stemmer', 'language': self.language, **self._params()}
+
     def _params(self):
-        return {'type': 'stemmer',
-                'stemmer_type': self._stemmer_type,
-                'language': self.language,
+        return {'stemmer_type': self._stemmer_type,
                 'language_code': self._language_code}
 
     def preprocess(self, data):
@@ -70,11 +68,14 @@ class Lemmatization(Preprocessing):
         self.language_codes = {'english': 'en',
                                'czech': 'cs'}
 
-    def _params(self):
+    def _detailed_params(self):
         return {'type': 'lemmatizer',
                 'lemmatizer_type': 'simplemma',
                 'language': self.language,
-                'language_code': self._language_code}
+                **self._params()}
+
+    def _params(self):
+        return {'language_code': self._language_code}
 
     @property
     def _language_code(self):

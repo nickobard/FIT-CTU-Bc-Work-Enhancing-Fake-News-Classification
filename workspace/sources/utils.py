@@ -89,13 +89,44 @@ SIGNATURE_SUBPART_SEPARATOR = ','
 SIGNATURE_KEY_VALUE_SEPARATOR = '='
 
 
-def string_signature(string):
-    words = string.split('_')
-    return ''.join(word[0] for word in words)
+def extract_signature(obj, is_key=False, short_keys=True):
+    if isinstance(obj, list):
+        return list_signature(obj, short_keys)
+    elif isinstance(obj, dict):
+        return dict_signature(obj, short_keys)
+    else:
+        obj_str_repr = str(obj)
+        if short_keys and is_key:
+            return str_short_signature(str(obj_str_repr))
+        return str_signature(obj_str_repr)
 
 
-def dict_signature(dict_):
-    key_val_joins = [SIGNATURE_KEY_VALUE_SEPARATOR.join([string_signature(key), str(value).lower()]) for key, value in
-                     dict_.items()]
-    signature = SIGNATURE_SUBPART_SEPARATOR.join(key_val_joins)
+def str_signature(str_, short=False):
+    lowercased = str_.lower()
+    if short:
+        words = lowercased.split('_')
+        return ''.join(word[0] for word in words)
+    return lowercased
+
+
+def str_short_signature(str_):
+    return str_signature(str_, short=True)
+
+
+def list_signature(list_, short_keys=True):
+    list_of_signatures = [extract_signature(el, short_keys=short_keys) for el in list_]
+    return f'[{SIGNATURE_SUBPART_SEPARATOR.join(list_of_signatures)}]'
+
+
+def dict_signature(dict_, short_keys=True):
+    def get_key_val_joined_signature(key, value):
+        key_signature = extract_signature(key, is_key=True, short_keys=short_keys)
+        val_signature = extract_signature(value, short_keys=short_keys)
+        join = SIGNATURE_KEY_VALUE_SEPARATOR.join([key_signature, val_signature])
+        return join
+
+    key_val_signatures_joins = [
+        get_key_val_joined_signature(key, value) for key, value in
+        dict_.items()]
+    signature = SIGNATURE_SUBPART_SEPARATOR.join(key_val_signatures_joins)
     return signature
