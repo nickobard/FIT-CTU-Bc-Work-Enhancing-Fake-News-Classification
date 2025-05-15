@@ -1,0 +1,1 @@
+{'type': ['tokenizer', 'encoder'], 'language': 'english', 'language_code': 'en', 'tokenizer_type': 'bert_tokenizer_fast', 'tokenizer': 'bert-base-uncased', 'truncation': True, 'padding': 'max_length', 'truncation_max_length': 128, 'is_split_into_words': True}
