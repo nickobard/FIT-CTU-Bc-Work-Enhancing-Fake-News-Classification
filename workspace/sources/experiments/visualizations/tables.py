@@ -66,6 +66,7 @@ def create_metrics_comparison_df(metric,
         }
         additional_experiment_data = {'Experiment': experiment_name,
                                       'Run Signature': run.data.params['run_signature'],
+                                      'Run ID': run.info.run_id,
                                       'Evaluation Metric': metric.name}
         data = {**experiment_data,
                 **metrics_data,
