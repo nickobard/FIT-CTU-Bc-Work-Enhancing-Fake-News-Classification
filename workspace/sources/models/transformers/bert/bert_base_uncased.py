@@ -134,12 +134,12 @@ class BertBaseUncased(TransformersModels):
             predictions = (probs > 0.5).astype(int)
 
             self.evaluation_data = {
-                'evaluation_embeddings': embeddings.tolist(),
-                'evaluation_logits': logits.tolist(),
-                'evaluation_probabilities': probs.tolist(),
-                'evaluations_predictions': predictions.tolist(),
-                'evaluation_labels': labels.tolist(),
-                'evaluation_metrics': metrics}
+                'embeddings': embeddings.tolist(),
+                'logits': logits.tolist(),
+                'probabilities': probs.tolist(),
+                'predictions': predictions.tolist(),
+                'labels': labels.tolist(),
+                'metrics': metrics}
             self.save_evaluation_data(evaluation_metric)
         self.logger.info('Finished model evaluations stage.')
         return self
@@ -151,7 +151,7 @@ class BertBaseUncased(TransformersModels):
             return False
         evaluation_artifacts_path = os.path.join(artifacts_path, 'evaluation', f'by_{metric.name}')
         Path(evaluation_artifacts_path).mkdir(parents=True, exist_ok=True)
-        evaluation_data_path = os.path.join(evaluation_artifacts_path, 'evaluation_data')
+        evaluation_data_path = os.path.join(evaluation_artifacts_path, 'data')
         with open(evaluation_data_path + '.pkl', 'wb') as f:
             self.logger.info(f'Saving evaluation data in pickle...')
             pickle.dump(self.evaluation_data, f)
