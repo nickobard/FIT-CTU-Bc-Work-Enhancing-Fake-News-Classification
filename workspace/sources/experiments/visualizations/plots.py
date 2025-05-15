@@ -1,61 +1,125 @@
-from .base import Visualization
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import roc_curve
+import os
+import json
+import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score
+from ...local_datasets.dataset import Dataset
+from sklearn.metrics import confusion_matrix
+from ..metrics import Loss
+from .utils import METRICS_PLOT_NAMES_MAPPING
+from sklearn.metrics import roc_curve, auc
+
+def plot_confusion_matrix(artifacts_path, by_metric=Loss, output_dir='assets/confusion_matrix'):
+    """
+    Create and save confusion matrix plot for given metric.
+    """
+    # Get artifacts
+    by_metric_dir_path = os.path.join(artifacts_path, 'evaluation', f'by_{by_metric.name}')
+
+    # Load predictions and labels
+    predictions_path = os.path.join(by_metric_dir_path,
+                                    'evaluations_predictions.json')
+    labels_path = os.path.join(by_metric_dir_path,
+                               'evaluation_labels.json')
+
+    with open(predictions_path, 'r') as f:
+        predictions = json.load(f)
+    with open(labels_path, 'r') as f:
+        labels = json.load(f)
+
+    # Get label mapping and create confusion matrix
+    label_mapping = Dataset.LABELS_MAPPING
+    cm = confusion_matrix(labels, predictions)
+
+    # Create plot
+    plt.figure(figsize=(8, 6))
+
+    # Calculate normalized confusion matrix
+    total = cm.sum()
+    cm_percentages = cm / total
+
+    # Create heatmap
+    hmap = sns.heatmap(cm_percentages, annot=True, fmt='.0%', cmap='Blues',
+                       xticklabels=[label_mapping[0], label_mapping[1]],
+                       yticklabels=[label_mapping[0], label_mapping[1]])
+
+    # Get the percentage labels
+    texts = hmap.texts
+
+    # Add count annotations and confusion matrix labels
+    confusion_labels = [['TN', 'FP'], ['FN', 'TP']]
+    for i in range(len(cm)):
+        for j in range(len(cm)):
+            text_color = texts[i * len(cm) + j].get_color()
+
+            # Add count annotation
+            plt.text(j + 0.5, i + 0.65, f'({cm[i, j]})',
+                     ha='center', va='center', color=text_color)
+
+            # Add confusion matrix label
+            plt.text(j + 0.04, i + 0.07, confusion_labels[i][j],
+                     ha='left', va='center', color=text_color,
+                     fontsize=8)
+
+    metric_plot_name = METRICS_PLOT_NAMES_MAPPING[by_metric.name]
+    plt.title(f'Confusion matrix with best model selected by {metric_plot_name} metric',
+              fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel('Predicted', fontweight='bold')
+    plt.ylabel('True', fontweight='bold')
+
+    os.makedirs(output_dir, exist_ok=True)
+    # Save plot
+    plt.savefig(os.path.join(output_dir, f'confusion_matrix_by_{by_metric.name.lower()}.png'),
+                bbox_inches='tight', dpi=300)
+    plt.show()
 
 
-class ConfusionMatrix(Visualization):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.predictions = None
-        self.probabilities = None
-        self.labels = None
-        self.name = 'confusion_matrix'
+def plot_roc_curve(artifacts_path, by_metric, output_dir='assets/roc_curve'):
+    """
+    Plot ROC curve for a given metric from MLflow artifacts
+    """
 
-    def init(self, **kwargs):
-        super().init(**kwargs)
-        self.labels = self.data['labels']
-        self.probabilities = self.data['probabilities']
-        self.predictions = (self.probabilities > 0.5).astype(int)
-        return self
+    by_metric_dir_path = os.path.join(artifacts_path, 'evaluation', f'by_{by_metric.name}')
 
-    def build_figure(self):
-        cm = confusion_matrix(self.labels, self.predictions)
-        self.figure, ax = plt.subplots()
-        ax.matshow(cm, cmap="Blues", alpha=0.8)
-        for i in range(cm.shape[0]):
-            for j in range(cm.shape[1]):
-                ax.text(x=j, y=i, s=cm[i, j], va="center", ha="center")
-        ax.set_xlabel("Predictions")
-        ax.set_ylabel("Actuals")
+    # Load predictions and labels
+    predictions_path = os.path.join(by_metric_dir_path,
+                                    'evaluations_predictions.json')
+    labels_path = os.path.join(by_metric_dir_path,
+                               'evaluation_labels.json')
 
+    with open(predictions_path, 'r') as f:
+        predictions = json.load(f)
+    with open(labels_path, 'r') as f:
+        labels = json.load(f)
 
-class ROC(Visualization):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.predictions = None
-        self.probabilities = None
-        self.labels = None
-        self.name = 'roc_curve'
+    y_true = np.array(labels)
+    y_pred = np.array(predictions)
 
-    def init(self, **kwargs):
-        super().init(**kwargs)
-        self.labels = self.data['labels']
-        self.probabilities = self.data['probabilities']
-        self.predictions = (self.probabilities > 0.5).astype(int)
-        return self
+    fpr, tpr, _ = roc_curve(y_true, y_pred)
+    roc_auc = auc(fpr, tpr)
 
-    def build_figure(self):
-        # ROC curve plot
-        roc_auc_score_value = roc_auc_score(self.labels, self.probabilities)
-        fpr, tpr, _ = roc_curve(self.labels, self.probabilities)
-        self.figure, ax = plt.subplots()
-        ax.plot(fpr, tpr, label="ROC curve (area = %0.2f)" % roc_auc_score_value)
-        ax.plot([0, 1], [0, 1], "k--")
-        ax.set_xlim([0.0, 1.0])
-        ax.set_ylim([0.0, 1.05])
-        ax.set_xlabel("False Positive Rate")
-        ax.set_ylabel("True Positive Rate")
-        ax.set_title("Receiver Operating Characteristic")
-        ax.legend(loc="lower right")
+    plt.figure(figsize=(8, 6))
+
+    # Create the base layer with fill
+    plt.fill_between(fpr, tpr, alpha=0.2, color='darkorange', zorder=1)
+
+    # Create a separate axes for the lines and legend
+    ax2 = plt.gca()
+    ax2.plot(fpr, tpr, color='darkorange', lw=2,
+             label=f'ROC curve (AUC = {roc_auc:.2f})', zorder=3)
+    ax2.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', zorder=3)
+
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positives Rate', fontweight='bold')
+    plt.ylabel('True Positives Rate', fontweight='bold')
+    metric_plot_name = METRICS_PLOT_NAMES_MAPPING[by_metric.name]
+    plt.title(f'ROC Curve of best model selected by {metric_plot_name} metric',
+              fontsize=14, fontweight='bold', pad=15)
+    legend = plt.legend(loc="lower right", framealpha=1, facecolor='white')
+    plt.grid(True)
+    os.makedirs(output_dir, exist_ok=True)
+    # Save plot
+    plt.savefig(os.path.join(output_dir, f'roc_curve_by_{by_metric.name.lower()}.png'),
+                bbox_inches='tight', dpi=300)
+    plt.show()
