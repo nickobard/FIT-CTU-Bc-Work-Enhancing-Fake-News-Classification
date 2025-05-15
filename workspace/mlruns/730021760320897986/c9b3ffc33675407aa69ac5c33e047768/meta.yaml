@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/730021760320897986/c9b3ffc33675407aa69ac5c33e047768/artifacts
+end_time: 1746957175890
+entry_point_name: ''
+experiment_id: '730021760320897986'
+lifecycle_stage: active
+run_id: c9b3ffc33675407aa69ac5c33e047768
+run_name: welcoming-shrew-845
+run_uuid: c9b3ffc33675407aa69ac5c33e047768
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746957024629
+status: 3
+tags: []
+user_id: nikita.bardatskii

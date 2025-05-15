@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/446382247722252569/59dc20ad174a4db4bca321a458231fec/artifacts
+end_time: 1744916438352
+entry_point_name: ''
+experiment_id: '446382247722252569'
+lifecycle_stage: active
+run_id: 59dc20ad174a4db4bca321a458231fec
+run_name: chill-mole-953
+run_uuid: 59dc20ad174a4db4bca321a458231fec
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1744916438066
+status: 4
+tags: []
+user_id: nikita.bardatskii

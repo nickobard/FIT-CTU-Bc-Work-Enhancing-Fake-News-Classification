@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/206496448065585351/c3593dd898954a70956a3969068d4e8c/artifacts
+end_time: 1746640146799
+entry_point_name: ''
+experiment_id: '206496448065585351'
+lifecycle_stage: active
+run_id: c3593dd898954a70956a3969068d4e8c
+run_name: brawny-dolphin-238
+run_uuid: c3593dd898954a70956a3969068d4e8c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746640146573
+status: 4
+tags: []
+user_id: nikita.bardatskii

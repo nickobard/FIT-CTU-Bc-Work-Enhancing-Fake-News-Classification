@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/446382247722252569/a61b995e9d8a47bc890337fa758a7d2a/artifacts
+end_time: 1744918453141
+entry_point_name: ''
+experiment_id: '446382247722252569'
+lifecycle_stage: active
+run_id: a61b995e9d8a47bc890337fa758a7d2a
+run_name: dapper-zebra-890
+run_uuid: a61b995e9d8a47bc890337fa758a7d2a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1744918452945
+status: 4
+tags: []
+user_id: nikita.bardatskii

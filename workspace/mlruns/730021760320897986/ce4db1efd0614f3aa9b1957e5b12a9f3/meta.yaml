@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/730021760320897986/ce4db1efd0614f3aa9b1957e5b12a9f3/artifacts
+end_time: 1746987534241
+entry_point_name: ''
+experiment_id: '730021760320897986'
+lifecycle_stage: active
+run_id: ce4db1efd0614f3aa9b1957e5b12a9f3
+run_name: enthused-finch-97
+run_uuid: ce4db1efd0614f3aa9b1957e5b12a9f3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746987490246
+status: 3
+tags: []
+user_id: nikita.bardatskii

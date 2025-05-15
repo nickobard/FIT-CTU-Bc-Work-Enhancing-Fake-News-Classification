@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/tests/../mlruns/328346920420097447/55fe799a14d84cbaa95b25ade07651e9/artifacts
+end_time: 1746974579509
+entry_point_name: ''
+experiment_id: '328346920420097447'
+lifecycle_stage: active
+run_id: 55fe799a14d84cbaa95b25ade07651e9
+run_name: burly-colt-28
+run_uuid: 55fe799a14d84cbaa95b25ade07651e9
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746974555050
+status: 3
+tags: []
+user_id: nikita.bardatskii

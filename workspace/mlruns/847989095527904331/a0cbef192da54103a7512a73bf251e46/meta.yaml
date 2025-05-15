@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/847989095527904331/a0cbef192da54103a7512a73bf251e46/artifacts
+end_time: 1747232379852
+entry_point_name: ''
+experiment_id: '847989095527904331'
+lifecycle_stage: active
+run_id: a0cbef192da54103a7512a73bf251e46
+run_name: model(mn=bert-base-uncased,mmn=loss,e=10,bs=8,ebs=8,lr=0.0001,wd=0.01,esp=3,est=0.001);dataset(dn=recovery,tp=0.7,vp=0.15);pipeline([truncation(f=0.1,tt=top),noise_reduction(),bert_base_uncased_encoder(t=bert-base-uncased,t=true,p=max_length,tml=512,isiw=false)]);2025-05-14_16-17-06;rs=201171153
+run_uuid: a0cbef192da54103a7512a73bf251e46
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747232226339
+status: 3
+tags: []
+user_id: nikita.bardatskii

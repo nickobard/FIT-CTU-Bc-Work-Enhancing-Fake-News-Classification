@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/206496448065585351/d454a613411e44e0bc72c9b1761f5abb/artifacts
+end_time: 1746639403713
+entry_point_name: ''
+experiment_id: '206496448065585351'
+lifecycle_stage: active
+run_id: d454a613411e44e0bc72c9b1761f5abb
+run_name: classy-skink-104
+run_uuid: d454a613411e44e0bc72c9b1761f5abb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746639403478
+status: 4
+tags: []
+user_id: nikita.bardatskii

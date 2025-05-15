@@ -1,0 +1,17 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/openai_gpt1/../../mlruns/881036469785460843/61b708cf7f8c4538b5f6c043bb12f5b3/artifacts
+end_time: 1746996358187
+entry_point_name: ''
+experiment_id: '881036469785460843'
+lifecycle_stage: active
+run_id: 61b708cf7f8c4538b5f6c043bb12f5b3
+run_name: model=open_a_i__g_p_t1(rs=1831585237,mmn=loss,e=3,bs=8,ebs=8,lr=5e-05,wd=0.01,esp=3,est=0.001);dataset=ReCovery(dn=recovery,ds=(2029,
+  2),tss=(1420, 2),vss=(304, 2),tss=(305, 2),ptss=(71, 6),pvss=(15, 6),ptss=(15, 6));pipeline=truncated_minimal_gpt1_pipeline(['truncation(t=truncation,f=0.05,tt=top)',
+  "opena_a_i__g_p_t1__encoder(t=['tokenizer', 'encoder'],t=openai-gpt,tt=open_a_i_g_p_t_tokenizer_fast,t=true,p=max_length,tml=512,isiw=false,l=english,lc=en)"]);2025-05-11_22-45-56
+run_uuid: 61b708cf7f8c4538b5f6c043bb12f5b3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746996342758
+status: 4
+tags: []
+user_id: nikita.bardatskii

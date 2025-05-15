@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/730021760320897986/04b6fe570c6b45d9a7a89cd4af7d0cf0/artifacts
+end_time: 1746982760173
+entry_point_name: ''
+experiment_id: '730021760320897986'
+lifecycle_stage: active
+run_id: 04b6fe570c6b45d9a7a89cd4af7d0cf0
+run_name: capable-auk-759
+run_uuid: 04b6fe570c6b45d9a7a89cd4af7d0cf0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746981214494
+status: 4
+tags: []
+user_id: nikita.bardatskii

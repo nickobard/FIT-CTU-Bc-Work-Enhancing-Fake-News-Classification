@@ -1,0 +1,1 @@
+<PreprocessingPipeline 'truncated_minimal_bert_pipeline': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x00000234A8660650>, <workspace.sources.local_datasets.preprocessing.encoders.bert_base_uncased.BertBaseUncasedEncoder object at 0x00000234A8A21910>]>

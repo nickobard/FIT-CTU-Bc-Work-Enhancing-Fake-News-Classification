@@ -1,0 +1,1 @@
+{'test_loss': 0.6534111499786377, 'test_false_positive_rate': 1.0, 'test_false_negative_rate': 0.0, 'test_accuracy': 0.6459016393442623, 'test_precision': 0.6459016393442623, 'test_recall': 1.0, 'test_f1': 0.7848605577689243, 'test_roc_auc': 0.5743325813122767, 'test_runtime': 10.5283, 'test_samples_per_second': 28.97, 'test_steps_per_second': 3.704}

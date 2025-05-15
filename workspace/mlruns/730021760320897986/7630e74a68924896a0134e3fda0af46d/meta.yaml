@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/730021760320897986/7630e74a68924896a0134e3fda0af46d/artifacts
+end_time: 1746986254083
+entry_point_name: ''
+experiment_id: '730021760320897986'
+lifecycle_stage: active
+run_id: 7630e74a68924896a0134e3fda0af46d
+run_name: secretive-chimp-695
+run_uuid: 7630e74a68924896a0134e3fda0af46d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746986204986
+status: 4
+tags: []
+user_id: nikita.bardatskii

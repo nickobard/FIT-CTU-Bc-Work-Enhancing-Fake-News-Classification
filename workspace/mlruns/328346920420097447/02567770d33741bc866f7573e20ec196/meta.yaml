@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/tests/../mlruns/328346920420097447/02567770d33741bc866f7573e20ec196/artifacts
+end_time: 1746963995472
+entry_point_name: ''
+experiment_id: '328346920420097447'
+lifecycle_stage: active
+run_id: 02567770d33741bc866f7573e20ec196
+run_name: magnificent-dog-389
+run_uuid: 02567770d33741bc866f7573e20ec196
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746963939802
+status: 3
+tags: []
+user_id: nikita.bardatskii

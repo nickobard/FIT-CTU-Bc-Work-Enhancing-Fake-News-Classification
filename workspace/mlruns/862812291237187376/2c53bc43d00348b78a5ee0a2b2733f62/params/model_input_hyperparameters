@@ -1,0 +1,1 @@
+{'epochs': 10, 'batch_size': 8, 'eval_batch_size': 128, 'learning_rate': 5e-05, 'weight_decay': 0.01, 'early_stopping_patience': None, 'early_stopping_threshold': None}

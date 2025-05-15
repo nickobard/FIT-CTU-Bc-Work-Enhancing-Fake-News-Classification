@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/730021760320897986/8daaf9f759f5426587fdb0d531b917f1/artifacts
+end_time: 1746986347701
+entry_point_name: ''
+experiment_id: '730021760320897986'
+lifecycle_stage: active
+run_id: 8daaf9f759f5426587fdb0d531b917f1
+run_name: handsome-wolf-285
+run_uuid: 8daaf9f759f5426587fdb0d531b917f1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746986291319
+status: 4
+tags: []
+user_id: nikita.bardatskii

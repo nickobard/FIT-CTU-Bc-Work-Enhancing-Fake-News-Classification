@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/446382247722252569/df3a2cde65844d60b5f97d12767c57db/artifacts
+end_time: 1744916505552
+entry_point_name: ''
+experiment_id: '446382247722252569'
+lifecycle_stage: active
+run_id: df3a2cde65844d60b5f97d12767c57db
+run_name: mysterious-whale-98
+run_uuid: df3a2cde65844d60b5f97d12767c57db
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1744916505254
+status: 4
+tags: []
+user_id: nikita.bardatskii

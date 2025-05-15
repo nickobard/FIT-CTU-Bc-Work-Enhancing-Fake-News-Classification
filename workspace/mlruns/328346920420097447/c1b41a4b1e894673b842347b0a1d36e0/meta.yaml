@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/tests/../mlruns/328346920420097447/c1b41a4b1e894673b842347b0a1d36e0/artifacts
+end_time: 1746963785856
+entry_point_name: ''
+experiment_id: '328346920420097447'
+lifecycle_stage: active
+run_id: c1b41a4b1e894673b842347b0a1d36e0
+run_name: nebulous-snake-232
+run_uuid: c1b41a4b1e894673b842347b0a1d36e0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746962527580
+status: 3
+tags: []
+user_id: nikita.bardatskii

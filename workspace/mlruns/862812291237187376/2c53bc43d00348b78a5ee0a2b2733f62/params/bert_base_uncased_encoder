@@ -1,0 +1,1 @@
+{'type': 'encoder', 'tokenizer_type': 'none_type', 'truncation': True, 'max_length': 512, 'tokenizer': 'bert-base-cased'}

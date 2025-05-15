@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/206496448065585351/76bbc37e9f9c48ecbe03ff5ba95c8edd/artifacts
+end_time: 1746647195408
+entry_point_name: ''
+experiment_id: '206496448065585351'
+lifecycle_stage: active
+run_id: 76bbc37e9f9c48ecbe03ff5ba95c8edd
+run_name: popular-turtle-224
+run_uuid: 76bbc37e9f9c48ecbe03ff5ba95c8edd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746647167961
+status: 4
+tags: []
+user_id: nikita.bardatskii

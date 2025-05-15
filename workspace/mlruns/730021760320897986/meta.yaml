@@ -1,0 +1,6 @@
+artifact_location: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/730021760320897986
+creation_time: 1746818078924
+experiment_id: '730021760320897986'
+last_update_time: 1746818078924
+lifecycle_stage: active
+name: test-evaluation-by-metrics-bert-base-uncased

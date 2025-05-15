@@ -1,0 +1,6 @@
+artifact_location: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/tests/../mlruns/328346920420097447
+creation_time: 1746961887234
+experiment_id: '328346920420097447'
+last_update_time: 1746961887234
+lifecycle_stage: active
+name: test_old_vs_new_training

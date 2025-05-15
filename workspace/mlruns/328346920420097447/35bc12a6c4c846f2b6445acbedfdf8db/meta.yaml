@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/tests/../mlruns/328346920420097447/35bc12a6c4c846f2b6445acbedfdf8db/artifacts
+end_time: 1746973848192
+entry_point_name: ''
+experiment_id: '328346920420097447'
+lifecycle_stage: active
+run_id: 35bc12a6c4c846f2b6445acbedfdf8db
+run_name: hilarious-mare-859
+run_uuid: 35bc12a6c4c846f2b6445acbedfdf8db
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746971510804
+status: 4
+tags: []
+user_id: nikita.bardatskii

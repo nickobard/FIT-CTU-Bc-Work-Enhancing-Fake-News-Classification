@@ -1,0 +1,18 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/tests/sources/../../mlruns/561272604917995285/0b40100af1a043d9b6f20bd47e4d3526/artifacts
+end_time: 1747153515844
+entry_point_name: ''
+experiment_id: '561272604917995285'
+lifecycle_stage: active
+run_id: 0b40100af1a043d9b6f20bd47e4d3526
+run_name: model=bert_base_uncased(rs=3016582317,mmn=loss,e=5,bs=8,ebs=8,lr=5e-05,wd=0.01,esp=3,est=0.001);dataset=ReCovery(dn=recovery,ds=(2029,
+  2),tss=(1420, 2),vss=(304, 2),tss=(305, 2),ptss=(142, 7),pvss=(30, 7),ptss=(30,
+  7));pipeline=truncated_cleaned_bert_pipeline(['truncation(t=truncation,f=0.1,tt=top)',
+  'noise_reduction()', "bert_base_uncased_encoder(t=['tokenizer', 'encoder'],t=bert-base-cased,tt=bert_tokenizer_fast,t=true,p=max_length,tml=512,isiw=false,l=english,lc=en)"]);2025-05-13_18-23-12
+run_uuid: 0b40100af1a043d9b6f20bd47e4d3526
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747153388388
+status: 3
+tags: []
+user_id: nikita.bardatskii

@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/experiments/notebooks/../../../mlruns/862812291237187376/60b793ec6de24ac283ee2cd6fe888454/artifacts
+end_time: 1746808122709
+entry_point_name: ''
+experiment_id: '862812291237187376'
+lifecycle_stage: active
+run_id: 60b793ec6de24ac283ee2cd6fe888454
+run_name: zealous-fawn-373
+run_uuid: 60b793ec6de24ac283ee2cd6fe888454
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746805976454
+status: 3
+tags: []
+user_id: nikita.bardatskii

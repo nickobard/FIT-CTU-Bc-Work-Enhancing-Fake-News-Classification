@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/experiments/notebooks/../../../mlruns/862812291237187376/2c53bc43d00348b78a5ee0a2b2733f62/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '862812291237187376'
+lifecycle_stage: active
+run_id: 2c53bc43d00348b78a5ee0a2b2733f62
+run_name: calm-bass-770
+run_uuid: 2c53bc43d00348b78a5ee0a2b2733f62
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746805430547
+status: 1
+tags: []
+user_id: nikita.bardatskii
