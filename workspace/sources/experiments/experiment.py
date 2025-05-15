@@ -2,7 +2,6 @@ from abc import ABC
 import mlflow
 from mlflow.entities import ViewType
 import logging
-from .visualizations.handlers import standard_visualizations_handler
 from ..utils import generate_random_state, log_params, create_and_get_local_logger, SIGNATURE_PART_SEPARATOR
 import time
 

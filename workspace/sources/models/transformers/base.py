@@ -69,7 +69,7 @@ class Transformer(Model):
         return self
 
     def _init_model(self):
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.name, num_labels=2)
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.transformers_identifier, num_labels=2)
 
     @classmethod
     def get_default_training_args(cls):
