@@ -12,7 +12,7 @@ from ..utils import generate_random_state, log_params, get_normalized_path_from_
 
 
 class Dataset(ABC):
-    LABELS_MAPPING = {0: 'fake', 1: 'reliable'}
+    LABELS_MAPPING = {0: 'Fake', 1: 'Reliable'}
     DEFAULT_DATA_OBJ_CLASS = PandasData
 
     def __init__(self, name, data_path, preprocessings_pipeline=None, train_pct=0.7, val_pct=0.15, resave=False):
