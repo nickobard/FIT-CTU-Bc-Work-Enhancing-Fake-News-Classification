@@ -1,5 +1,6 @@
 from .base import Preprocessing
-from .flajzik_classification_2024.preprocessing_functions import remove_urls, remove_punctation, remove_numbers, remove_special_characters, \
+from .flajzik_classification_2024.preprocessing_functions import remove_urls, remove_punctation, remove_numbers, \
+    remove_special_characters, \
     stem, \
     lemmatize
 from typing import Literal
@@ -57,7 +58,7 @@ class Stemming(Preprocessing):
                 'language_code': self._language_code}
 
     def preprocess(self, data):
-        data.features = stem(data.features, self._language_code)
+        data.features = stem(data.features, self._language_code, embedding=True)
         return data
 
 
@@ -82,5 +83,5 @@ class Lemmatization(Preprocessing):
         return self.language_codes[self.language]
 
     def preprocess(self, data):
-        data.features = lemmatize(data.features, self._language_code)
+        data.features = lemmatize(data.features, self._language_code, embedding=True)
         return data

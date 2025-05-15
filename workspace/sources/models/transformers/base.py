@@ -126,116 +126,116 @@ class Transformer(Model):
         )
         self.trainer.train(resume_from_checkpoint=True if self.has_checkpoints() else False)
 
-        def evaluate(self):
-            for evaluation_metric in self.evaluation_metrics:
-                self.logger.info(f'Evaluating model using {evaluation_metric.name} metric...')
-                best_entry = self._load_best_model_for_metrics(OrderedSet([evaluation_metric, Loss]))
-                self.logger.info(f'Best entry according to validation metrics: {best_entry}')
-                self.logger.info(f'Best model found at epoch {best_entry["epoch"]}.')
-                # Extract predictions and labels
-                with self.trainer.collect_hidden_states():
-                    logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
-                                                                   metric_key_prefix='test')
-                    embeddings = self.trainer.get_collected_embeddings()
-                best_epoch = best_entry['epoch']
-                metrics['test_epoch'] = best_epoch
-                self.logger.info(f'Test metrics: {metrics}')
-                postfix = f'_by_{evaluation_metric.name}'
-                mlflow.log_metrics({m_key + postfix: m_val for m_key, m_val in metrics.items()})
-                mlflow.log_metric('best_epoch' + postfix, best_epoch)
+    def evaluate(self):
+        for evaluation_metric in self.evaluation_metrics:
+            self.logger.info(f'Evaluating model using {evaluation_metric.name} metric...')
+            best_entry = self._load_best_model_for_metrics(OrderedSet([evaluation_metric, Loss]))
+            self.logger.info(f'Best entry according to validation metrics: {best_entry}')
+            self.logger.info(f'Best model found at epoch {best_entry["epoch"]}.')
+            # Extract predictions and labels
+            with self.trainer.collect_hidden_states():
+                logits, labels, metrics = self.trainer.predict(self.dataset.preprocessed_test_set.dataset,
+                                                               metric_key_prefix='test')
+                embeddings = self.trainer.get_collected_embeddings()
+            best_epoch = best_entry['epoch']
+            metrics['test_epoch'] = best_epoch
+            self.logger.info(f'Test metrics: {metrics}')
+            postfix = f'_by_{evaluation_metric.name}'
+            mlflow.log_metrics({m_key + postfix: m_val for m_key, m_val in metrics.items()})
+            mlflow.log_metric('best_epoch' + postfix, best_epoch)
 
-                probs = softmax(logits, axis=1)[:, 1]
-                predictions = (probs > 0.5).astype(int)
+            probs = softmax(logits, axis=1)[:, 1]
+            predictions = (probs > 0.5).astype(int)
 
-                self.evaluation_data = {
-                    'embeddings': embeddings.tolist(),
-                    'logits': logits.tolist(),
-                    'probabilities': probs.tolist(),
-                    'predictions': predictions.tolist(),
-                    'labels': labels.tolist(),
-                    'metrics': metrics}
-                self.save_evaluation_data(evaluation_metric)
-            self.logger.info('Finished model evaluations stage.')
-            return self
+            self.evaluation_data = {
+                'embeddings': embeddings.tolist(),
+                'logits': logits.tolist(),
+                'probabilities': probs.tolist(),
+                'predictions': predictions.tolist(),
+                'labels': labels.tolist(),
+                'metrics': metrics}
+            self.save_evaluation_data(evaluation_metric)
+        self.logger.info('Finished model evaluations stage.')
+        return self
 
-        def save_evaluation_data(self, metric):
-            artifacts_path = utils.get_current_run_artifacts_path()
-            if artifacts_path is None:
-                self.logger.info('Could not save evaluation data, because artifacts path is None.')
-                return False
-            evaluation_artifacts_path = os.path.join(artifacts_path, 'evaluation', f'by_{metric.name}')
-            Path(evaluation_artifacts_path).mkdir(parents=True, exist_ok=True)
-            evaluation_data_path = os.path.join(evaluation_artifacts_path, 'data')
-            with open(evaluation_data_path + '.pkl', 'wb') as f:
-                self.logger.info(f'Saving evaluation data in pickle...')
-                pickle.dump(self.evaluation_data, f)
-            with open(evaluation_data_path + '.json', 'w', encoding='utf-8') as f:
-                self.logger.info(f'Saving evaluation data in json...')
-                json.dump(self.evaluation_data, f)
+    def save_evaluation_data(self, metric):
+        artifacts_path = utils.get_current_run_artifacts_path()
+        if artifacts_path is None:
+            self.logger.info('Could not save evaluation data, because artifacts path is None.')
+            return False
+        evaluation_artifacts_path = os.path.join(artifacts_path, 'evaluation', f'by_{metric.name}')
+        Path(evaluation_artifacts_path).mkdir(parents=True, exist_ok=True)
+        evaluation_data_path = os.path.join(evaluation_artifacts_path, 'data')
+        with open(evaluation_data_path + '.pkl', 'wb') as f:
+            self.logger.info(f'Saving evaluation data in pickle...')
+            pickle.dump(self.evaluation_data, f)
+        with open(evaluation_data_path + '.json', 'w', encoding='utf-8') as f:
+            self.logger.info(f'Saving evaluation data in json...')
+            json.dump(self.evaluation_data, f)
 
-            for data_name, data in self.evaluation_data.items():
-                evaluations_data_path_part = os.path.join(evaluation_artifacts_path, data_name)
-                with open(evaluations_data_path_part + '.json', 'w', encoding='utf-8') as f:
-                    json.dump(data, f)
-            self.logger.info('Successfully saved evaluation data.')
-            return True
+        for data_name, data in self.evaluation_data.items():
+            evaluations_data_path_part = os.path.join(evaluation_artifacts_path, data_name)
+            with open(evaluations_data_path_part + '.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f)
+        self.logger.info('Successfully saved evaluation data.')
+        return True
 
-        def _load_best_model_for_metrics(self, metrics: OrderedSet[Metric]):
-            # 1. Filter log entries that have all required metrics at evaluation-time
-            metric_names = [f'eval_{metric.name}' for metric in metrics]
-            entries = [
-                entry for entry in self.trainer.state.log_history
-                if all(metric_name in entry for metric_name in metric_names) and entry.get("epoch") is not None
-            ]
-            if not entries:
-                raise ValueError(f"No entries found for metrics: {metric_names}")
+    def _load_best_model_for_metrics(self, metrics: OrderedSet[Metric]):
+        # 1. Filter log entries that have all required metrics at evaluation-time
+        metric_names = [f'eval_{metric.name}' for metric in metrics]
+        entries = [
+            entry for entry in self.trainer.state.log_history
+            if all(metric_name in entry for metric_name in metric_names) and entry.get("epoch") is not None
+        ]
+        if not entries:
+            raise ValueError(f"No entries found for metrics: {metric_names}")
 
-            def _get_entry_sort_key(entry, metrics):
-                return tuple(entry[f'eval_{m.name}'] if m.greater_is_better else -entry[f'eval_{m.name}']
-                             for m in metrics)
+        def _get_entry_sort_key(entry, metrics):
+            return tuple(entry[f'eval_{m.name}'] if m.greater_is_better else -entry[f'eval_{m.name}']
+                         for m in metrics)
 
-            # 2. Find the best entry using lexicographical sorting based on provided metrics
-            best_entry = max(entries, key=lambda e: _get_entry_sort_key(e, metrics))
+        # 2. Find the best entry using lexicographical sorting based on provided metrics
+        best_entry = max(entries, key=lambda e: _get_entry_sort_key(e, metrics))
 
-            # 3. Derive checkpoint name from the global step
-            step = int(best_entry["step"])
-            ckpt_dir = os.path.join(self.trainer.args.output_dir, f"checkpoint-{step}")
-            if not os.path.isdir(ckpt_dir):
-                raise FileNotFoundError(f"Checkpoint not found: {ckpt_dir}")
-            self.logger.info(f"Found checkpoint with best metrics at: checkpoint-{step}")
+        # 3. Derive checkpoint name from the global step
+        step = int(best_entry["step"])
+        ckpt_dir = os.path.join(self.trainer.args.output_dir, f"checkpoint-{step}")
+        if not os.path.isdir(ckpt_dir):
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt_dir}")
+        self.logger.info(f"Found checkpoint with best metrics at: checkpoint-{step}")
 
-            # 4. Load and return the model
-            # 1) Load the exact config you used
-            config = AutoConfig.from_pretrained(ckpt_dir)
+        # 4. Load and return the model
+        # 1) Load the exact config you used
+        config = AutoConfig.from_pretrained(ckpt_dir)
 
-            # 2) Instantiate the model from that config + weights
-            model = AutoModelForSequenceClassification.from_pretrained(
-                ckpt_dir,
-                config=config
-            )
-            # 3) Move to the right device & set to eval mode
-            model.to(self.trainer.args.device)
-            model.eval()
+        # 2) Instantiate the model from that config + weights
+        model = AutoModelForSequenceClassification.from_pretrained(
+            ckpt_dir,
+            config=config
+        )
+        # 3) Move to the right device & set to eval mode
+        model.to(self.trainer.args.device)
+        model.eval()
 
-            # 4) Swap in and return
-            self.model = model
-            self.trainer.model = model
-            return best_entry
+        # 4) Swap in and return
+        self.model = model
+        self.trainer.model = model
+        return best_entry
 
-        def _params(self):
-            super_class_params = super()._params()
-            additional_params = {'model_name': self.name,
-                                 'transformers_identifier': self.transformers_identifier,
-                                 'main_metrics_name': self.train_best_model_metric.name}
-            return {**super_class_params,
-                    **additional_params,
-                    **self.training_args}
+    def _params(self):
+        super_class_params = super()._params()
+        additional_params = {'model_name': self.name,
+                             'transformers_identifier': self.transformers_identifier,
+                             'main_metrics_name': self.train_best_model_metric.name}
+        return {**super_class_params,
+                **additional_params,
+                **self.training_args}
 
-        @classmethod
-        def load_from_mlflow(cls, logger):
-            raise NotImplementedError(
-                f"The save_to_mlflow method is not supported for the {cls.__name__} class.")
+    @classmethod
+    def load_from_mlflow(cls, logger):
+        raise NotImplementedError(
+            f"The save_to_mlflow method is not supported for the {cls.__name__} class.")
 
-        def save_to_mlflow(self):
-            raise NotImplementedError(
-                f"The save_to_mlflow method is not supported for the {self.__class__.__name__} class.")
+    def save_to_mlflow(self):
+        raise NotImplementedError(
+            f"The save_to_mlflow method is not supported for the {self.__class__.__name__} class.")

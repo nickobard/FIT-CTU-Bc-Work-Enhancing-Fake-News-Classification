@@ -90,7 +90,7 @@ class GPT2_Encoder(OpenAI_GPT_Encoder):
     def __init__(self,
                  tokenizer_identifier='gpt2',
                  truncation=True,
-                 truncation_max_length=512,
+                 truncation_max_length=1024,
                  padding: Literal['max_length'] = 'max_length',
                  is_split_into_words=False,
                  add_decoded_input_ids_for_debug=True):
