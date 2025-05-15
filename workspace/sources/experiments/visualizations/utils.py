@@ -1,3 +1,5 @@
+from ..metrics import Loss
+
 METRICS_PLOT_NAMES_MAPPING = {
     'precision': 'Precision',
     'recall': 'Recall',

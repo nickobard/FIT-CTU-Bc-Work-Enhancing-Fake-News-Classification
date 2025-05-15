@@ -5,8 +5,9 @@ from .utils import METRICS_PLOT_NAMES_MAPPING
 from ..metrics import standard_metrics
 
 
-def export_best_models_to_latex(dataset_name, metrics_df: pd.DataFrame, output_dir: str = 'assets/tables/') -> str:
-    by_metric = metrics_df['Evaluation Metric'].iloc[0]
+def export_best_models_to_latex(metric, dataset_name, metrics_df: pd.DataFrame,
+                                output_dir: str = 'assets/tables/') -> str:
+    by_metric = metric.name
     experiment_columns = ['Model']
     metrics_columns = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC', 'FPR', 'FNR']
     selected_columns = experiment_columns + metrics_columns
@@ -48,23 +49,28 @@ def export_best_models_to_latex(dataset_name, metrics_df: pd.DataFrame, output_d
     return table_env
 
 
-def create_metrics_comparison_df(metric, best_modesl_by_metrics_data, output_dir='assets/tables/'):
+def create_metrics_comparison_df(metric,
+                                 df_data,
+                                 output_dir='assets/tables/'):
     metrics_df_data = []
-    experiments_data = best_modesl_by_metrics_data[metric.name]
+    experiments_data = df_data[metric.name]
     for experiment_name, run in experiments_data.items():
         experiment_data = {
-            'Experiment': experiment_name,
-            'Run Signature': run.data.params['run_signature'],
-            'Evaluation Metric': metric.name,
             'Model': run.data.params['model_name']
         }
         metrics_data = {METRICS_PLOT_NAMES_MAPPING[m.name]: run.data.metrics[f'test_{m.name}_by_{metric.name}']
                         for m in standard_metrics
                         if f'test_{m.name}_by_{metric.name}' in run.data.metrics}
-        params_data = {
+        additional_metrics_data = {
             'best_epoch': run.data.metrics[f'best_epoch_by_{metric.name}'],
         }
-        data = {**experiment_data, **metrics_data, **params_data}
+        additional_experiment_data = {'Experiment': experiment_name,
+                                      'Run Signature': run.data.params['run_signature'],
+                                      'Evaluation Metric': metric.name}
+        data = {**experiment_data,
+                **metrics_data,
+                **additional_experiment_data,
+                **additional_metrics_data}
         metrics_df_data.append(data)
     metrics_df = pd.DataFrame(metrics_df_data)
     output_path = os.path.join(output_dir, f'best_models_table_by_{metric.name}.csv')

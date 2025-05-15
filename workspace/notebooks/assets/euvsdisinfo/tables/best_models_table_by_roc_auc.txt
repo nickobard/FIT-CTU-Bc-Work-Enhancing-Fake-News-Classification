@@ -1,0 +1,14 @@
+\begin{table}[]
+    \footnotesize
+    \caption{Best models selected by ROC-AUC metric.}
+    \label{tab:euvsdisinfo_best_models_by_roc_auc}
+    \centering
+\begin{tabular}{|l||r|r|r|r|r|r|r|}
+\toprule
+Model & Accuracy & \textbf{Precision} & Recall & \textbf{F1-Score} & \textbf{ROC-AUC} & \textbf{FPR} & FNR \\
+\midrule \midrule
+bert-base-uncased & 0.969 & 1.000 & 0.947 & 0.973 & 1.000 & 0.000 & 0.053 \\
+distilbert-base-uncased & 1.000 & 1.000 & 1.000 & 1.000 & 1.000 & 0.000 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
