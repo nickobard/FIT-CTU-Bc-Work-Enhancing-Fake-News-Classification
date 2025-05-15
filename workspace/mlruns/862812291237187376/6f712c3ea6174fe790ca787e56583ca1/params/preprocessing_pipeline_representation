@@ -1,1 +1,0 @@
-<PreprocessingPipeline 'minima_bert_pipeline': [<workspace.sources.datasets.preprocessing.tokenization.BertBaseUncasedTokenizer object at 0x0000020C5F4BA090>, <workspace.sources.datasets.preprocessing.encoding.BertBaseUncasedEncoder object at 0x0000020C6CC29220>, <workspace.sources.datasets.preprocessing.encoding.HuggingFaceDatasetConversion object at 0x0000020C6CB86480>]>

@@ -1,1 +1,0 @@
-{'type': 'tokenizer', 'tokenizer': 'bert-base-uncased', 'tokenizer_type': 'bert_tokenizer', 'language': 'english', 'language_code': 'en'}

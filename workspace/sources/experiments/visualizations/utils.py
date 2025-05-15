@@ -1,12 +1,12 @@
 METRICS_PLOT_NAMES_MAPPING = {
     'precision': 'Precision',
     'recall': 'Recall',
-    'f1_score': 'F1 Score',
-    'roc_auc': 'ROC AUC',
+    'f1_score': 'F1-Score',
+    'roc_auc': 'ROC-AUC',
     'loss': 'Loss',
     'accuracy': 'Accuracy',
-    'false_positives_rate': 'False Positives Rate',
-    'false_negatives_rate': 'False Negatives Rate'
+    'false_positives_rate': 'FPR',
+    'false_negatives_rate': 'FNR'
 }
 
 

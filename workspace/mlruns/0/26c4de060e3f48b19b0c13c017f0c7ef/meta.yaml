@@ -1,8 +1,9 @@
 artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/0/26c4de060e3f48b19b0c13c017f0c7ef/artifacts
+deleted_time: 1747326738979
 end_time: 1746713500529
 entry_point_name: ''
 experiment_id: '0'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: 26c4de060e3f48b19b0c13c017f0c7ef
 run_name: zealous-snipe-908
 run_uuid: 26c4de060e3f48b19b0c13c017f0c7ef

@@ -1,8 +1,9 @@
 artifact_uri: file:///C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/sources/mlruns/0/a2796dc5088445d49e02d1211dd1a891/artifacts
+deleted_time: 1747326738980
 end_time: 1744915351512
 entry_point_name: ''
 experiment_id: '0'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: a2796dc5088445d49e02d1211dd1a891
 run_name: placid-squirrel-425
 run_uuid: a2796dc5088445d49e02d1211dd1a891
