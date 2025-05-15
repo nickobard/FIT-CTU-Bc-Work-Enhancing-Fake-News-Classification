@@ -24,7 +24,7 @@ class OpenAI_GPT(Transformer):
         self.encoder = gpt_encoder
 
     def _init_model(self):
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.name, num_labels=2)
+        super()._init_model()
         self.model.resize_token_embeddings(self.encoder.vocab_size)
         self.model.config.pad_token_id = self.encoder.pad_token_id
 
