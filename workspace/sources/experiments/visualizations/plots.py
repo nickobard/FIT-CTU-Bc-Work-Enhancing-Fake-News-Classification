@@ -9,7 +9,8 @@ from ..metrics import Loss
 from .utils import METRICS_PLOT_NAMES_MAPPING
 from sklearn.metrics import roc_curve, auc
 
-def plot_confusion_matrix(artifacts_path, by_metric=Loss, output_dir='assets/confusion_matrix'):
+
+def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/'):
     """
     Create and save confusion matrix plot for given metric.
     """
@@ -67,6 +68,8 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, output_dir='assets/con
     plt.xlabel('Predicted', fontweight='bold')
     plt.ylabel('True', fontweight='bold')
 
+    output_dir = os.path.join(output_dir, dataset_name) if dataset_name else output_dir
+    output_dir = os.path.join(output_dir, 'confusion_matrix')
     os.makedirs(output_dir, exist_ok=True)
     # Save plot
     plt.savefig(os.path.join(output_dir, f'confusion_matrix_by_{by_metric.name.lower()}.png'),
@@ -74,7 +77,7 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, output_dir='assets/con
     plt.show()
 
 
-def plot_roc_curve(artifacts_path, by_metric, output_dir='assets/roc_curve'):
+def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='assets/'):
     """
     Plot ROC curve for a given metric from MLflow artifacts
     """
@@ -118,6 +121,8 @@ def plot_roc_curve(artifacts_path, by_metric, output_dir='assets/roc_curve'):
               fontsize=14, fontweight='bold', pad=15)
     legend = plt.legend(loc="lower right", framealpha=1, facecolor='white')
     plt.grid(True)
+    output_dir = os.path.join(output_dir, dataset_name) if dataset_name else output_dir
+    output_dir = os.path.join(output_dir, 'roc_curve')
     os.makedirs(output_dir, exist_ok=True)
     # Save plot
     plt.savefig(os.path.join(output_dir, f'roc_curve_by_{by_metric.name.lower()}.png'),

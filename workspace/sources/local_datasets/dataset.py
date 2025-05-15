@@ -34,7 +34,8 @@ class Dataset(ABC):
 
     def init(self, logger=None, random_state=None):
         self.logger = logger if logger else create_and_get_local_logger(self.__class__.__name__)
-        log_params(self.get_dataset_params())
+        log_params(self.get_dataset_params(), logger=self.logger)
+        log_params({'dataset_signature': self.assemble_signature()}, logger=self.logger)
         self.logger.info(self.get_dataset_params())
         self.artifacts_path = self.get_artifacts_path()
         if self.artifacts_path:
