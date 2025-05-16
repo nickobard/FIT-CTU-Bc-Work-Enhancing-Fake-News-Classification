@@ -11,6 +11,7 @@ from workspace.sources.experiments.utils import get_best_models_by_metrics
 from workspace.sources.experiments.visualizations.tables import create_metrics_comparison_df, \
     export_best_models_to_latex
 from workspace.sources.experiments.visualizations.utils import METRICS_PLOT_NAMES_MAPPING
+from jinja2 import Environment, FileSystemLoader
 
 
 def flatten_dict(d: dict, flatten_key: str) -> dict:
@@ -32,12 +33,12 @@ def get_experiment_best_runs_by_metrics(experiment_name, dataset_name):
                         flatten_key=experiment_name)
 
 
-def hparams_by_metric_to_latex_table(hparams_by_metric, dataset_name, columns):
+def hparams_by_metric_to_latex_table(hparams_by_metric, columns, output_dir):
     for metric, model_hparams in hparams_by_metric.items():
         df = pd.DataFrame(list(model_hparams.items()), columns=columns)
-        output_dir = f'assets/{dataset_name}/model_hyperparameters/'
         os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, f'model_hyperparameters_table_by_{metric.name}.tex')
+        output_path = os.path.join(output_dir, f'hparams_table_by_{metric.name}.tex')
+
         float_format_fn = lambda x: f'{x:.3f}' if isinstance(x, (float, int)) else str(x).replace('_', '\\_')
         latex_table = df.to_latex(index=False,
                                   escape=True,
@@ -45,6 +46,7 @@ def hparams_by_metric_to_latex_table(hparams_by_metric, dataset_name, columns):
                                   column_format='|c||c|')
         # Add horizontal lines between each row
         latex_table = latex_table.replace('\\\\', '\\\\ \\midrule')
+
         with open(output_path, 'w') as f:
             f.write(latex_table)
 
@@ -56,8 +58,10 @@ def produce_experiment_model_hparams_tables(model_best_runs_by_metrics, dataset_
         model_hparams_dict = ast.literal_eval(model_hparams_dict_str)
 
         hyperparameters_by_metric[metric] = model_hparams_dict
-
-    hparams_by_metric_to_latex_table(hyperparameters_by_metric, dataset_name, columns=['Hyperparameter', 'Value'])
+    output_dir = os.path.join('assets', dataset_name, 'model_hyperparameters')
+    hparams_by_metric_to_latex_table(hyperparameters_by_metric,
+                                     columns=['Hyperparameter', 'Value'],
+                                     output_dir=output_dir)
 
 
 def produce_experiment_pipeline_hparams_tables(model_best_runs_by_metrics, dataset_name):
@@ -72,10 +76,10 @@ def produce_experiment_pipeline_hparams_tables(model_best_runs_by_metrics, datas
             pipeline_hparams[f'step_{step}'] = preprocessing
 
         hyperparameters_by_metric[metric] = pipeline_hparams
-
-    hparams_by_metric_to_latex_table(
-        hyperparameters_by_metric, dataset_name, columns=['Parameter', 'Value']
-    )
+    output_dir = os.path.join('assets', dataset_name, 'pipeline_hyperparameters')
+    hparams_by_metric_to_latex_table(hyperparameters_by_metric,
+                                     columns=['Parameter', 'Value'],
+                                     output_dir=output_dir)
 
 
 def produce_experiment_confusion_matrices(model_best_runs_by_metrics, dataset_name):
@@ -118,3 +122,44 @@ def get_best_models_results(dataset_name, experiments, display=True):
             display(best_models_df)
             display(Markdown('#### LaTeX Table:'))
             print(latex_table)
+
+
+def render_template(templates_dir, template_name, experiment, dataset, output_dir):
+    env = load_templates_env(templates_dir)
+    tmpl = env.get_template(template_name)
+    model = EXPERIMENTS_MODEL_MAPPING[experiment]
+    model_lower = model.lower()
+    dataset = DATASET_NAMES_MAPPING[dataset]
+    dataset_lower = dataset.lower()
+    output = tmpl.render(MODEL=model,
+                         MODEL_LOWER=model_lower,
+                         DATASET=dataset,
+                         DATASET_LOWER=dataset_lower)
+    output_path = os.path.join(output_dir, f'table.tex')
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(output)
+
+
+def load_templates_env(path_to_templates):
+    return Environment(
+        loader=FileSystemLoader(path_to_templates),
+        autoescape=False,
+        block_start_string='((*', block_end_string='*))',
+        variable_start_string='(((', variable_end_string=')))'
+    )
+
+
+DATASET_NAMES_MAPPING = {
+    'recovery': 'ReCOVery',
+    'isot': 'ISOT',
+    'euvsdisinfo': 'EUvsDisinfo',
+    'cz_dataset': 'Czech'
+}
+
+EXPERIMENTS_MODEL_MAPPING = {
+    'bert': 'BERT',
+    'distillibert': 'DistilliBERT',
+    'robert': 'RoBERTa',
+    'gpt1': 'GPT1',
+    'gpt2': 'GPT2'
+}
