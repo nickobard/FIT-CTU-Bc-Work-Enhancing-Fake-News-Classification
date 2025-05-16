@@ -1,0 +1,1 @@
+{'type': 'stemmer', 'language': 'english', 'stemmer_type': 'snowball', 'language_code': 'en'}

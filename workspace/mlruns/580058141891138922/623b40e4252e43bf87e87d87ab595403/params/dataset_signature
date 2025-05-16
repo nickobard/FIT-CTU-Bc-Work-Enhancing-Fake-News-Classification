@@ -1,0 +1,1 @@
+dataset(dn=isot,tp=0.7,vp=0.15);pipeline([distilli_bert__encoder(t=distilbert-base-uncased,t=true,p=max_length,tml=256,isiw=false)])

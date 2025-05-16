@@ -1,0 +1,1 @@
+model(mn=distillibert,ti=distilbert-base-uncased,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01);dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([noise_reduction(),distilli_bert__encoder(t=distilbert-base-uncased,t=true,p=max_length,tml=128,isiw=false)]);2025-05-16_15-22-00;rs=2543001873

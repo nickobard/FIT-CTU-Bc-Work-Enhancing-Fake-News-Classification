@@ -1,0 +1,1 @@
+model(mn=distillibert,ti=distilbert-base-uncased,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01);dataset(dn=isot,tp=0.7,vp=0.15);pipeline([distilli_bert__encoder(t=distilbert-base-uncased,t=true,p=max_length,tml=128,isiw=false)])

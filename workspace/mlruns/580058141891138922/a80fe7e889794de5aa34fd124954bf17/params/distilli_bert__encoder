@@ -1,0 +1,1 @@
+{'tokenizer': 'distilbert-base-uncased', 'truncation': True, 'padding': 'max_length', 'truncation_max_length': 256, 'is_split_into_words': True}
