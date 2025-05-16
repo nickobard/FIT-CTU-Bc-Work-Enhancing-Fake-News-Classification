@@ -1,1 +1,0 @@
-<PreprocessingPipeline 'noise_reduction': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x000001AC6F5088F0>, <workspace.sources.local_datasets.preprocessing.cleaning.NoiseReduction object at 0x000001AC6F508350>, <workspace.sources.local_datasets.preprocessing.encoders.encoders.BertBaseUncasedEncoder object at 0x000001AC6F509070>]>

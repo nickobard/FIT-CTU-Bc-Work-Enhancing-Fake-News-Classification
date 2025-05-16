@@ -1,1 +1,0 @@
-<PreprocessingPipeline 'truncated_minimal_gpt1_pipeline': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x0000015FE10175F0>, <workspace.sources.local_datasets.preprocessing.encoding.OpenaAI_GPT1_Encoder object at 0x0000015FB8A7E330>]>

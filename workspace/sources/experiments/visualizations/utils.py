@@ -1,5 +1,3 @@
-from ..metrics import Loss
-
 METRICS_PLOT_NAMES_MAPPING = {
     'precision': 'Precision',
     'recall': 'Recall',
@@ -10,27 +8,6 @@ METRICS_PLOT_NAMES_MAPPING = {
     'false_positives_rate': 'FPR',
     'false_negatives_rate': 'FNR'
 }
-
-
-def pick_best_run_by_metric(runs, metric, second_metric=Loss):
-    """Pick the best run based on given metric and its loss value."""
-    metrics_keys = [f'test_{metric.name}_by_{metric.name}', f'test_{second_metric.name}_by_{metric.name}']
-    metrics_greater_is_better = [metric.greater_is_better,
-                                 second_metric.greater_is_better]
-    metrics = zip(metrics_keys, metrics_greater_is_better)
-    # Filter runs that have required metrics
-    valid_runs = [run for run in runs
-                  if all(key in run.data.metrics for key in metrics_keys)]
-
-    if not valid_runs:
-        return None
-
-    # Define sort key function
-    def _get_run_sort_key(run):
-        return tuple(run.data.metrics[m_key] if m_gib else -run.data.metrics[m_key] for m_key, m_gib in metrics)
-
-    # Return run with best metrics
-    return max(valid_runs, key=_get_run_sort_key)
 
 
 class InteractiveText:

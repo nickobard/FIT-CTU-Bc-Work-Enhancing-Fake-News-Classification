@@ -1,1 +1,0 @@
-model=bert_base_uncased(mmn=loss,e=10,bs=8,ebs=8,lr=5e-05,wd=0.01,esp=3,est=0.001);d=ReCOVery(dn=recovery,tp=0.7,vp=0.15);pipeline=truncated_minimal_bert_pipeline([truncation(f=0.1,tt=top),bert_base_uncased_encoder(t=bert-base-cased,tt=bert_tokenizer_fast,t=true,p=max_length,tml=512,isiw=false)])

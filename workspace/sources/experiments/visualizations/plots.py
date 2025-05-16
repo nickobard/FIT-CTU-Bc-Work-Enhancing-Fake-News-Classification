@@ -10,7 +10,7 @@ from .utils import METRICS_PLOT_NAMES_MAPPING
 from sklearn.metrics import roc_curve, auc
 
 
-def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/'):
+def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=True):
     """
     Create and save confusion matrix plot for given metric.
     """
@@ -63,8 +63,9 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, out
                      fontsize=8)
 
     metric_plot_name = METRICS_PLOT_NAMES_MAPPING[by_metric.name]
-    plt.title(f'Confusion matrix with best model selected by {metric_plot_name} metric',
-              fontsize=14, fontweight='bold', pad=15)
+    if show_title:
+        plt.title(f'Confusion matrix with best model selected by {metric_plot_name} metric',
+                  fontsize=14, fontweight='bold', pad=15)
     plt.xlabel('Predicted', fontweight='bold')
     plt.ylabel('True', fontweight='bold')
 
@@ -77,7 +78,7 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, out
     plt.show()
 
 
-def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='assets/'):
+def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='assets/', show_title=True):
     """
     Plot ROC curve for a given metric from MLflow artifacts
     """
@@ -117,8 +118,9 @@ def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='ass
     plt.xlabel('False Positives Rate', fontweight='bold')
     plt.ylabel('True Positives Rate', fontweight='bold')
     metric_plot_name = METRICS_PLOT_NAMES_MAPPING[by_metric.name]
-    plt.title(f'ROC Curve of best model selected by {metric_plot_name} metric',
-              fontsize=14, fontweight='bold', pad=15)
+    if show_title:
+        plt.title(f'ROC Curve of best model selected by {metric_plot_name} metric',
+                  fontsize=14, fontweight='bold', pad=15)
     legend = plt.legend(loc="lower right", framealpha=1, facecolor='white')
     plt.grid(True)
     output_dir = os.path.join(output_dir, dataset_name) if dataset_name else output_dir

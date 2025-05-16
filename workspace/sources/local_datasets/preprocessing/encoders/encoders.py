@@ -1,3 +1,5 @@
+from transformers import AutoTokenizer
+
 from .base import TransformersEncoder
 from typing import Literal
 
@@ -26,7 +28,7 @@ class DistilliBERT_Encoder(TransformersEncoder):
                          add_decoded_input_ids_for_debug)
 
 
-class RobertaEncoder(BertBaseUncasedEncoder):
+class RoBERTaEncoder(BertBaseUncasedEncoder):
     def __init__(self,
                  tokenizer_identifier='roberta-base',
                  truncation=True,
@@ -36,6 +38,11 @@ class RobertaEncoder(BertBaseUncasedEncoder):
                  add_decoded_input_ids_for_debug=True):
         super().__init__(tokenizer_identifier, truncation, truncation_max_length, padding, is_split_into_words,
                          add_decoded_input_ids_for_debug)
+        self.add_prefix_space = is_split_into_words
+
+    def _init_encoder(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_identifier,
+                                                       add_prefix_space=self.add_prefix_space)
 
 
 class OpenAI_GPT_Encoder(TransformersEncoder):
@@ -96,3 +103,12 @@ class GPT2_Encoder(OpenAI_GPT_Encoder):
                  add_decoded_input_ids_for_debug=True):
         super().__init__(tokenizer_identifier, truncation, truncation_max_length, padding, is_split_into_words,
                          add_decoded_input_ids_for_debug)
+        self.add_prefix_space = is_split_into_words
+
+    def _init_encoder(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_identifier,
+                                                       add_prefix_space=self.add_prefix_space)
+        self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        self.vocab_size = len(self.tokenizer.get_vocab())
+        self.pad_token = self.tokenizer.pad_token
+        self.pad_token_id = self.tokenizer.pad_token_id

@@ -1,1 +1,0 @@
-dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([truncation(f=0.05,tt=top),bert_base_uncased_encoder(t=bert-base-uncased,t=true,p=max_length,tml=128,isiw=false)])
