@@ -5,7 +5,7 @@ from .utils import METRICS_PLOT_NAMES_MAPPING
 from ..metrics import standard_metrics
 
 
-def export_best_models_to_latex(metric, dataset_name, metrics_df: pd.DataFrame,
+def export_best_models_to_latex(metric, metrics_df: pd.DataFrame,
                                 output_dir: str = 'assets/tables/') -> str:
     by_metric = metric.name
     experiment_columns = ['Model']
@@ -14,7 +14,7 @@ def export_best_models_to_latex(metric, dataset_name, metrics_df: pd.DataFrame,
     selection_df = metrics_df[selected_columns]
 
     # Add bold formatting to specific columns
-    bold_columns = ['Precision', 'F1-Score', 'ROC-AUC', 'FPR']
+    bold_columns = ['Accuracy', 'Precision', 'F1-Score', 'ROC-AUC', 'FPR']
     column_format_left_size = '|' + '|'.join(['l'] * len(experiment_columns)) + '|'
     column_format_right_size = '|' + '|'.join(['r'] * len(metrics_columns)) + '|'
     column_format = column_format_left_size + column_format_right_size
@@ -27,26 +27,13 @@ def export_best_models_to_latex(metric, dataset_name, metrics_df: pd.DataFrame,
     latex_table = latex_table.replace('\\midrule', '\\midrule \\midrule')
     for col in bold_columns:
         latex_table = latex_table.replace(col, f'\\textbf{{{col}}}')
-    # Add table environment, caption and label
-    by_metric_label = METRICS_PLOT_NAMES_MAPPING[by_metric]
-    caption = f'Best models selected by {by_metric_label} metric.'
-    label = f'tab:{dataset_name.lower()}_best_models_by_{by_metric.lower()}'
-    table_env = (
-        "\\begin{table}[]\n"
-        "    \\footnotesize\n"
-        f"    \\caption{{{caption}}}\n"
-        f"    \\label{{{label}}}\n"
-        "    \\centering\n"
-        f"{latex_table}"
-        "\\end{table}"
-    )
 
     output_path = os.path.join(output_dir, f'best_models_table_by_{by_metric}.tex')
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w') as f:
-        f.write(table_env)
+        f.write(latex_table)
 
-    return table_env
+    return latex_table
 
 
 def create_metrics_comparison_df(metric,
