@@ -1,0 +1,1 @@
+<PreprocessingPipeline 'minimal': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x000001CAA8006D80>, <workspace.sources.local_datasets.preprocessing.encoders.encoders.DistilliBERT_Encoder object at 0x000001CAA831F740>]>

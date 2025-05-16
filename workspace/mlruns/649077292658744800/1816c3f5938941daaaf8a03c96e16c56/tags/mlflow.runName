@@ -1,0 +1,1 @@
+model(mn=gpt2,ti=gpt2,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01,pt=none,pti=none);dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([truncation(f=0.15,tt=top),gpt2__encoder(t=gpt2,t=true,p=max_length,tml=128,isiw=false,pt=none)]);2025-05-16_02-06-57;rs=2272126363

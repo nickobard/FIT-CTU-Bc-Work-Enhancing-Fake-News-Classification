@@ -1,0 +1,1 @@
+dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([truncation(f=0.1,tt=top),noise_reduction(),nltk_tokenizer(lc=cs),lemmatization(lc=cs),bert_base_uncased_encoder(t=bert-base-uncased,t=true,p=max_length,tml=128,isiw=true)])

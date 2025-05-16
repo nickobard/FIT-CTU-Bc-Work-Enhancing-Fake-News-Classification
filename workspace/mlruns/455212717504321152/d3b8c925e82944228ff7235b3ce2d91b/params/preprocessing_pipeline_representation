@@ -1,0 +1,1 @@
+<PreprocessingPipeline 'minimal': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x00000232B0E98D10>, <workspace.sources.local_datasets.preprocessing.encoders.encoders.GPT1_Encoder object at 0x00000232B0E9BD10>]>

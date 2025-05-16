@@ -1,0 +1,1 @@
+<PreprocessingPipeline 'noise_reduction': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x00000232B0E9BE90>, <workspace.sources.local_datasets.preprocessing.cleaning.NoiseReduction object at 0x00000232B0E9A120>, <workspace.sources.local_datasets.preprocessing.encoders.encoders.GPT1_Encoder object at 0x00000232B0E9A060>]>

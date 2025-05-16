@@ -1,0 +1,1 @@
+dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([truncation(f=0.15,tt=top),ro_ber_ta_encoder(t=roberta-base,t=true,p=max_length,tml=128,isiw=false)])

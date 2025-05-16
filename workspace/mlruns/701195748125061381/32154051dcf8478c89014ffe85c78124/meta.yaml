@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/distillibert/../../mlruns/701195748125061381/32154051dcf8478c89014ffe85c78124/artifacts
+end_time: 1747351648587
+entry_point_name: ''
+experiment_id: '701195748125061381'
+lifecycle_stage: active
+run_id: 32154051dcf8478c89014ffe85c78124
+run_name: model(mn=distillibert,ti=distilbert-base-uncased,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01);dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([truncation(f=0.1,tt=top),noise_reduction(),nltk_tokenizer(lc=cs),stemming(st=czech_stemmer,lc=cs),distilli_bert__encoder(t=distilbert-base-uncased,t=true,p=max_length,tml=128,isiw=true)]);2025-05-16_01-26-59;rs=3121896883
+run_uuid: 32154051dcf8478c89014ffe85c78124
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747351619911
+status: 3
+tags: []
+user_id: nikita.bardatskii
