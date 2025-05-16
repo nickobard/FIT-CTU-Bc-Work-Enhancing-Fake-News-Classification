@@ -94,5 +94,3 @@ def compute_standard_metrics(evaluation):
                         'probabilities': probabilities,
                         'confusion_matrix_': confusion_matrix_}
     return {metric.name: metric.compute(**computation_data) for metric in standard_metrics}
-
-

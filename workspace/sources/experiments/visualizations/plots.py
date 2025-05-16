@@ -10,7 +10,7 @@ from .utils import METRICS_PLOT_NAMES_MAPPING
 from sklearn.metrics import roc_curve, auc
 
 
-def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=True):
+def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=False):
     """
     Create and save confusion matrix plot for given metric.
     """
@@ -19,9 +19,9 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, out
 
     # Load predictions and labels
     predictions_path = os.path.join(by_metric_dir_path,
-                                    'evaluations_predictions.json')
+                                    'predictions.json')
     labels_path = os.path.join(by_metric_dir_path,
-                               'evaluation_labels.json')
+                               'labels.json')
 
     with open(predictions_path, 'r') as f:
         predictions = json.load(f)
@@ -78,7 +78,7 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, out
     plt.show()
 
 
-def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='assets/', show_title=True):
+def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='assets/', show_title=False):
     """
     Plot ROC curve for a given metric from MLflow artifacts
     """
@@ -87,9 +87,9 @@ def plot_roc_curve(artifacts_path, by_metric, dataset_name=None, output_dir='ass
 
     # Load predictions and labels
     predictions_path = os.path.join(by_metric_dir_path,
-                                    'evaluations_predictions.json')
+                                    'predictions.json')
     labels_path = os.path.join(by_metric_dir_path,
-                               'evaluation_labels.json')
+                               'labels.json')
 
     with open(predictions_path, 'r') as f:
         predictions = json.load(f)

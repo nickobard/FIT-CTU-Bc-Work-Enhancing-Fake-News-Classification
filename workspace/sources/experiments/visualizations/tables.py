@@ -41,7 +41,7 @@ def export_best_models_to_latex(metric, dataset_name, metrics_df: pd.DataFrame,
         "\\end{table}"
     )
 
-    output_path = os.path.join(output_dir, f'best_models_table_by_{by_metric}.txt')
+    output_path = os.path.join(output_dir, f'best_models_table_by_{by_metric}.tex')
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w') as f:
         f.write(table_env)
