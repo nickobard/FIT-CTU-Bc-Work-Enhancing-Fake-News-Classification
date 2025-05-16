@@ -26,7 +26,11 @@ class Preprocessing(ABC):
         self._set_logger(logger)
         exploded_params = {f'{self.name()}_param_{prep_key}': prep_val for prep_key, prep_val in
                            self._detailed_params().items()}
-        params = {self.name(): self._detailed_params(),
+        detailed_params_dict = {f'{self.name()}_detailed': self._detailed_params()}
+        params_dict = {self.name(): self._params()}
+
+        params = {**detailed_params_dict,
+                  **params_dict,
                   **exploded_params}
         log_params(params, logger=self.logger)
         return params
