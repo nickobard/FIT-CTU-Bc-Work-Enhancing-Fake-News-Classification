@@ -1,4 +1,4 @@
-from transformers import BertTokenizer
+from transformers import BertTokenizer, AutoTokenizer
 from .base import Preprocessing
 import nltk
 from nltk.tokenize import word_tokenize
@@ -39,6 +39,68 @@ class NLTKTokenizer(Preprocessing):
             return tokens
         elif isinstance(text, str):
             return word_tokenize(text, language=self.language)
+        else:
+            return text
+
+    def preprocess(self, data):
+        tokenized_features = data.features.apply(self.tokenize)
+        data.features = tokenized_features
+        return data
+
+
+class BERTTokenizer(Preprocessing):
+    def __init__(self, tokenizer_identifier: str = 'bert-base-uncased'):
+        super().__init__()
+        self.tokenizer_identifier = tokenizer_identifier
+        self.tokenizer = None
+
+    def init(self, logger=None):
+        super().init(logger)
+        self._init_tokenizer()
+        return self
+
+    def _init_tokenizer(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_identifier)
+
+    def tokenize(self, text: str | list[str]):
+        if isinstance(text, list):
+            tokens = []
+            for word in text:
+                tokens.extend(self.tokenizer.tokenize(word))
+            return tokens
+        elif isinstance(text, str):
+            return self.tokenizer.tokenize(text)
+        else:
+            return text
+
+    def preprocess(self, data):
+        tokenized_features = data.features.apply(self.tokenize)
+        data.features = tokenized_features
+        return data
+
+
+class GPT1_Tokenizer(Preprocessing):
+    def __init__(self, tokenizer_identifier: str = 'openai-gpt'):
+        super().__init__()
+        self.tokenizer_identifier = tokenizer_identifier
+        self.tokenizer = None
+
+    def init(self, logger=None):
+        super().init(logger)
+        self._init_tokenizer()
+        return self
+
+    def _init_tokenizer(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_identifier)
+
+    def tokenize(self, text: str | list[str]):
+        if isinstance(text, list):
+            tokens = []
+            for word in text:
+                tokens.extend(self.tokenizer.tokenize(word))
+            return tokens
+        elif isinstance(text, str):
+            return self.tokenizer.tokenize(text)
         else:
             return text
 
