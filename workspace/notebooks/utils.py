@@ -63,12 +63,15 @@ def produce_experiment_model_hparams_tables(model_best_runs_by_metrics, dataset_
 def produce_experiment_pipeline_hparams_tables(model_best_runs_by_metrics, dataset_name):
     hyperparameters_by_metric = dict()
     for metric in standard_evaluation_metrics:
+        pipeline_hparams = dict()
         pipeline_name = model_best_runs_by_metrics[metric.name].data.params['preprocessing_pipeline_name']
-        hyperparameters_by_metric['pipeline_name'] = pipeline_name
+        pipeline_hparams['pipeline_name'] = pipeline_name
 
         pipeline = ast.literal_eval(model_best_runs_by_metrics[metric.name].data.params['preprocessing_pipeline'])
         for step, preprocessing in enumerate(pipeline):
-            hyperparameters_by_metric[f'step_{step}'] = preprocessing
+            pipeline_hparams[f'step_{step}'] = preprocessing
+
+        hyperparameters_by_metric[metric] = pipeline_hparams
 
     hparams_by_metric_to_latex_table(
         hyperparameters_by_metric, dataset_name, columns=['Parameter', 'Value']
