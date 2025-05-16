@@ -1,0 +1,1 @@
+{'type': 'tokenizer', 'tokenizer_type': 'nltk', 'tokenizer': 'word-tokenize', 'nltk_package': 'punkt_pub', 'language': 'english', 'language_code': 'en'}

@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/roberta/../../mlruns/610464483484670404/8f5af57e89d74b2f9e412360ba9a3696/artifacts
+end_time: 1747417856971
+entry_point_name: ''
+experiment_id: '610464483484670404'
+lifecycle_stage: active
+run_id: 8f5af57e89d74b2f9e412360ba9a3696
+run_name: model(mn=gpt2,ti=gpt2,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01,pt=[pad],pti=50257);dataset(dn=euvsdisinfo,tp=0.7,vp=0.15);pipeline([gpt2__encoder(t=gpt2,t=true,p=max_length,tml=128,isiw=false,pt=[pad])]);2025-05-16_19-46-24;rs=952744202
+run_uuid: 8f5af57e89d74b2f9e412360ba9a3696
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747417584503
+status: 3
+tags: []
+user_id: nikita.bardatskii

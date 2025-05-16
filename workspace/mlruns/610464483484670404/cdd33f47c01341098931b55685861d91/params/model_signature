@@ -1,0 +1,1 @@
+model(mn=gpt2,ti=gpt2,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01,pt=[pad],pti=50257)
