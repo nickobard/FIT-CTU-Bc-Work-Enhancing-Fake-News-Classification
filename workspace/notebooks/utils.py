@@ -159,7 +159,7 @@ DATASET_NAMES_MAPPING = {
 EXPERIMENTS_MODEL_MAPPING = {
     'bert': 'BERT',
     'distillibert': 'DistilliBERT',
-    'robert': 'RoBERTa',
+    'roberta': 'RoBERTa',
     'gpt1': 'GPT1',
     'gpt2': 'GPT2'
 }
