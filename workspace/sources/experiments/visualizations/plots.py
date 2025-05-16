@@ -10,7 +10,8 @@ from .utils import METRICS_PLOT_NAMES_MAPPING
 from sklearn.metrics import roc_curve, auc
 
 
-def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=False):
+def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=False,
+                          show_plot=True):
     """
     Create and save confusion matrix plot for given metric.
     """
@@ -93,10 +94,13 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, out
     # Save plot
     plt.savefig(os.path.join(output_dir, f'confusion_matrix_by_{by_metric.name.lower()}.png'),
                 bbox_inches='tight', dpi=300)
-    plt.show()
+    if show_plot:
+        plt.show()
+    plt.close()
 
 
-def plot_roc_curve(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=False):
+def plot_roc_curve(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=False,
+                   show_plot=True):
     """
     Plot ROC curve for a given metric from MLflow artifacts
     """
@@ -157,4 +161,6 @@ def plot_roc_curve(artifacts_path, by_metric=Loss, dataset_name=None, output_dir
     # Save plot
     plt.savefig(os.path.join(output_dir, f'roc_curve_by_{by_metric.name.lower()}.png'),
                 bbox_inches='tight', dpi=300)
-    plt.show()
+    if show_plot:
+        plt.show()
+    plt.close()
