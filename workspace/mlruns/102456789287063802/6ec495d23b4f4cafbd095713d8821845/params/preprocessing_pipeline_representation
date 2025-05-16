@@ -1,0 +1,1 @@
+<PreprocessingPipeline 'minimal': [<workspace.sources.local_datasets.preprocessing.transformations.Truncation object at 0x0000019ED4AC7170>, <workspace.sources.local_datasets.preprocessing.encoders.encoders.BertBaseUncasedEncoder object at 0x0000019ED4914E30>]>
