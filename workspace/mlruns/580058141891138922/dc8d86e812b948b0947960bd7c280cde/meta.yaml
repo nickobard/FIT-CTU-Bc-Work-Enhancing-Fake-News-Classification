@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/580058141891138922/dc8d86e812b948b0947960bd7c280cde/artifacts
+end_time: 1747403417734
+entry_point_name: ''
+experiment_id: '580058141891138922'
+lifecycle_stage: active
+run_id: dc8d86e812b948b0947960bd7c280cde
+run_name: model(mn=distillibert,ti=distilbert-base-uncased,mmn=loss,e=10,bs=16,ebs=16,lr=5e-05,ls=linear,wd=0.001,o=adamw_torch,esp=3,est=0.01);dataset(dn=cz_dataset,tp=0.7,vp=0.15);pipeline([distilli_bert__encoder(t=distilbert-base-uncased,t=true,p=max_length,tml=256,isiw=false)]);2025-05-16_15-48-19;rs=3026648893
+run_uuid: dc8d86e812b948b0947960bd7c280cde
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747403299148
+status: 3
+tags: []
+user_id: nikita.bardatskii
