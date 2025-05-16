@@ -2,43 +2,70 @@ import matplotlib.pyplot as plt
 from ..dataset import Dataset
 
 
-def plot_token_length_distribution(dataset):
-    df_train_set = dataset.preprocessed_train_set.dataset
-    token_lengths = df_train_set['article'].apply(len)
+def plot_token_length_distribution(dataset, dataset_name, tokenizer_name,
+                                   save_path='images/token_lengths_distribution.png'):
+    # Font sizes
+    title_font_size = 14
+    label_font_size = 12
+    super_title_font_size = 16
 
-    # Create figure with 2 subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 10))
+    # Calculate token lengths
+    token_lengths = dataset['article'].apply(len)
 
-    # First plot
-    ax1.hist(token_lengths, bins=50, color='skyblue', edgecolor=None)
-    ax1.set_title('Distribution of Article Lengths (in tokens)')
-    ax1.set_xlabel('Number of tokens')
-    ax1.set_ylabel('Frequency')
+    # Create figure with 4 subplots in 2x2 grid
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
 
-    # Second plot
+    # First plot - full distribution
+    ax1.hist(token_lengths, bins=50, color='skyblue', edgecolor='skyblue', linewidth=0)
+    y_limit = ax1.get_ylim()[1]  # Get the y-limit from compound distribution
+    x_limit = ax1.get_xlim()  # Get the x-limits from compound distribution
+
+    # Set same y-limit and x-limit for all plots
+    for ax in [ax1, ax2, ax3, ax4]:
+        ax.set_ylim(0, y_limit)
+        ax.set_xlim(x_limit)
+
+    ax1.set_title('Compound Distribution', fontweight='bold', fontsize=title_font_size)
+    ax1.set_xlabel('Number of tokens', fontsize=label_font_size)
+    ax1.set_ylabel('Frequency', fontsize=label_font_size)
+
+    # Second plot - distribution by label (overlapped)
     colors = ['red', 'green']
     labels = ['Fake News', 'Reliable']
 
     for label, color, name in zip([0, 1], colors, labels):
-        mask = df_train_set['label'] == label
+        mask = dataset['label'] == label
         ax2.hist(token_lengths[mask], bins=50, color=color,
-                 alpha=0.5, label=name, edgecolor=None)
+                 alpha=0.5, label=name, edgecolor=color, linewidth=0)
 
-    ax2.set_title('Distribution of Article Lengths by Label')
-    ax2.set_xlabel('Number of tokens')
-    ax2.set_ylabel('Frequency')
+    ax2.set_title('Distribution by Label\n(overlapped)', fontweight='bold', fontsize=title_font_size)
+    ax2.set_xlabel('Number of tokens', fontsize=label_font_size)
+    ax2.set_ylabel('Frequency', fontsize=label_font_size)
+    ax2.legend()
+
+    # Third plot - Fake News distribution
+    mask_fake = dataset['label'] == 0
+    ax3.hist(token_lengths[mask_fake], bins=50, color='red', alpha=0.5, edgecolor='red', linewidth=0)
+    ax3.set_title('Fake News Distribution', fontweight='bold', fontsize=title_font_size)
+    ax3.set_xlabel('Number of tokens', fontsize=label_font_size)
+    ax3.set_ylabel('Frequency', fontsize=label_font_size)
+
+    # Fourth plot - Reliable News distribution
+    mask_reliable = dataset['label'] == 1
+    ax4.hist(token_lengths[mask_reliable], bins=50, color='green', alpha=0.5, edgecolor='green', linewidth=0)
+    ax4.set_title('Reliable News Distribution', fontweight='bold', fontsize=title_font_size)
+    ax4.set_xlabel('Number of tokens', fontsize=label_font_size)
+    ax4.set_ylabel('Frequency', fontsize=label_font_size)
 
     # Add vertical lines for model limits
     for limit, label, color in zip([512, 1024], ['512 tokens', '1024 tokens'], ['red', 'blue']):
-        ax1.axvline(x=limit, color=color, linestyle='--', label=label)
-        ax2.axvline(x=limit, color=color, linestyle='--', label=label)
+        for ax in [ax1, ax2, ax3, ax4]:
+            ax.axvline(x=limit, color=color, linestyle='--', label=label)
+            ax.legend()
 
-    ax1.legend()
-    ax2.legend()
-    fig.suptitle(f'{dataset.name} Dataset Distribution of Article Token Sizes')
-
+    fig.suptitle(f'{dataset_name} Dataset Distribution of Article Token Lengths ({tokenizer_name} tokenizer)',
+                 fontweight='bold', fontsize=super_title_font_size)
     plt.tight_layout()
-    plt.show()
 
 
 def plot_label_distribution(data, dataset_name):
@@ -61,9 +88,9 @@ def plot_label_distribution(data, dataset_name):
                  ha='center', fontsize=10, fontweight='bold')
 
     plt.ylim(0, max(label_counts.values) * 1.15)  # Add 15% margin on top
-    plt.show()
+
     plt.savefig('images/label_distribution.png')
-    plt.close()
+    plt.show()
 
 
 def plot_article_length_distribution(df, dataset_name, save_path='images/article_lengths_distribution.png'):
@@ -80,6 +107,14 @@ def plot_article_length_distribution(df, dataset_name, save_path='images/article
 
     # First plot - full distribution
     ax1.hist(article_lengths, bins=50, color='skyblue', edgecolor='skyblue', linewidth=0)
+    y_limit = ax1.get_ylim()[1]  # Get the y-limit from compound distribution
+    x_limit = ax1.get_xlim()  # Get the x-limits from compound distribution
+
+    # Set same y-limit and x-limit for all plots
+    for ax in [ax1, ax2, ax3, ax4]:
+        ax.set_ylim(0, y_limit)
+        ax.set_xlim(x_limit)
+
     ax1.set_title('Compound Distribution', fontweight='bold', fontsize=title_font_size)
     ax1.set_xlabel('Number of characters', fontsize=label_font_size)
     ax1.set_ylabel('Frequency', fontsize=label_font_size)
@@ -113,7 +148,7 @@ def plot_article_length_distribution(df, dataset_name, save_path='images/article
     ax4.set_ylabel('Frequency', fontsize=label_font_size)
 
     fig.suptitle(f'{dataset_name} Dataset Distribution of Article Lengths (in characters)',
-                 fontweight='bold', fontsize=super_title_font_size, y=1.01)
+                 fontweight='bold', fontsize=super_title_font_size)
     plt.tight_layout()
 
     # Save plots
