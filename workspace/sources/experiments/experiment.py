@@ -84,3 +84,7 @@ class Experiment(ABC):
             self._prepare(experiment_run)
             self.model.fit(self.dataset)
             self.model.evaluate()
+
+    def prune_artifacts(self):
+        self.model.prune_artifacts()
+        self.dataset.prune_artifacts()

@@ -3,6 +3,7 @@ import mlflow
 import pickle
 import os
 import utils
+import shutil
 from ..experiments.metrics import Loss
 from utils import generate_random_state
 from ..utils import create_and_get_local_logger
@@ -69,3 +70,12 @@ class Model(ABC):
         model_path = os.path.join(model_dir, "model.pkl")
         with open(model_path, 'wb') as f:
             pickle.dump(self, f)
+
+    def prune_artifacts(self):
+        self.logger.info('Pruning models artifacts to free space...')
+        model_artifacts = self.get_artifacts_path()
+        if model_artifacts and os.path.exists(model_artifacts):
+            shutil.rmtree(model_artifacts)
+            self.logger.info('Pruning models artifacts done...')
+        else:
+            self.logger.info('Could not prune artifacts...')
