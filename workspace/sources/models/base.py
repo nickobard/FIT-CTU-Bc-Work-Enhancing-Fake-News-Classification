@@ -78,8 +78,12 @@ class Model(ABC):
             used_logger = self.logger
         used_logger.info('Pruning models artifacts to free space...')
         model_artifacts = self.get_artifacts_path()
-        if model_artifacts and os.path.exists(model_artifacts):
-            shutil.rmtree(model_artifacts)
-            used_logger.info('Pruning models artifacts done...')
-        else:
-            used_logger.info('Could not prune artifacts...')
+        if not model_artifacts:
+            used_logger.info('Model artifacts path is None. Could not prune artifacts...')
+            return
+        if not os.path.exists(model_artifacts):
+            used_logger.info('Model artifacts path does not exist. Could not prune artifacts...')
+            return
+
+        shutil.rmtree(model_artifacts)
+        used_logger.info('Pruning models artifacts done...')
