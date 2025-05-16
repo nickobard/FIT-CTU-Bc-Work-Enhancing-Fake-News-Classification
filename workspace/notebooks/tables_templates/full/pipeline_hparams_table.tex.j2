@@ -1,6 +1,6 @@
 \begin{table}[!htbp]
-    \caption{Best (((MODEL))) model hyperparameters from the best epoch selected by different metrics on (((DATASET))) dataset}
-    \label{tab:(((DATASET_LOWER)))_(((MODEL_LOWER)))_hparams}
+    \caption{Best (((MODEL))) model pipeline parameters from the best epoch selected by different metrics on (((DATASET))) dataset}
+    \label{tab:(((DATASET_LOWER)))_(((MODEL_LOWER)))_pipeline_params}
     \centering
 
     %── Row 1 ──
@@ -27,9 +27,23 @@
     \hfill
     \begin{subtable}[t]{0.48\linewidth}
         \scriptsize
+        \caption{By False Positives Rate}
+        \input{hparams_table_by_false_positives_rate}
+    \end{subtable}
+
+    \vspace{1em}
+
+    %── Row 3 ──
+    \begin{subtable}[t]{0.48\linewidth}
+        \scriptsize
         \caption{By ROC-AUC}
         \input{hparams_table_by_roc_auc}
     \end{subtable}
-
+    \hfill
+    \begin{subtable}[t]{0.48\linewidth}
+        \scriptsize
+        \caption{By Loss}
+        \input{hparams_table_by_loss}
+    \end{subtable}
 
 \end{table}

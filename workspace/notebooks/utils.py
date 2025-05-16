@@ -127,8 +127,12 @@ def get_best_models_results(dataset_name, experiments, display=True):
 def render_template(templates_dir, template_name, experiment, dataset, output_dir):
     env = load_templates_env(templates_dir)
     tmpl = env.get_template(template_name)
-    model = EXPERIMENTS_MODEL_MAPPING[experiment]
-    model_lower = model.lower()
+    if experiment:
+        model = EXPERIMENTS_MODEL_MAPPING[experiment]
+        model_lower = model.lower()
+    else:
+        model = None
+        model_lower = None
     dataset = DATASET_NAMES_MAPPING[dataset]
     dataset_lower = dataset.lower()
     output = tmpl.render(MODEL=model,
