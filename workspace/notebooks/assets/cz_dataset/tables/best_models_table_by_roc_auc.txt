@@ -1,0 +1,17 @@
+\begin{table}[]
+    \footnotesize
+    \caption{Best models selected by ROC-AUC metric.}
+    \label{tab:cz_dataset_best_models_by_roc_auc}
+    \centering
+\begin{tabular}{|l||r|r|r|r|r|r|r|}
+\toprule
+Model & Accuracy & \textbf{Precision} & Recall & \textbf{F1-Score} & \textbf{ROC-AUC} & \textbf{FPR} & FNR \\
+\midrule \midrule
+BERT & 0.667 & 1.000 & 0.545 & 0.706 & 0.977 & 0.000 & 0.455 \\
+DistilliBERT & 0.467 & 0.750 & 0.300 & 0.429 & 0.800 & 0.200 & 0.700 \\
+RoBERTa & 0.682 & 0.682 & 1.000 & 0.811 & 0.886 & 1.000 & 0.000 \\
+GPT1 & 0.318 & 0.333 & 0.154 & 0.211 & 0.419 & 0.444 & 0.846 \\
+GPT2 & 0.636 & 0.684 & 0.867 & 0.765 & 0.476 & 0.857 & 0.133 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -7,8 +7,11 @@
 \toprule
 Model & Accuracy & \textbf{Precision} & Recall & \textbf{F1-Score} & \textbf{ROC-AUC} & \textbf{FPR} & FNR \\
 \midrule \midrule
-bert-base-uncased & 0.733 & 0.762 & 0.842 & 0.800 & 0.823 & 0.455 & 0.158 \\
-distilbert-base-uncased & 0.667 & 0.667 & 1.000 & 0.800 & 0.755 & 1.000 & 0.000 \\
+BERT & 0.667 & 0.667 & 1.000 & 0.800 & 0.580 & 1.000 & 0.000 \\
+DistilliBERT & 0.800 & 0.786 & 1.000 & 0.880 & 0.864 & 0.750 & 0.000 \\
+RoBERTa & 0.600 & 0.600 & 1.000 & 0.750 & 0.667 & 1.000 & 0.000 \\
+GPT1 & 0.667 & 0.615 & 1.000 & 0.762 & 0.804 & 0.714 & 0.000 \\
+GPT2 & 0.600 & 0.600 & 1.000 & 0.750 & 0.519 & 1.000 & 0.000 \\
 \bottomrule
 \end{tabular}
 \end{table}
