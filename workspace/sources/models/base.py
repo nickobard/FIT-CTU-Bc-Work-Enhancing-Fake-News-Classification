@@ -71,11 +71,15 @@ class Model(ABC):
         with open(model_path, 'wb') as f:
             pickle.dump(self, f)
 
-    def prune_artifacts(self):
-        self.logger.info('Pruning models artifacts to free space...')
+    def prune_artifacts(self, logger=None):
+        if logger:
+            used_logger = logger
+        else:
+            used_logger = self.logger
+        used_logger.info('Pruning models artifacts to free space...')
         model_artifacts = self.get_artifacts_path()
         if model_artifacts and os.path.exists(model_artifacts):
             shutil.rmtree(model_artifacts)
-            self.logger.info('Pruning models artifacts done...')
+            used_logger.info('Pruning models artifacts done...')
         else:
-            self.logger.info('Could not prune artifacts...')
+            used_logger.info('Could not prune artifacts...')

@@ -191,8 +191,9 @@ class Dataset(ABC):
                 'train_pct': self.train_pct,
                 'val_pct': self.val_pct}
 
-    def prune_artifacts(self):
+    def prune_artifacts(self, logger=None):
         pass
+
 
 if __name__ == "__main__":
     recovery = Dataset('ReCovery', 'workspace/sources/local_datasets/ReCOVery/recovery.csv').init().split()

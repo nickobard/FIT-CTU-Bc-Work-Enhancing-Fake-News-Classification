@@ -86,5 +86,16 @@ class Experiment(ABC):
             self.model.evaluate()
 
     def prune_artifacts(self):
-        self.model.prune_artifacts()
-        self.dataset.prune_artifacts()
+        if mlflow.active_run() is None:
+            existing_run = self._init_experiment()
+            if existing_run:
+                self.run_id = existing_run.info.run_id
+                with mlflow.start_run(run_id=self.run_id, experiment_id=self.experiment_id) as run:
+                    self.dataset.prune_artifacts(logger=self.logger)
+                    self.model.prune_artifacts(logger=self.logger)
+            else:
+                self.logger.info(
+                    'Could not run experiment pruning, because there is active run and no existing run with same experiment signature.')
+        else:
+            self.dataset.prune_artifacts(logger=self.logger)
+            self.model.prune_artifacts(logger=self.logger)
