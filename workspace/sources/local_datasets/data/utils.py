@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from ..dataset import Dataset
 import os
 
+
 def plot_token_length_distribution(dataset, dataset_name, tokenizer_name,
                                    save_dir='images/'):
     # Font sizes
