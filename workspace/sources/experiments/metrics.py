@@ -80,7 +80,7 @@ class Loss(Metric):
 
 standard_metrics = [Accuracy, Precision, Recall, F1Score, ROC_AUC, FalsePositivesRate, FalseNegativesRate]
 
-standard_evaluation_metrics = [Precision, F1Score, FalsePositivesRate, ROC_AUC, Loss]
+standard_evaluation_metrics = [Accuracy, Precision, F1Score, FalsePositivesRate, ROC_AUC, Loss]
 
 
 def compute_standard_metrics(evaluation):
