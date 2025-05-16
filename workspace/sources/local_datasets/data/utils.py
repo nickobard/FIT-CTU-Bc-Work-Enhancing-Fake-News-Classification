@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 from ..dataset import Dataset
-
+import os
 
 def plot_token_length_distribution(dataset, dataset_name, tokenizer_name,
-                                   save_path='images/token_lengths_distribution.png'):
+                                   save_dir='images/'):
     # Font sizes
     title_font_size = 14
     label_font_size = 12
@@ -66,6 +66,9 @@ def plot_token_length_distribution(dataset, dataset_name, tokenizer_name,
     fig.suptitle(f'{dataset_name} Dataset Distribution of Article Token Lengths ({tokenizer_name} tokenizer)',
                  fontweight='bold', fontsize=super_title_font_size)
     plt.tight_layout()
+    save_path = os.path.join(save_dir, f'{tokenizer_name.lower()}_token_length_distribution.png')
+    plt.savefig(save_path)
+    plt.show()
 
 
 def plot_label_distribution(data, dataset_name):
