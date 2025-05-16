@@ -96,9 +96,6 @@ def plot_confusion_matrix(artifacts_path, by_metric=Loss, dataset_name=None, out
     plt.show()
 
 
-plot_confusion_matrix(artifacts_path)
-
-
 def plot_roc_curve(artifacts_path, by_metric=Loss, dataset_name=None, output_dir='assets/', show_title=False):
     """
     Plot ROC curve for a given metric from MLflow artifacts
