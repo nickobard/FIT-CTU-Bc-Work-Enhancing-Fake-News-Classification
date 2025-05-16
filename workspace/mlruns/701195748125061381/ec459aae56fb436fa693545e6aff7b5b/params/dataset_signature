@@ -1,0 +1,1 @@
+dataset(dn=euvsdisinfo,tp=0.7,vp=0.15);pipeline([noise_reduction(),nltk_tokenizer(lc=en),stemming(st=snowball,lc=en),distilli_bert__encoder(t=distilbert-base-uncased,t=true,p=max_length,tml=128,isiw=true)])
