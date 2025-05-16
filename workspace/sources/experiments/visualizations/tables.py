@@ -38,7 +38,8 @@ def export_best_models_to_latex(metric, metrics_df: pd.DataFrame,
 
 def create_metrics_comparison_df(metric,
                                  df_data,
-                                 output_dir='assets/tables/'):
+                                 output_dir='assets/tables/',
+                                 output_csv=False):
     metrics_df_data = []
     experiments_data = df_data[metric.name]
     for experiment_name, run in experiments_data.items():
@@ -61,7 +62,8 @@ def create_metrics_comparison_df(metric,
                 **additional_metrics_data}
         metrics_df_data.append(data)
     metrics_df = pd.DataFrame(metrics_df_data)
-    output_path = os.path.join(output_dir, f'best_models_table_by_{metric.name}.csv')
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    metrics_df.to_csv(output_path, index=False)
+    if output_csv:
+        output_path = os.path.join(output_dir, f'best_models_table_by_{metric.name}.csv')
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        metrics_df.to_csv(output_path, index=False)
     return metrics_df
