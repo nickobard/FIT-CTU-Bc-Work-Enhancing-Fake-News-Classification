@@ -1,4 +1,4 @@
-artifact_uri: file:./mlruns/852930392549225895/b253f3bc3c97417f91ae776fe46ce56c/artifacts
+artifact_uri: ./mlruns/852930392549225895/b253f3bc3c97417f91ae776fe46ce56c/artifacts
 end_time: 1747402936120
 entry_point_name: ''
 experiment_id: '852930392549225895'

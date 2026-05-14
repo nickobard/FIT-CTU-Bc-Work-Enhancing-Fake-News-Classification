@@ -1,4 +1,4 @@
-artifact_location: file:./mlruns/455212717504321152
+artifact_location: ./mlruns/455212717504321152
 creation_time: 1747351776847
 experiment_id: '455212717504321152'
 last_update_time: 1747351776847

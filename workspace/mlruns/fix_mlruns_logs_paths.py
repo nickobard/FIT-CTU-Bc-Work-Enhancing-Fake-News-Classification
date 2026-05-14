@@ -10,6 +10,18 @@ def remove_pycache_dirs(root: Path) -> None:
             shutil.rmtree(pycache_dir)
             print(f"Removed: {pycache_dir}")
 
+def ensure_artifact_dir_exists(artifact_uri: str, mlruns_root: Path) -> None:
+    path = normalize_path(artifact_uri)
+
+    if path.startswith("./mlruns/"):
+        relative_part = path[len("./mlruns/"):]
+        artifact_path = mlruns_root / relative_part
+    else:
+        artifact_path = Path(path)
+
+    artifact_path.mkdir(parents=True, exist_ok=True)
+    print(f"Ensured artifact directory exists: {artifact_path}")
+
 def normalize_path(value: str) -> str:
     value = value.strip()
 
@@ -35,7 +47,7 @@ def to_relative_mlruns_path(value: str) -> str:
 
     relative_part = normalized.split(marker, 1)[1]
 
-    return f"file:./mlruns/{relative_part}"
+    return f"./mlruns/{relative_part}"
 
 
 def to_absolute_mlruns_path(value: str, mlruns_root: Path) -> str:
@@ -56,7 +68,7 @@ def to_absolute_mlruns_path(value: str, mlruns_root: Path) -> str:
 
     absolute_path = (mlruns_root / relative_part).resolve()
 
-    return f"file:{absolute_path.as_posix()}"
+    return f"{absolute_path.as_posix()}"
 
 
 def convert_path(value: str, mode: str, mlruns_root: Path) -> str:
@@ -86,6 +98,9 @@ def fix_yaml_file(
 
     old_value = str(data[key])
     new_value = convert_path(old_value, mode, mlruns_root)
+
+    if key == "artifact_uri":
+        ensure_artifact_dir_exists(new_value, mlruns_root)
 
     if old_value == new_value:
         return True

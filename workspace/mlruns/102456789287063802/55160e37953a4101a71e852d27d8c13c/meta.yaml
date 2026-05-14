@@ -1,4 +1,4 @@
-artifact_uri: file:./mlruns/102456789287063802/55160e37953a4101a71e852d27d8c13c/artifacts
+artifact_uri: ./mlruns/102456789287063802/55160e37953a4101a71e852d27d8c13c/artifacts
 deleted_time: 1747355274920
 end_time: 1747350103529
 entry_point_name: ''
