@@ -10,7 +10,7 @@
       <excludeFolder url="file://$MODULE_DIR$/workspace/mlruns" />
       <excludeFolder url="file://$MODULE_DIR$/workspace/thesis_theme_preparation" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at C:\Users\nikita.bardatskii\git\bi-bap-2025-bardanik\.venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="bi-bap-bardanik" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

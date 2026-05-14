@@ -1,4 +1,4 @@
-artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/bert_base_uncased/../../mlruns/852930392549225895/101e7330e8584bf9bf6ac2e3069680f8/artifacts
+artifact_uri: file:./mlruns/852930392549225895/101e7330e8584bf9bf6ac2e3069680f8/artifacts
 deleted_time: 1747371905979
 end_time: 1747371895088
 entry_point_name: ''

@@ -1,4 +1,4 @@
-artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/roberta/../../mlruns/610464483484670404/7f973b1c99a84000893967bf0bcbb640/artifacts
+artifact_uri: file:./mlruns/610464483484670404/7f973b1c99a84000893967bf0bcbb640/artifacts
 end_time: 1747418699418
 entry_point_name: ''
 experiment_id: '610464483484670404'

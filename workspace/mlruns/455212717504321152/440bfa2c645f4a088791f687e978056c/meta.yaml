@@ -1,4 +1,4 @@
-artifact_uri: file:C:/Users/nikita.bardatskii/git/bi-bap-2025-bardanik/workspace/notebooks/openai_gpt1/../../mlruns/455212717504321152/440bfa2c645f4a088791f687e978056c/artifacts
+artifact_uri: file:./mlruns/455212717504321152/440bfa2c645f4a088791f687e978056c/artifacts
 end_time: 1747352464258
 entry_point_name: ''
 experiment_id: '455212717504321152'
