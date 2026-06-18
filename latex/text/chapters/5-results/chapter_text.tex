@@ -1,0 +1,143 @@
+\chapter{Results}
+
+\begin{markdown}
+
+This chapter presents the results obtained during the experiments and compares them with the results reported in the previous work by Jan Flajžík \cite{flajzik_classification_2024}. The results are presented separately for each dataset.
+
+\end{markdown}
+
+\section{Results for the ReCOVery Dataset}
+
+\begin{markdown}
+
+The results for the ReCOVery dataset are shown in Table \ref{tab:recovery_accuracy_results}. Among the evaluated models, BERT achieved the highest accuracy.
+
+In the previous work by Jan Flajžík \cite{flajzik_classification_2024}, the best-performing model for this dataset was Naive Bayes with an accuracy of 83.5\%. In that implementation, articles were truncated to 250 words before preprocessing. Since transformer tokenizers typically split words into multiple subword tokens, the effective amount of processed text in this thesis is not directly comparable to word-based truncation. Nevertheless, the transformer-based BERT model achieved higher accuracy despite operating on only the first 512 tokens of each article.
+
+The improvement over the previous approach is relatively moderate. However, considering that many articles in the ReCOVery dataset significantly exceed the selected token limit, it is possible that processing longer text segments or complete articles could further improve transformer performance.
+
+\end{markdown}
+
+\begin{table}[b]
+    \small
+    \centering
+    \caption{Best results for the ReCOVery dataset ranked by accuracy}
+    \label{tab:recovery_accuracy_results}
+    \input{assets/recovery/tables/best_models_table_by_accuracy.tex}
+\end{table}
+
+\FloatBarrier
+
+\begin{markdown}
+
+The preprocessing pipeline used for the best-performing configuration consisted only of tokenization using the BERT tokenizer without additional preprocessing operations such as stemming, lemmatization, or noise reduction.
+
+The selected hyperparameters were:
+- batch size: 16,
+- learning rate: $5 \times 10^{-5}$,
+- learning rate scheduler: linear,
+- weight decay: 0,
+- optimizer: AdamW.
+
+\end{markdown}
+
+\FloatBarrier
+
+\section{Results for the ISOT Dataset}
+
+\begin{markdown}
+
+The results for the ISOT dataset are shown in Table \ref{tab:isot_accuracy_results}. Similarly to the ReCOVery dataset, BERT achieved the highest accuracy among all evaluated models.
+
+The previous work by Jan Flajžík \cite{flajzik_classification_2024} reported approximately 97\% accuracy using a CNN-based architecture with articles truncated to 250 words. In this thesis, BERT achieved  near-perfect classification performance. One possible explanation is that the ISOT articles are generally shorter than those in the ReCOVery dataset, allowing the selected 512-token window to preserve a larger proportion of the original text.
+
+\end{markdown}
+
+\begin{table}[b]
+    \small
+    \centering
+    \caption{Best results for the ISOT dataset ranked by accuracy}
+    \label{tab:isot_accuracy_results}
+    \input{assets/isot/tables/best_models_table_by_accuracy.tex}
+\end{table}
+
+\FloatBarrier
+
+\begin{markdown}
+
+The best-performing configuration used the following hyperparameters:
+- batch size: 16,
+- learning rate: $5 \times 10^{-5}$,
+- learning rate scheduler: linear,
+- weight decay: 0.001,
+- optimizer: AdamW.
+
+The preprocessing pipeline again consisted only of BERT tokenization without additional preprocessing operations.
+
+\end{markdown}
+
+\section{Results for the EUvsDisinfo Dataset}
+
+\begin{markdown}
+
+Table \ref{tab:euvsdisinfo_accuracy_results} presents the results for the EUvsDisinfo dataset. BERT again achieved the best overall performance.
+
+This dataset differs substantially from the previous datasets because it consists primarily of short summaries rather than full-length articles. As discussed in the dataset analysis chapter, nearly all samples fit entirely within the 512-token limit. Consequently, the transformer models are able to process the complete textual information without truncation.
+
+The best-performing BERT configuration achieved 100\% accuracy, improving upon the 95.1\% accuracy with LSTM reported in \cite{flajzik_classification_2024}.
+
+\end{markdown}
+
+\begin{table}[b]
+    \small
+    \centering
+    \caption{Best results for the EUvsDisinfo dataset ranked by accuracy}
+    \label{tab:euvsdisinfo_accuracy_results}
+    \input{assets/euvsdisinfo/tables/best_models_table_by_accuracy.tex}
+\end{table}
+
+\FloatBarrier
+
+\begin{markdown}
+
+The selected hyperparameters for the best-performing model were:
+- batch size: 16,
+- learning rate: $5 \times 10^{-5}$,
+- learning rate scheduler: linear,
+- weight decay: 0.001,
+- optimizer: AdamW.
+
+The preprocessing pipeline again consisted only of tokenization using the BERT tokenizer.
+
+\end{markdown}
+
+\section{Results for the Czech Dataset}
+
+\begin{markdown}
+
+The results for the Czech dataset are shown in Table \ref{tab:cz_accuracy_results}. Unlike the English-language datasets, the Czech dataset produced less consistent results across the evaluated transformer architectures.
+
+Interestingly, DistilBERT achieved better performance than the full BERT model despite being substantially smaller. Across multiple experimental runs \ref{fig:cz_dataset_distillbert_runs}, DistilBERT consistently produced stronger results than BERT under various hyperparameter configurations.
+
+The experiments also suggest that preprocessing techniques had only a limited influence on the final performance. Both minimal preprocessing pipelines and more extensive preprocessing configurations produced both strong and weak results across different runs.
+
+Another notable observation is that the Naive Bayes model reported in \cite{flajzik_classification_2024} achieved an accuracy of 89.9\%, outperforming the BERT model evaluated in this thesis. At the current stage of experimentation, no clear explanation for this behavior has been identified.
+
+\end{markdown}
+
+\begin{table}[b]
+    \small
+    \centering
+    \caption{Best results for the Czech dataset ranked by accuracy}
+    \label{tab:cz_accuracy_results}
+    \input{assets/cz_dataset/tables/best_models_table_by_accuracy.tex}
+\end{table}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{FITthesis-LaTeX-master/text/chapters/5-results/assets/images/cz_dataset_distillbert.png}
+    \caption{Example of DistilBERT experiment runs for the Czech dataset recorded in MLflow}
+    \label{fig:cz_dataset_distillbert_runs}
+\end{figure}
+
+\FloatBarrier

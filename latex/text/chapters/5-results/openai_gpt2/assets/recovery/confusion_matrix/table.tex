@@ -1,0 +1,33 @@
+\begin{figure}[!htbp]
+    \centering
+    \caption{Confusion matrices for the best GPT2 model selected by different metrics on ReCOVery dataset}
+    \label{fig:recovery_gpt2_confusion_matrices}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \caption{by Accuracy}
+        \includegraphics[width=\linewidth]{confusion_matrix_by_accuracy}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \caption{by F1-Score}
+        \includegraphics[width=\linewidth]{confusion_matrix_by_f1_score}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \caption{by Precision}
+        \includegraphics[width=\linewidth]{confusion_matrix_by_precision}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \caption{by ROC-AUC}
+        \includegraphics[width=\linewidth]{confusion_matrix_by_roc_auc}
+    \end{subfigure}
+
+
+
+\end{figure}

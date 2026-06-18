@@ -1,0 +1,225 @@
+%% This is the ctufit-thesis example file. It is used to produce theses
+%% for submission to Czech Technical University, Faculty of Information Technology.
+%%
+%% This is version 1.3.10, built 27. 2. 2025.
+%% 
+%% Get the newest version from
+%% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
+%%
+%%
+%% Copyright 2024, Tomas Novacek
+%% Copyright 2021, Eliska Sestakova and Ondrej Guth
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%  https://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% The current maintainer of this work is Tomas Novacek.
+%% Alternatively, submit bug reports to the tracker at
+%% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX/issues
+%%
+%%
+
+% arara: xelatex
+% arara: biber
+% arara: xelatex
+% arara: xelatex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CLASS OPTIONS
+% language: czech/english/slovak
+% thesis type: bachelor/master/dissertation
+% colour: bw for black&white OR no option for default colour scheme
+% electronic (oneside) or printed (twoside), twoside is default
+% paragraph - if passed, this optional argument sets paragraphs as the deepest level of headers, styles it, numbers it and adds it to Table of Content. Use with care! Normally, it is considered unwise to use it, since its too deep.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[english,bachelor,unicode,oneside]{ctufit-thesis}
+
+\input{utils/custom_packages_imports}
+\input{utils/custom_commands}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILL IN THIS INFORMATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ctufittitle{Enhancing Fake News Classification with Advanced NLP Models} % replace with the title of your thesis
+\ctufitauthorfull{Nikita Bardatskii} % replace with your full name (first name(s) and then family name(s) / surname(s)) including academic degrees
+\ctufitauthorsurnames{Bardatskii} % replace with your surname(s) / family name(s)
+\ctufitauthorgivennames{Nikita} % replace with your first name(s) / given name(s)
+\ctufitsupervisor{doc.\,Ing.\,Ladislava Smítková Janků,\,Ph.D.} % replace with name of your supervisor/advisor (include academic degrees)
+\ctufitdepartment{Department of Applied Mathematics} % replace with the department of your defence
+\ctufityear{2026} % replace with the year of your defence
+\ctufitdeclarationplace{Prague} % replace with the place where you sign the declaration
+\ctufitdeclarationdate{\today} % replace with the date of signature of the declaration
+
+% DO NOT REMOVE - breaks everything
+\input{text/misc/main_abstract_and_keywords}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END FILL IN
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CUSTOMIZATION of this template
+% Skip this part or alter it if you know what you are doing.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{iftex}[2020/03/06]
+\iftutex % XeLaTeX and LuaLaTeX
+    \RequirePackage{ellipsis}[2020/05/22] %ellipsis workaround for XeLaTeX
+\else
+    \errmessage{Onl in Overleaf
+y compilation with XeLaTeX or LuaLaTeX is allowed}
+    \stop
+\fi
+
+% hyperlinks
+\hypersetup{
+    pdfpagelayout=TwoPageRight,
+    colorlinks=false,
+    allcolors=decoration,
+    pdfborder={0 0 0.1}
+}
+
+% uncomment the following to hide all hyperlinks
+%\hypersetup{hidelinks}
+
+% uncomment the following to change the colour of all hyperlinks to CTU blue
+%\hypersetup{allbordercolors=decoration}
+
+\RequirePackage{pdfpages}[2020/01/28]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CUSTOMIZATION of this template END
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+% DEMO CONTENTS SETTINGS
+% You may choose to modify this part.
+%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{dirtree}
+\usepackage{lipsum,tikz}
+\usepackage[style=iso-numeric]{biblatex}
+\addbibresource{utils/bib-database.bib}
+\usepackage{xurl}
+\usepackage{listings} % typesetting of sources
+%\usepackage{minted}
+\usepackage{csquotes}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% DEMO CONTENTS SETTINGS END
+%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document} 
+\frontmatter\frontmatterinit % do not remove these two commands
+
+\thispagestyle{empty}\maketitle\thispagestyle{empty}\cleardoublepage % do not remove these four commands
+
+
+% !!!!!!!!!!!!!!!!!!!!!!!!! include in final version !!!!!!!!!!!!!!!!!!!!!!!!!
+% \includepdf[pages={1-}]{text/misc/assignment.pdf} % replace this file with your thesis assignment generated from ProjectsFIT
+
+\imprintpage % do not remove this command
+\stopTOCentries
+%%%%%%%%%%%%%%%%%%%%%%
+% list of other contents END
+%%%%%%%%%%%%%%%%%%%%%%
+% !!!!!!!!!!!!!!!!!!!!!!!!! include in final version !!!!!!!!!!!!!!!!!!!!!!!!!
+\input{text/misc/acknowledgements}   
+% !!!!!!!!!!!!!!!!!!!!!!!!! include in final version !!!!!!!!!!!!!!!!!!!!!!!!!
+\input{text/misc/declaration}
+
+\printabstractpage % do not remove this command
+
+%%%%%%%%%%%%%%%%%%%
+% SUMMARY
+% FILL IN / MODIFY
+% OR REMOVE ENTIRELY (upon agreement with your supervisor)
+% (appropriate to remove in most theses)
+%%%%%%%%%%%%%%%%%%%
+% \begin{summarypage}
+% \section*{Summary section}
+% 
+% \lipsum[1][1-8]
+% 
+% \section*{Summary section}
+% 
+% \lipsum[2][1-6]
+% 
+% \section*{Summary section}
+% 
+% \lipsum[3]
+% 
+% \section*{Summary section}
+% 
+% \lipsum[2]
+% 
+% \section*{Summary section}
+% 
+% \lipsum[1][1-8] Lorem lorem lorem.
+% \end{summarypage}
+%%%%%%%%%%%%%%%%%%%
+% SUMMARY END
+%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents % do not remove this command
+%%%%%%%%%%%%%%%%%%%%%%
+% list of other contents: figures, tables, code listings, algorithms, etc.
+% add/remove commands accordingly
+%%%%%%%%%%%%%%%%%%%%%%
+\listoffigures % list of figures
+\begingroup
+\let\clearpage\relax
+\listoftables % list of tables
+\thectufitlistingscommand
+\endgroup
+
+%%%%%%%%%%%%%%%%%%%
+% ABBREVIATIONS
+%%%%%%%%%%%%%%%%%%%
+
+% DO NOT REMOVE - it breaks numeration of chapters, etc.
+\input{text/misc/abbreviations}  
+
+%%%%%%%%%%%%%%%%%%%
+% ABBREVIATIONS END
+%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%
+% THE THESIS
+% MODIFY ANYTHING BELOW THIS LINE
+%%%%%%%%%%%%%%%%%%%
+
+\include{text/main_text} % include `text.tex' from `text/' subdirectory
+
+
+
+\appendix\appendixinit % do not remove these two commands
+
+
+%%%%%%%%%%%%%%%%%%%
+% APPENDIX INCLUDE
+%%%%%%%%%%%%%%%%%%%
+
+% !!!!!!!!!!!!!!!!!!!!!!!!! include in final version !!!!!!!!!!!!!!!!!!!!!!!!!
+% \include{text/misc/appendix} % include `appendix.tex' from `text/' subdirectory
+
+%%%%%%%%%%%%%%%%%%%
+% APPENDIX INCLUDE END
+%%%%%%%%%%%%%%%%%%%
+
+\backmatter % do not remove this command
+
+\printbibliography % print out the BibLaTeX-generated bibliography list
+
+% !!!!!!!!!!!!!!!!!!!!!!!!! include in final version !!!!!!!!!!!!!!!!!!!!!!!!!
+\include{text/misc/medium} % include `medium.tex' from `text/' subdirectory
+
+\end{document}

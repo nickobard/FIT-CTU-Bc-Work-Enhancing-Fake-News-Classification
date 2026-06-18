@@ -1,0 +1,39 @@
+% helper package for todo notes
+\usepackage[color=green,  textsize=scriptsize, loadshadowlibrary]{todonotes}
+
+% set the default options for all \todo calls
+\setuptodonotes{
+  color=gray!30,
+  shadow}
+
+
+
+% custom styles for high, medium and low priorities
+\todostyle{h}{color=red!30, shadow}
+\todostyle{m}{color=yellow!30, shadow}
+\todostyle{l}{color=blue!30, shadow}
+
+
+\usepackage{import}
+
+\usepackage[hybrid]{markdown}
+
+\usepackage{environ}
+
+% To turn off markdown completely use this command
+% it will make markdow blocks as normal ones
+% \RenewEnviron{markdown}{\BODY}
+
+\usepackage{booktabs}
+
+\usepackage{subcaption}
+
+% package to prevent figures overfloating to other sections
+\usepackage{placeins}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{minted}
+
+% for the medium
+\usepackage{dirtree}

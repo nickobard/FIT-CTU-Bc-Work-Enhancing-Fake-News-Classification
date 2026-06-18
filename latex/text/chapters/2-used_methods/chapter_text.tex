@@ -1,0 +1,175 @@
+%---------------------------------------------------------------
+\chapter{Used Methods}
+%---------------------------------------------------------------
+
+
+\begin{markdown}
+
+Before discussing the methods used in this work, it is useful to briefly review the models employed in the previous study by Jan Flajžík \cite{flajzik_classification_2024}:
+
+- Naive Bayes
+- Random Forest
+- Convolutional Neural Network (specifically the OPCNN-FAKE architecture)
+- Long Short-Term Memory (LSTM) network implemented as a simple one-layer neural architecture
+
+One of the observations raised during the evaluation of the previous work was the absence of more advanced machine learning architectures. This thesis addresses that limitation by investigating the extent to which transformer-based models can improve fake news classification performance compared to the previously used classical approaches.
+
+It is also important to note that the previous study achieved strong results, with accuracy exceeding 90\% on English datasets and 80\% on Czech-language datasets. In the results chapter, the performance of the transformer-based models will be compared with these previously reported results in order to evaluate whether the advanced architectures provide measurable improvements over the classical approaches.
+
+\end{markdown}
+
+\section{Related Studies}
+
+\begin{markdown}
+
+Although this thesis primarily represents a direct continuation of the work by Jan Flajžík \cite{flajzik_classification_2024}, additional recent studies related to fake news detection were also examined in order to better understand current trends and methodologies in the field.
+
+The studies by \cite{haqi_al-tai_deep_2023} and \cite{swathi_enhancing_2024} review recent developments in fake news classification and compare the performance of different machine learning and deep learning models across multiple datasets.
+
+In particular, the Deep Learning for Fake News Detection by Haqi Al-Tai et al.\cite{haqi_al-tai_deep_2023} demonstrates that incorporating attention mechanisms can significantly improve the performance of classical neural architectures. The reviewed studies reported an accuracy of 45.3\% on the LIAR dataset for CNN-based models enhanced with attention mechanisms, while transformer-based architectures achieved an accuracy of 40.55\%. In the original LIAR dataset study by Wang, A New Benchmark Dataset for Fake News Detection \cite{wang_liar_2017}, more traditional approaches achieved considerably lower results, with a classical CNN reaching 27\% accuracy and LSTM architectures achieving 23.3\%.
+
+Although the LIAR dataset is not used in this thesis, these results suggest that attention-based architectures and transformer models generally outperform more traditional machine learning approaches. This observation further motivates the use of transformer-based models in the experiments conducted in this work.
+
+\end{markdown}
+
+\section{Models}
+
+\begin{markdown}
+
+The experiments conducted in this thesis utilize the following transformer-based architectures:
+
+- BERT
+- DistilBERT
+- RoBERTa
+- GPT-2
+
+The selection of these models was motivated by the intention to evaluate widely used and well-established transformer architectures while maintaining reasonable computational requirements. The chosen models represent relatively standard and lightweight transformer-based approaches that are suitable for experimentation under limited computational resources.
+
+\end{markdown}
+
+\subsection{Transformers}
+
+\begin{markdown}
+
+All models used in this work are based on the Transformer architecture originally introduced in the paper Attention Is All You Need by Vaswani et al.\cite{vaswani_attention_2017}. Each selected model represents a modification or optimization of the original Transformer architecture and therefore exhibits different properties and performance characteristics.
+
+The Transformer is a sequence transduction architecture that relies entirely on attention mechanisms, eliminating the need for recurrent or convolutional layers in order to model dependencies between input and output sequences. The original architecture follows an encoder-decoder design, where both components consist of stacks of identical layers containing multi-head self-attention mechanisms and position-wise feed-forward neural networks. Since the architecture does not utilize recurrent structures, positional encodings are incorporated into the input embeddings to preserve information about token order within the sequence. Residual connections and layer normalization are also applied throughout the network to stabilize and improve the training process.
+
+Figure \ref{fig:transformer_architecture} illustrates the original Transformer architecture proposed in \cite{vaswani_attention_2017}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{FITthesis-LaTeX-master/text/chapters/2-used_methods/assets/transformers.png}
+    \caption{Original Transformer architecture introduced in \cite{vaswani_attention_2017}}
+    \label{fig:transformer_architecture}
+\end{figure}
+
+The following subsections briefly describe the transformer-based models used in the experiments.
+
+\end{markdown}
+
+\subsubsection{BERT}
+
+\begin{markdown}
+
+BERT (Bidirectional Encoder Representations from Transformers), introduced by Devlin et al., BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding \cite{devlin_bert_2019}, is a language representation model designed to pre-train deep bidirectional contextual representations from large amounts of unlabeled text. Unlike traditional language models that process text in a single direction, BERT jointly considers both left and right context during training. This allows the model to capture richer contextual information and achieve state-of-the-art performance across a wide range of natural language processing tasks after fine-tuning.
+
+BERT differs from the original Transformer architecture in several important aspects:
+
+* Encoder-Only Architecture: While the original Transformer architecture follows an encoder-decoder structure intended primarily for sequence transduction tasks such as machine translation, BERT utilizes only the encoder component of the Transformer.
+
+* Bidirectional Context Processing: Traditional autoregressive language models process text in a unidirectional manner, meaning that each token attends only to preceding tokens. In contrast, BERT employs bidirectional self-attention, allowing the model to simultaneously incorporate information from both preceding and following tokens.
+
+* Masked Language Modeling (MLM): To enable bidirectional training, BERT introduces the Masked Language Modeling objective. During pretraining, approximately 15\% of input tokens are randomly masked, and the model is trained to predict the original masked tokens using the surrounding context.
+
+* Next Sentence Prediction (NSP): BERT additionally introduces the Next Sentence Prediction task, where the model learns relationships between pairs of sentences by predicting whether one sentence logically follows another in the original text. This objective improves performance on tasks involving sentence relationships, such as question answering and natural language inference.
+
+* Input Representation: BERT uses a unified token representation capable of processing both single sentences and sentence pairs. Special tokens such as \texttt{[CLS]} and \texttt{[SEP]} are used to represent the entire sequence and to separate multiple sentences within the input.
+
+\end{markdown}
+
+\subsubsection{DistilBERT}
+
+\begin{markdown}
+
+DistilBERT, introduced by Sanh et al., DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter \cite{sanh_distilbert_2020}, is a smaller and computationally more efficient variant of the BERT architecture. The model was designed to preserve most of BERT’s language understanding capabilities while significantly reducing model size and training and inference time. DistilBERT is trained using the technique of knowledge distillation, where a smaller student model learns to reproduce the behavior of a larger teacher model, in this case BERT.
+
+DistilBERT differs from the original Transformer architecture and from BERT in several important ways:
+
+* Encoder-Only Architecture: Similar to BERT, DistilBERT uses only the encoder component of the original Transformer architecture.
+
+* Reduced Model Complexity: DistilBERT contains approximately half the number of layers used in BERT, making the model substantially smaller and faster. According to the original paper, the model is approximately 40\% smaller and 60\% faster while retaining around 97\% of BERT’s performance.
+
+* Knowledge Distillation Training: Instead of training the model entirely from scratch, DistilBERT is trained using a distillation objective that transfers knowledge from the larger BERT model. The training objective combines language modeling loss, distillation loss, and cosine embedding loss.
+
+* Simplified Architecture: To further reduce computational complexity, DistilBERT removes several components present in BERT, including token-type embeddings and the pooler layer.
+
+* Initialization Strategy: The model initialization process reuses selected layers from the original BERT model, allowing DistilBERT to benefit from the pretrained representations of the larger architecture.
+
+\end{markdown}
+
+\subsubsection{RoBERTa}
+
+\begin{markdown}
+
+RoBERTa (Robustly Optimized BERT Pretraining Approach), introduced by Liu et al. \cite{liu_roberta_2019}, is an optimized variant of the BERT architecture. The authors of RoBERTa demonstrated that the original BERT model was significantly undertrained and that its performance could be improved through modifications to the training procedure and the use of substantially larger training datasets.
+
+Like BERT, RoBERTa is based on the Transformer encoder architecture; however, it introduces several important modifications to the original training methodology:
+
+* Encoder-Only Architecture: Similar to BERT, RoBERTa utilizes only the encoder component of the original Transformer architecture.
+
+* Dynamic Masking: Unlike BERT’s static masking strategy, RoBERTa applies dynamic masking, meaning that masked tokens are selected differently each time a training sequence is processed. This increases variability during training and improves generalization.
+
+* Removal of Next Sentence Prediction (NSP): RoBERTa removes the Next Sentence Prediction objective used in BERT. The authors found that eliminating this task and training on continuous text sequences led to improved model performance.
+
+* Larger-Scale Training: RoBERTa was trained on significantly larger datasets and with substantially larger batch sizes compared to BERT. The training corpus exceeded 160 GB of text data, allowing the model to learn richer language representations.
+
+* Byte-Pair Encoding (BPE): The model employs byte-level Byte-Pair Encoding tokenization with a large subword vocabulary, enabling efficient representation of text without relying on unknown tokens.
+
+* Training on Longer Sequences: RoBERTa is trained primarily on full-length sequences of up to 512 tokens, which improves the model’s ability to capture long-range contextual dependencies.
+
+\end{markdown}
+
+\subsubsection{GPT-2}
+
+\begin{markdown}
+
+GPT-2 (Generative Pre-trained Transformer 2), introduced by Radford et al., Language Models are Unsupervised Multitask Learners \cite{radford_language_2019}, is a large-scale language model based on the Transformer decoder architecture. Unlike encoder-based models such as BERT and RoBERTa, GPT-2 follows a decoder-only autoregressive design, where the model predicts the next token based on the preceding context. The architecture was designed as a general-purpose language model capable of performing multiple natural language processing tasks without task-specific modifications.
+
+The original GPT-2 model contains up to 1.5 billion parameters and demonstrated that sufficiently large language models can perform a variety of tasks, including text generation, summarization, translation, and question answering, in a zero-shot setting.
+
+Several important characteristics distinguish GPT-2 from previous Transformer-based architectures:
+
+* Decoder-Only Architecture: GPT-2 uses only the decoder component of the original Transformer architecture and processes text autoregressively from left to right.
+
+* Large-Scale Training Dataset: The model was trained on the WebText dataset, which consists of millions of documents collected from outbound Reddit links with high user engagement. The resulting dataset contains approximately 40 GB of text data.
+
+* Architecture Improvements: Compared to the original GPT model, GPT-2 introduces modifications such as adjusted layer normalization placement, an expanded context window of up to 1024 tokens, and a larger vocabulary size.
+
+* Byte-Pair Encoding (BPE): GPT-2 employs byte-level Byte-Pair Encoding tokenization, allowing efficient representation of arbitrary Unicode text while avoiding problems related to unknown tokens.
+
+* Zero-Shot Learning Capability: One of the most significant contributions of GPT-2 is its ability to perform multiple tasks without explicit task-specific fine-tuning. The model achieved strong performance on several benchmark datasets using only natural language prompts.
+
+* Scaling Effects: The GPT-2 study demonstrated that increasing model size and training data significantly improves performance across a wide range of language modeling tasks. The authors also observed that even the largest GPT-2 variant still underfit the training dataset, suggesting that additional scaling could further improve performance.
+
+Although GPT-2 demonstrated impressive text generation capabilities, the authors noted that some complex tasks still required further improvements before the model could be reliably applied in practical real-world scenarios.
+
+\end{markdown}
+
+\section{Text Preprocessing Techniques}
+
+\begin{markdown}
+
+Similarly to the previous work by Jan Flajžík \cite{flajzik_classification_2024}, several text preprocessing techniques were applied in this thesis. These preprocessing methods were treated as configurable components of the training pipeline and were evaluated in combination with different models and datasets.
+
+The preprocessing techniques used in this work include:
+
+- stemming,
+- lemmatization,
+- text cleaning operations such as punctuation removal, number removal, URL removal, and special character removal,
+- tokenization using NLTK, BERT, and GPT-2 tokenizers,
+- sequence transformation techniques such as token truncation.
+
+Most preprocessing techniques were adapted from the implementation provided in \cite{flajzik_classification_2024}. However, the preprocessing pipeline was redesigned and extended to support transformer-based architectures and their corresponding tokenization methods. The BERT model-based and GPT-2 tokenizers were implemented using the libraries provided within the Hugging Face Transformers framework.
+
+\end{markdown}

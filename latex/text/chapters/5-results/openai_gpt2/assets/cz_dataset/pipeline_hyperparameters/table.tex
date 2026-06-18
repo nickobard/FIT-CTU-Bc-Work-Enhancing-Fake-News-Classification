@@ -1,0 +1,34 @@
+\begin{table}[!htbp]
+    \caption{Best GPT2 model pipeline parameters from the best epoch selected by different metrics on Czech dataset}
+    \label{tab:czech_gpt2_pipeline_params}
+    \centering
+
+    %── Row 1 ──
+    \begin{subtable}[t]{0.48\linewidth}
+        \scriptsize
+        \caption{By Accuracy}
+        \input{hparams_table_by_accuracy}
+    \end{subtable}
+    \hfill
+    \begin{subtable}[t]{0.48\linewidth}
+        \scriptsize
+        \caption{By F1-Score}
+        \input{hparams_table_by_f1_score}
+    \end{subtable}
+
+    \vspace{1em}
+
+    %── Row 2 ──
+    \begin{subtable}[t]{0.48\linewidth}
+        \scriptsize
+        \caption{By Precision}
+        \input{hparams_table_by_precision}
+    \end{subtable}
+    \hfill
+    \begin{subtable}[t]{0.48\linewidth}
+        \scriptsize
+        \caption{By ROC-AUC}
+        \input{hparams_table_by_roc_auc}
+    \end{subtable}
+
+\end{table}

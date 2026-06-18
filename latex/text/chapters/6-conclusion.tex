@@ -1,0 +1,15 @@
+\chapter{Conclusion}
+
+\begin{markdown}
+
+This thesis extended the previous work by Jan Flajžík \cite{flajzik_classification_2024} through the application of transformer-based architectures for fake news classification. The conducted experiments demonstrated that modern transformer models are capable of achieving strong performance across multiple datasets and, in several cases, improving upon the results obtained using classical machine learning approaches.
+
+Another important contribution of this work is the implementation of a reusable and extensible experimental framework for transformer-based natural language processing tasks. The developed pipeline integrates preprocessing, model training, experiment tracking, and artifact management through MLflow, simplifying experimentation, debugging, and reproducibility.
+
+The experiments also highlighted several limitations of the current approach. In particular, the fixed transformer input length represents a significant challenge for datasets containing long articles, where substantial portions of the text are truncated before processing. This limitation may prevent the models from utilizing important contextual information and can negatively affect generalization performance.
+
+Future work could therefore focus on methods for processing longer documents more effectively, for example by splitting articles into multiple segments or by utilizing architectures designed for long-context processing. Additional experiments on larger and more diverse datasets could also provide further insight into the robustness of transformer-based fake news classification systems.
+
+More broadly, the results suggest that careful experimentation, modular implementation, and efficient utilization of computational resources may be more beneficial than simply increasing model or dataset size without methodological improvements.
+
+\end{markdown}
